@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suporte — Leonardo Gabriel</title>
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 50% 0%, rgba(255,255,255,.08), transparent 35%),
+                linear-gradient(135deg, #080808 0%, #151515 50%, #090909 100%);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+            background-size: 45px 45px;
+            mask-image: linear-gradient(to bottom, black, transparent 90%);
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 18px 30px;
+            background: rgba(8,8,8,.82);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(255,255,255,.09);
+        }
+
+        .navbar-content {
+            max-width: 1250px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 11px;
+            background: rgba(255,255,255,.06);
+            box-shadow: 0 0 25px rgba(255,255,255,.05);
+        }
+
+        .brand-icon::before {
+            content: "◆";
+            font-size: 17px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,.65);
+            font-size: .88rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #7dff9b;
+            box-shadow: 0 0 12px #7dff9b;
+        }
+
+        .container {
+            width: min(1200px, calc(100% - 32px));
+            margin: auto;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 90px 20px 55px;
+            animation: fadeIn .7s ease-out;
+        }
+
+        .support-icon {
+            width: 105px;
+            height: 105px;
+            margin: 0 auto 28px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 28px;
+            background: linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.025));
+            box-shadow:
+                0 0 45px rgba(255,255,255,.08),
+                inset 0 0 25px rgba(255,255,255,.025);
+            font-size: 3rem;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.7rem);
+            line-height: 1;
+            letter-spacing: -2px;
+            margin-bottom: 18px;
+        }
+
+        .hero p {
+            max-width: 680px;
+            margin: auto;
+            color: rgba(255,255,255,.65);
+            font-size: 1.12rem;
+            line-height: 1.8;
+        }
+
+        .support-panel {
+            margin: 25px auto 80px;
+            padding: 34px;
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 24px;
+            background: rgba(255,255,255,.045);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 25px 80px rgba(0,0,0,.28);
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .panel-header h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .panel-header p {
+            color: rgba(255,255,255,.58);
+            line-height: 1.6;
+        }
+
+        .embed-wrapper {
+            width: 100%;
+            overflow: hidden;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,.1);
+            background: #0c0c0c;
+            box-shadow: 0 15px 45px rgba(0,0,0,.35);
+        }
+
+        .embed-wrapper iframe {
+            display: block;
+            width: 100%;
+            height: 720px;
+            border: 0;
+        }
+
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin: 0 0 70px;
+        }
+
+        .help-card {
+            padding: 25px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,.1);
+            background: rgba(255,255,255,.035);
+            transition: .3s ease;
+        }
+
+        .help-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,.22);
+            background: rgba(255,255,255,.055);
+        }
+
+        .help-card .icon {
+            font-size: 1.7rem;
+            margin-bottom: 14px;
+        }
+
+        .help-card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+        }
+
+        .help-card p {
+            color: rgba(255,255,255,.55);
+            line-height: 1.65;
+            font-size: .93rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 35px 20px 50px;
+            border-top: 1px solid rgba(255,255,255,.08);
+            color: rgba(255,255,255,.42);
+            font-size: .88rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @media (max-width: 800px) {
+            .navbar {
+                padding: 15px 18px;
+            }
+
+            .status {
+                display: none;
+            }
+
+            .hero {
+                padding: 65px 15px 40px;
+            }
+
+            .support-panel {
+                padding: 18px;
+                margin-bottom: 55px;
+            }
+
+            .embed-wrapper iframe {
+                height: 680px;
+            }
+
+            .help-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brand {
+                font-size: 1rem;
+            }
+
+            .brand-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .support-icon {
+                width: 85px;
+                height: 85px;
+                font-size: 2.4rem;
+            }
+
+            .hero h1 {
+                letter-spacing: -1px;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .embed-wrapper iframe {
+                height: 650px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="brand">
+                <div class="brand-icon"></div>
+                <span>Leonardo Gabriel</span>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                Suporte online
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="hero">
+            <div class="support-icon">🔧</div>
+            <h1>Central de Suporte</h1>
+            <p>
+                Precisa de ajuda? Abra seu atendimento, acompanhe sua solicitação
+                ou encontre respostas para as dúvidas mais comuns.
+            </p>
+        </section>
+
+        <section class="support-panel">
+            <div class="panel-header">
+                <h2>🎫 Atendimento</h2>
+                <p>Utilize o sistema abaixo para abrir e acompanhar seu suporte.</p>
+            </div>
+
+            <div class="embed-wrapper">
+                <iframe src="suporte.html" title="Sistema de Suporte" allow="fullscreen"></iframe>
+            </div>
+        </section>
+
+        <section class="help-grid">
+            <div class="help-card">
+                <div class="icon">🎫</div>
+                <h3>Abra um ticket</h3>
+                <p>Crie uma solicitação e informe os detalhes necessários para que o atendimento seja mais rápido.</p>
+            </div>
+
+            <div class="help-card">
+                <div class="icon">🛠️</div>
+                <h3>Suporte técnico</h3>
+                <p>Conte com auxílio para problemas, configurações, atualizações e manutenção dos seus sistemas.</p>
+            </div>
+
+            <div class="help-card">
+                <div class="icon">⚡</div>
+                <h3>Atendimento organizado</h3>
+                <p>Acompanhe suas solicitações em um único lugar, de forma simples e prática.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 Leonardo Gabriel — Central de Suporte</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,4556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Painel Admin - Suporte</title>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-deep: #050505;
+            --bg-dark: #0f0f0f;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+
+            --accent: #4ade80;
+            --accent-rgb: 74, 222, 128;
+
+            --danger: #f87171;
+            --warning: #fbbf24;
+
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+
+            --border: rgba(255, 255, 255, 0.1);
+
+            --glass: blur(20px);
+
+            --shadow:
+                0 25px 50px -12px rgba(0, 0, 0, 0.7);
+
+            --transition:
+                all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background:
+                radial-gradient(
+                    circle at top right,
+                    #111,
+                    var(--bg-deep)
+                );
+
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+
+            min-height: 100vh;
+
+            padding: 40px 20px;
+
+            line-height: 1.6;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        button {
+            user-select: none;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* ================================
+           ADMIN HEADER
+        ================================= */
+
+        .admin-panel {
+            display: block;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 30px;
+
+            background: var(--bg-card);
+
+            border: 1px solid var(--border);
+
+            padding: 25px 35px;
+
+            border-radius: 24px;
+
+            backdrop-filter: var(--glass);
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .admin-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-info span {
+            white-space: nowrap;
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            color: #fca5a5;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .connection-status.online {
+            background: rgba(74, 222, 128, 0.1);
+            border-color: rgba(74, 222, 128, 0.25);
+            color: var(--accent);
+        }
+
+        .logout-btn {
+            background: rgba(248, 113, 113, 0.1);
+
+            border: 1px solid rgba(248, 113, 113, 0.2);
+
+            color: #fca5a5;
+
+            padding: 10px 20px;
+
+            border-radius: 12px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: rgba(248, 113, 113, 0.2);
+
+            transform: translateY(-2px);
+        }
+
+        /* ================================
+           NAVIGATION
+        ================================= */
+
+        .admin-nav {
+            display: flex;
+
+            gap: 10px;
+
+            margin-bottom: 30px;
+
+            justify-content: center;
+
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: var(--bg-card);
+
+            border: 1px solid var(--border);
+
+            color: var(--text-muted);
+
+            padding: 12px 24px;
+
+            border-radius: 14px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.07);
+
+            color: #fff;
+
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: #fff;
+
+            color: #000;
+
+            border-color: #fff;
+        }
+
+        /* ================================
+           SECTIONS
+        ================================= */
+
+        .admin-section {
+            display: none;
+
+            animation: fadeIn 0.4s ease;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ================================
+           STATS
+        ================================= */
+
+        .stats-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(240px, 1fr));
+
+            gap: 25px;
+
+            margin-bottom: 50px;
+        }
+
+        .stat-card {
+            background:
+                rgba(255, 255, 255, 0.02);
+
+            border: 1px solid var(--border);
+
+            border-radius: 24px;
+
+            padding: 30px;
+
+            backdrop-filter: blur(25px);
+
+            text-align: center;
+
+            transition: var(--transition);
+
+            position: relative;
+
+            overflow: hidden;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+
+            background:
+                rgba(255, 255, 255, 0.04);
+
+            border-color:
+                rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+
+            margin-bottom: 15px;
+
+            opacity: 0.8;
+
+            filter:
+                drop-shadow(
+                    0 0 10px
+                    rgba(var(--accent-rgb), 0.3)
+                );
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+
+            font-weight: 800;
+
+            margin-bottom: 5px;
+
+            display: block;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #fff 0%,
+                    #888 100%
+                );
+
+            -webkit-background-clip: text;
+
+            -webkit-text-fill-color: transparent;
+
+            letter-spacing: -2px;
+
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+
+            color: var(--text-muted);
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            font-weight: 600;
+        }
+
+        /* ================================
+           SECTIONS
+        ================================= */
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+
+            font-weight: 700;
+
+            margin-bottom: 25px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+        .ticket-badge {
+            background:
+                rgba(248, 113, 113, 0.2);
+
+            border:
+                1px solid rgba(248, 113, 113, 0.3);
+
+            color: #fca5a5;
+
+            padding: 4px 12px;
+
+            border-radius: 100px;
+
+            font-size: 0.8rem;
+
+            font-weight: 700;
+
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        /* ================================
+           TICKETS
+        ================================= */
+
+        .tickets-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fill,
+                    minmax(400px, 1fr)
+                );
+
+            gap: 25px;
+        }
+
+        .ticket-card {
+            background:
+                rgba(255, 255, 255, 0.02);
+
+            border: 1px solid var(--border);
+
+            border-radius: 24px;
+
+            padding: 30px;
+
+            backdrop-filter: blur(25px);
+
+            transition: var(--transition);
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .ticket-card:hover {
+            border-color:
+                rgba(255, 255, 255, 0.3);
+
+            background:
+                rgba(255, 255, 255, 0.05);
+
+            transform: translateY(-8px);
+
+            box-shadow: var(--shadow);
+        }
+
+        .ticket-card.new {
+            border-color:
+                rgba(var(--accent-rgb), 0.4);
+
+            background:
+                rgba(var(--accent-rgb), 0.03);
+        }
+
+        .ticket-card.new::before {
+            content: 'NOVO';
+
+            position: absolute;
+
+            top: 15px;
+
+            right: -30px;
+
+            background:
+                linear-gradient(
+                    45deg,
+                    var(--accent),
+                    #86efac
+                );
+
+            color: #000;
+
+            padding: 4px 35px;
+
+            font-size: 0.65rem;
+
+            font-weight: 800;
+
+            transform: rotate(45deg);
+
+            box-shadow:
+                0 2px 10px
+                rgba(0, 0, 0, 0.3);
+
+            z-index: 1;
+        }
+
+        .ticket-header {
+            margin-bottom: 20px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+        }
+
+        .ticket-id {
+            font-family:
+                'JetBrains Mono',
+                monospace;
+
+            font-weight: 600;
+
+            color: var(--text-muted);
+
+            font-size: 0.8rem;
+
+            background:
+                rgba(255, 255, 255, 0.05);
+
+            padding: 2px 8px;
+
+            border-radius: 6px;
+        }
+
+        .ticket-status {
+            padding: 4px 12px;
+
+            border-radius: 100px;
+
+            font-size: 0.7rem;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            border: 1px solid transparent;
+        }
+
+        .status-open {
+            background:
+                rgba(74, 222, 128, 0.15);
+
+            color: #4ade80;
+
+            border-color:
+                rgba(74, 222, 128, 0.3);
+        }
+
+        .status-pending {
+            background:
+                rgba(251, 191, 36, 0.15);
+
+            color: #fbbf24;
+
+            border-color:
+                rgba(251, 191, 36, 0.3);
+        }
+
+        .status-closed {
+            background:
+                rgba(148, 163, 184, 0.15);
+
+            color: #cbd5e1;
+
+            border-color:
+                rgba(148, 163, 184, 0.3);
+        }
+
+        .ticket-title {
+            font-size: 1.3rem;
+
+            font-weight: 700;
+
+            margin-bottom: 15px;
+
+            color: #fff;
+
+            overflow-wrap: break-word;
+
+            word-wrap: break-word;
+
+            word-break: break-word;
+        }
+
+        .ticket-info {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 12px;
+
+            margin-bottom: 20px;
+        }
+
+        .ticket-info-item {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 4px;
+
+            background:
+                rgba(0, 0, 0, 0.3);
+
+            padding: 10px 14px;
+
+            border-radius: 14px;
+
+            border: 1px solid var(--border);
+
+            transition: var(--transition);
+        }
+
+        .ticket-info-item:hover {
+            border-color:
+                rgba(255, 255, 255, 0.2);
+
+            background:
+                rgba(0, 0, 0, 0.4);
+        }
+
+        .ticket-info-label {
+            font-weight: 700;
+
+            color: var(--text-muted);
+
+            font-size: 0.6rem;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.8px;
+        }
+
+        .ticket-desc {
+            color:
+                rgba(255, 255, 255, 0.7);
+
+            line-height: 1.6;
+
+            margin-bottom: 20px;
+
+            font-size: 0.95rem;
+
+            background:
+                rgba(0, 0, 0, 0.3);
+
+            padding: 15px;
+
+            border-radius: 14px;
+
+            border-left:
+                4px solid var(--accent);
+
+            overflow-wrap: break-word;
+
+            word-wrap: break-word;
+        }
+
+        .ticket-actions {
+            display: flex;
+
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+
+            padding: 12px;
+
+            background:
+                rgba(255, 255, 255, 0.05);
+
+            border:
+                1px solid var(--border);
+
+            color: #fff;
+
+            border-radius: 14px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+            transition: var(--transition);
+
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background:
+                rgba(255, 255, 255, 0.1);
+
+            transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn.accept {
+            background:
+                rgba(var(--accent-rgb), 0.1);
+
+            color: var(--accent);
+
+            border-color:
+                rgba(var(--accent-rgb), 0.3);
+        }
+
+        .action-btn.accept:hover {
+            background:
+                rgba(var(--accent-rgb), 0.2);
+
+            box-shadow:
+                0 0 20px
+                rgba(var(--accent-rgb), 0.2);
+        }
+
+        .action-btn.close-ticket {
+            background:
+                rgba(248, 113, 113, 0.08);
+
+            color: #fca5a5;
+
+            border-color:
+                rgba(248, 113, 113, 0.2);
+        }
+
+        /* ================================
+           EMPTY
+        ================================= */
+
+        .empty-state {
+            text-align: center;
+
+            padding: 80px 20px;
+
+            color: var(--text-muted);
+
+            grid-column: 1 / -1;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+
+            margin-bottom: 20px;
+
+            opacity: 0.3;
+        }
+
+        /* ================================
+           NOTIFICATION
+        ================================= */
+
+        .notification {
+            position: fixed;
+
+            top: 30px;
+
+            right: 30px;
+
+            background:
+                rgba(20, 20, 20, 0.95);
+
+            border:
+                1px solid var(--accent);
+
+            color: var(--accent);
+
+            padding: 16px 28px;
+
+            border-radius: 16px;
+
+            display: none;
+
+            z-index: 10000;
+
+            backdrop-filter: var(--glass);
+
+            box-shadow: var(--shadow);
+
+            font-weight: 600;
+
+            animation:
+                notificationIn 0.3s ease;
+
+            max-width: 420px;
+        }
+
+        @keyframes notificationIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ================================
+           CHAT
+        ================================= */
+
+        .chat-modal {
+            display: none;
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(0, 0, 0, 0.8);
+
+            backdrop-filter: blur(8px);
+
+            z-index: 10001;
+
+            justify-content: center;
+
+            align-items: center;
+
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: #111;
+
+            width: 95%;
+
+            max-width: 900px;
+
+            height: 85vh;
+
+            border-radius: 28px;
+
+            border:
+                1px solid var(--border);
+
+            display: flex;
+
+            flex-direction: column;
+
+            overflow: hidden;
+
+            box-shadow: var(--shadow);
+
+            animation:
+                chatIn 0.25s ease;
+        }
+
+        @keyframes chatIn {
+            from {
+                opacity: 0;
+                transform: scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .chat-header {
+            padding: 25px;
+
+            background:
+                rgba(255, 255, 255, 0.03);
+
+            border-bottom:
+                1px solid var(--border);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+        .chat-header h3 {
+            font-size: 1.3rem;
+
+            font-weight: 700;
+
+            overflow-wrap: break-word;
+        }
+
+        .chat-header-actions {
+            display: flex;
+
+            gap: 10px;
+
+            align-items: center;
+        }
+
+        .close-chat {
+            background: none;
+
+            border: none;
+
+            color: var(--text-muted);
+
+            cursor: pointer;
+
+            font-size: 1.8rem;
+
+            transition: var(--transition);
+
+            line-height: 1;
+        }
+
+        .close-chat:hover {
+            color: var(--danger);
+
+            transform: rotate(90deg);
+        }
+
+        .chat-messages {
+            flex: 1;
+
+            padding: 30px;
+
+            overflow-y: auto;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 20px;
+
+            background: #0a0a0a;
+        }
+
+        .message {
+            max-width: 75%;
+
+            padding: 14px 18px;
+
+            border-radius: 18px;
+
+            font-size: 0.95rem;
+
+            line-height: 1.5;
+
+            position: relative;
+
+            overflow-wrap: break-word;
+
+            word-wrap: break-word;
+        }
+
+        .message.admin {
+            align-self: flex-end;
+
+            background:
+                rgba(var(--accent-rgb), 0.15);
+
+            border:
+                1px solid
+                rgba(var(--accent-rgb), 0.3);
+
+            color: #fff;
+
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.user {
+            align-self: flex-start;
+
+            background:
+                rgba(255, 255, 255, 0.07);
+
+            border:
+                1px solid var(--border);
+
+            color: #fff;
+
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-info {
+            font-size: 0.7rem;
+
+            color: var(--text-muted);
+
+            margin-bottom: 6px;
+
+            display: block;
+
+            font-weight: 600;
+
+            text-transform: uppercase;
+        }
+
+        .message-file {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-top: 10px;
+
+            padding: 10px 14px;
+
+            background:
+                rgba(0, 0, 0, 0.4);
+
+            border-radius: 10px;
+
+            color: var(--accent);
+
+            text-decoration: none;
+
+            font-size: 0.85rem;
+
+            font-weight: 600;
+
+            border:
+                1px solid
+                rgba(var(--accent-rgb), 0.1);
+
+            overflow-wrap: anywhere;
+        }
+
+        .message-image {
+            display: block;
+
+            max-width: 100%;
+
+            max-height: 500px;
+
+            border-radius: 12px;
+
+            margin-top: 10px;
+
+            border:
+                1px solid var(--border);
+
+            cursor: pointer;
+        }
+
+        .chat-input-area {
+            padding: 25px;
+
+            background:
+                rgba(255, 255, 255, 0.03);
+
+            border-top:
+                1px solid var(--border);
+
+            display: flex;
+
+            gap: 15px;
+
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+
+            background:
+                rgba(0, 0, 0, 0.4);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 14px;
+
+            padding: 14px 20px;
+
+            color: #fff;
+
+            outline: none;
+
+            transition: var(--transition);
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent);
+
+            box-shadow:
+                0 0 0 4px
+                rgba(var(--accent-rgb), 0.1);
+        }
+
+        .chat-btn {
+            background: #fff;
+
+            border: none;
+
+            color: #000;
+
+            padding: 14px 20px;
+
+            border-radius: 14px;
+
+            cursor: pointer;
+
+            font-weight: 700;
+
+            transition: var(--transition);
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+        .chat-btn:hover {
+            background: var(--accent);
+
+            transform: translateY(-2px);
+        }
+
+        .chat-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ================================
+           LOADING
+        ================================= */
+
+        .loading-state {
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 15px;
+
+            padding: 80px 20px;
+
+            color: var(--text-muted);
+
+            grid-column: 1 / -1;
+        }
+
+        .loading-spinner {
+            width: 38px;
+
+            height: 38px;
+
+            border:
+                3px solid
+                rgba(255, 255, 255, 0.1);
+
+            border-top-color:
+                var(--accent);
+
+            border-radius: 50%;
+
+            animation:
+                spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ================================
+           ERROR
+        ================================= */
+
+        .api-error {
+            display: none;
+
+            margin-bottom: 25px;
+
+            padding: 16px 20px;
+
+            border-radius: 16px;
+
+            border:
+                1px solid
+                rgba(248, 113, 113, 0.3);
+
+            background:
+                rgba(248, 113, 113, 0.08);
+
+            color: #fca5a5;
+
+            font-size: 0.9rem;
+
+            line-height: 1.5;
+        }
+
+        .api-error strong {
+            color: #fff;
+        }
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 768px) {
+
+            body {
+                padding: 20px 12px;
+            }
+
+            .admin-header {
+                flex-direction: column;
+
+                gap: 20px;
+
+                text-align: center;
+
+                padding: 22px;
+            }
+
+            .admin-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .admin-info {
+                flex-wrap: wrap;
+
+                justify-content: center;
+            }
+
+            .tickets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-info {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-actions {
+                flex-direction: column;
+            }
+
+            .chat-modal {
+                padding: 0;
+            }
+
+            .chat-container {
+                width: 100%;
+
+                height: 100%;
+
+                border-radius: 0;
+            }
+
+            .chat-header {
+                padding: 18px;
+            }
+
+            .chat-messages {
+                padding: 18px;
+            }
+
+            .chat-input-area {
+                padding: 15px;
+
+                gap: 8px;
+            }
+
+            .chat-input {
+                min-width: 0;
+
+                padding:
+                    12px 14px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .notification {
+                left: 15px;
+
+                right: 15px;
+
+                top: 15px;
+
+                text-align: center;
+
+                max-width: none;
+            }
+
+            .connection-status {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-panel" id="adminPanel">
+
+        <div class="container">
+
+            <!-- HEADER -->
+
+            <div class="admin-header">
+
+                <h1>
+                    👨‍💼 Painel de Suporte Admin
+                </h1>
+
+                <div class="admin-info">
+
+                    <span
+                        style="
+                            font-weight: 600;
+                            color: var(--text-muted);
+                        "
+                    >
+                        👤 <span id="adminNameDisplay">Administrador</span>
+                    </span>
+
+                    <span
+                        style="
+                            font-weight: 600;
+                            color: var(--text-muted);
+                        "
+                    >
+                        ⏰ <span id="liveTime"></span>
+                    </span>
+
+                    <span
+                        class="connection-status"
+                        id="connectionStatus"
+                    >
+                        🔴 Desconectado
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- API ERROR -->
+
+            <div
+                class="api-error"
+                id="apiError"
+            ></div>
+
+
+            <!-- NAVIGATION -->
+
+            <div class="admin-nav">
+
+                <button
+                    class="nav-btn active"
+                    type="button"
+                    data-section="dashboard"
+                    onclick="switchAdminSection('dashboard', this)"
+                >
+                    📊 Dashboard
+                </button>
+
+                <button
+                    class="nav-btn"
+                    type="button"
+                    data-section="chats"
+                    onclick="switchAdminSection('chats', this)"
+                >
+                    💬 Conversas
+                </button>
+
+                <button
+                    class="nav-btn"
+                    type="button"
+                    data-section="closed"
+                    onclick="switchAdminSection('closed', this)"
+                >
+                    📁 Fechados
+                </button>
+
+            </div>
+
+
+            <!-- DASHBOARD -->
+
+            <div
+                id="dashboard"
+                class="admin-section active"
+            >
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon">
+                            📊
+                        </div>
+
+                        <div
+                            class="stat-number"
+                            id="totalTickets"
+                        >
+                            0
+                        </div>
+
+                        <div class="stat-label">
+                            Tickets Totais
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon">
+                            🆕
+                        </div>
+
+                        <div
+                            class="stat-number"
+                            id="newTickets"
+                        >
+                            0
+                        </div>
+
+                        <div class="stat-label">
+                            Novos Tickets
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon">
+                            ⏳
+                        </div>
+
+                        <div
+                            class="stat-number"
+                            id="pendingTickets"
+                        >
+                            0
+                        </div>
+
+                        <div class="stat-label">
+                            Em Andamento
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon">
+                            ✅
+                        </div>
+
+                        <div
+                            class="stat-number"
+                            id="resolvedTickets"
+                        >
+                            0
+                        </div>
+
+                        <div class="stat-label">
+                            Resolvidos
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="section">
+
+                    <h2 class="section-title">
+
+                        🆕 Tickets para Assumir
+
+                        <span
+                            class="ticket-badge"
+                            id="badge"
+                        >
+                            0
+                        </span>
+
+                    </h2>
+
+                    <div
+                        class="tickets-grid"
+                        id="newTicketsContainer"
+                    >
+
+                        <div class="loading-state">
+
+                            <div class="loading-spinner"></div>
+
+                            <p>
+                                Carregando tickets...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CHATS -->
+
+            <div
+                id="chats"
+                class="admin-section"
+            >
+
+                <div class="section">
+
+                    <h2 class="section-title">
+                        💬 Todas as Conversas
+                    </h2>
+
+                    <div
+                        class="tickets-grid"
+                        id="adminChatsContainer"
+                    >
+
+                        <div class="empty-state">
+
+                            <div class="empty-state-icon">
+                                💬
+                            </div>
+
+                            <p>
+                                Nenhuma conversa disponível no momento.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CLOSED -->
+
+            <div
+                id="closed"
+                class="admin-section"
+            >
+
+                <div class="section">
+
+                    <h2 class="section-title">
+                        📁 Tickets Fechados
+                    </h2>
+
+                    <div
+                        class="tickets-grid"
+                        id="adminClosedContainer"
+                    >
+
+                        <div class="empty-state">
+
+                            <div class="empty-state-icon">
+                                📦
+                            </div>
+
+                            <p>
+                                Nenhum ticket fechado no momento.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHAT MODAL -->
+
+    <div
+        class="chat-modal"
+        id="chatModal"
+    >
+
+        <div class="chat-container">
+
+            <div class="chat-header">
+
+                <h3 id="chatTitle">
+                    💬 Chat - Ticket
+                </h3>
+
+                <div class="chat-header-actions">
+
+                    <button
+                        class="logout-btn"
+                        id="closeTicketBtn"
+                        type="button"
+                        onclick="closeTicket()"
+                    >
+                        🔒 Fechar Ticket
+                    </button>
+
+                    <button
+                        class="close-chat"
+                        type="button"
+                        onclick="closeChat()"
+                        title="Fechar"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="chat-messages"
+                id="chatMessages"
+            ></div>
+
+
+            <div
+                class="chat-input-area"
+                id="chatInputArea"
+            >
+
+                <label
+                    class="chat-btn"
+                    style="cursor:pointer;"
+                    title="Enviar arquivo"
+                >
+
+                    📎
+
+                    <input
+                        type="file"
+                        id="chatFile"
+                        style="display:none;"
+                        onchange="handleFileSelect()"
+                    >
+
+                </label>
+
+
+                <input
+                    type="text"
+                    class="chat-input"
+                    id="chatInput"
+                    placeholder="Digite sua mensagem..."
+                    autocomplete="off"
+                >
+
+
+                <button
+                    class="chat-btn"
+                    type="button"
+                    onclick="sendChatMessage()"
+                    title="Enviar mensagem"
+                >
+                    🚀
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- NOTIFICATION -->
+
+    <div
+        class="notification"
+        id="notification"
+    ></div>
+
+
+    <script>
+
+        /* =====================================================
+           CONFIGURAÇÃO
+        ===================================================== */
+
+        const API_URL = 'http://localhost:3000';
+
+        let socket = null;
+
+        let activeTicketId = null;
+
+        let selectedFile = null;
+
+        let notificationTimeout = null;
+
+        let timeInterval = null;
+
+        let ticketsRefreshInterval = null;
+
+        let lastTicketsSnapshot = '';
+
+
+        /* =====================================================
+           TOKEN OPCIONAL
+        ===================================================== */
+
+        function getAdminToken() {
+
+            return (
+                localStorage.getItem('adminToken') ||
+                ''
+            );
+
+        }
+
+
+        function getAuthHeaders() {
+
+            const token = getAdminToken();
+
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            /*
+             * Se existir token, enviamos.
+             *
+             * Como o painel não possui login próprio,
+             * ele também funciona sem token caso o backend
+             * permita acesso aos endpoints administrativos.
+             */
+
+            if (token) {
+
+                headers['Authorization'] =
+                    token.startsWith('Bearer ')
+                        ? token
+                        : `Bearer ${token}`;
+
+            }
+
+            return headers;
+
+        }
+
+
+        /* =====================================================
+           ESCAPE HTML
+        ===================================================== */
+
+        function escapeHTML(value) {
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
+
+                return '';
+
+            }
+
+            const element =
+                document.createElement('div');
+
+            element.textContent =
+                String(value);
+
+            return element.innerHTML;
+
+        }
+
+
+        /* =====================================================
+           NOTIFICAÇÃO
+        ===================================================== */
+
+        function showNotification(message) {
+
+            const notification =
+                document.getElementById(
+                    'notification'
+                );
+
+            if (!notification) return;
+
+            notification.textContent =
+                message;
+
+            notification.style.display =
+                'block';
+
+            clearTimeout(
+                notificationTimeout
+            );
+
+            notificationTimeout =
+                setTimeout(() => {
+
+                    notification.style.display =
+                        'none';
+
+                }, 4000);
+
+        }
+
+
+        /* =====================================================
+           ERRO API
+        ===================================================== */
+
+        function showApiError(message) {
+
+            const element =
+                document.getElementById(
+                    'apiError'
+                );
+
+            if (!element) return;
+
+            element.innerHTML =
+                `<strong>⚠️ Atenção:</strong> ${escapeHTML(message)}`;
+
+            element.style.display =
+                'block';
+
+        }
+
+
+        function hideApiError() {
+
+            const element =
+                document.getElementById(
+                    'apiError'
+                );
+
+            if (!element) return;
+
+            element.style.display =
+                'none';
+
+        }
+
+
+        /* =====================================================
+           STATUS CONEXÃO
+        ===================================================== */
+
+        function setConnectionStatus(
+            online,
+            text = ''
+        ) {
+
+            const element =
+                document.getElementById(
+                    'connectionStatus'
+                );
+
+            if (!element) return;
+
+            if (online) {
+
+                element.classList.add('online');
+
+                element.textContent =
+                    `🟢 ${text || 'Online'}`;
+
+            } else {
+
+                element.classList.remove(
+                    'online'
+                );
+
+                element.textContent =
+                    `🔴 ${text || 'Desconectado'}`;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           API
+        ===================================================== */
+
+        async function apiFetch(
+            url,
+            options = {}
+        ) {
+
+            try {
+
+                const finalOptions = {
+                    ...options,
+                    headers: {
+                        ...getAuthHeaders(),
+                        ...(options.headers || {})
+                    }
+                };
+
+
+                const response =
+                    await fetch(
+                        `${API_URL}${url}`,
+                        finalOptions
+                    );
+
+
+                if (response.status === 401) {
+
+                    showApiError(
+                        'O servidor recusou o acesso ao painel (HTTP 401). Como este painel não possui login, o backend precisa permitir o acesso administrativo aos endpoints de tickets ou fornecer um token administrativo.'
+                    );
+
+                    return null;
+
+                }
+
+
+                if (response.status === 403) {
+
+                    showApiError(
+                        'O servidor bloqueou o acesso ao painel (HTTP 403). Verifique as permissões administrativas no backend.'
+                    );
+
+                    return null;
+
+                }
+
+
+                hideApiError();
+
+                return response;
+
+            } catch (error) {
+
+                console.error(
+                    'Erro de conexão com API:',
+                    error
+                );
+
+                showApiError(
+                    `Não foi possível conectar ao servidor em ${API_URL}. Verifique se o Node.js/Express está rodando.`
+                );
+
+                setConnectionStatus(
+                    false,
+                    'Servidor offline'
+                );
+
+                return null;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           NAVEGAÇÃO
+        ===================================================== */
+
+        function switchAdminSection(
+            sectionId,
+            button
+        ) {
+
+            document
+                .querySelectorAll('.admin-section')
+                .forEach(section => {
+
+                    section.classList.remove(
+                        'active'
+                    );
+
+                });
+
+
+            document
+                .querySelectorAll('.nav-btn')
+                .forEach(btn => {
+
+                    btn.classList.remove(
+                        'active'
+                    );
+
+                });
+
+
+            const section =
+                document.getElementById(
+                    sectionId
+                );
+
+
+            if (section) {
+
+                section.classList.add(
+                    'active'
+                );
+
+            }
+
+
+            if (button) {
+
+                button.classList.add(
+                    'active'
+                );
+
+            }
+
+
+            if (sectionId === 'dashboard') {
+
+                updateStats();
+
+                renderNewTickets();
+
+            }
+
+
+            if (sectionId === 'chats') {
+
+                renderAllChats();
+
+            }
+
+
+            if (sectionId === 'closed') {
+
+                renderClosedTickets();
+
+            }
+
+        }
+
+
+        /* =====================================================
+           TEMPO
+        ===================================================== */
+
+        function updateTime() {
+
+            const element =
+                document.getElementById(
+                    'liveTime'
+                );
+
+            if (!element) return;
+
+            const now =
+                new Date();
+
+            element.textContent =
+                now.toLocaleTimeString(
+                    'pt-BR',
+                    {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           STATUS DO TICKET
+        ===================================================== */
+
+        function getStatusClass(status) {
+
+            const classes = {
+
+                open:
+                    'status-open',
+
+                pending:
+                    'status-pending',
+
+                closed:
+                    'status-closed'
+
+            };
+
+            return (
+                classes[status] ||
+                'status-pending'
+            );
+
+        }
+
+
+        function getStatusLabel(status) {
+
+            const labels = {
+
+                open:
+                    '🆕 Aberto',
+
+                pending:
+                    '⏳ Em andamento',
+
+                closed:
+                    '✅ Fechado'
+
+            };
+
+            return (
+                labels[status] ||
+                'Ticket'
+            );
+
+        }
+
+
+        /* =====================================================
+           CATEGORIA
+        ===================================================== */
+
+        function getCategoryEmoji(
+            category
+        ) {
+
+            const emojis = {
+
+                bug:
+                    '🐛',
+
+                feature:
+                    '✨',
+
+                maintenance:
+                    '🔧',
+
+                update:
+                    '📦',
+
+                other:
+                    '📝'
+
+            };
+
+            return (
+                emojis[category] ||
+                '📋'
+            );
+
+        }
+
+
+        /* =====================================================
+           CARREGAR TICKETS
+        ===================================================== */
+
+        async function getTickets() {
+
+            const response =
+                await apiFetch(
+                    '/api/tickets'
+                );
+
+
+            if (!response) {
+
+                return null;
+
+            }
+
+
+            if (!response.ok) {
+
+                let errorText = '';
+
+                try {
+
+                    errorText =
+                        await response.text();
+
+                } catch {
+
+                    errorText =
+                        '';
+
+                }
+
+
+                throw new Error(
+                    `HTTP ${response.status}${errorText ? `: ${errorText}` : ''}`
+                );
+
+            }
+
+
+            const tickets =
+                await response.json();
+
+
+            if (!Array.isArray(tickets)) {
+
+                console.error(
+                    'Resposta inesperada da API:',
+                    tickets
+                );
+
+                throw new Error(
+                    'A API /api/tickets não retornou uma lista de tickets.'
+                );
+
+            }
+
+
+            setConnectionStatus(
+                true,
+                'Servidor online'
+            );
+
+
+            return tickets;
+
+        }
+
+
+        /* =====================================================
+           STATS
+        ===================================================== */
+
+        async function updateStats() {
+
+            try {
+
+                const tickets =
+                    await getTickets();
+
+
+                if (!tickets) return;
+
+
+                const newCount =
+                    tickets.filter(
+                        ticket =>
+                            ticket.status ===
+                            'open'
+                    ).length;
+
+
+                const pendingCount =
+                    tickets.filter(
+                        ticket =>
+                            ticket.status ===
+                            'pending'
+                    ).length;
+
+
+                const resolvedCount =
+                    tickets.filter(
+                        ticket =>
+                            ticket.status ===
+                            'closed'
+                    ).length;
+
+
+                document
+                    .getElementById(
+                        'totalTickets'
+                    )
+                    .textContent =
+                    tickets.length;
+
+
+                document
+                    .getElementById(
+                        'newTickets'
+                    )
+                    .textContent =
+                    newCount;
+
+
+                document
+                    .getElementById(
+                        'pendingTickets'
+                    )
+                    .textContent =
+                    pendingCount;
+
+
+                document
+                    .getElementById(
+                        'resolvedTickets'
+                    )
+                    .textContent =
+                    resolvedCount;
+
+
+                document
+                    .getElementById(
+                        'badge'
+                    )
+                    .textContent =
+                    newCount;
+
+            } catch (error) {
+
+                console.error(
+                    'Erro ao atualizar estatísticas:',
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           NOVOS TICKETS
+        ===================================================== */
+
+        async function renderNewTickets() {
+
+            const container =
+                document.getElementById(
+                    'newTicketsContainer'
+                );
+
+
+            if (!container) return;
+
+
+            try {
+
+                const tickets =
+                    await getTickets();
+
+
+                if (!tickets) return;
+
+
+                const newTickets =
+                    tickets.filter(
+                        ticket =>
+                            ticket.status ===
+                            'open'
+                    );
+
+
+                if (!newTickets.length) {
+
+                    container.innerHTML = `
+                        <div class="empty-state">
+
+                            <div class="empty-state-icon">
+                                ✅
+                            </div>
+
+                            <p>
+                                Nenhum ticket novo no momento.
+                                Tudo em ordem!
+                            </p>
+
+                        </div>
+                    `;
+
+                    return;
+
+                }
+
+
+                container.innerHTML =
+                    newTickets
+                        .map(ticket => {
+
+                            const ticketId =
+                                escapeHTML(
+                                    ticket.id
+                                );
+
+
+                            return `
+                                <div class="ticket-card new">
+
+                                    <div class="ticket-header">
+
+                                        <span class="ticket-id">
+                                            #${ticketId}
+                                        </span>
+
+                                        <span class="ticket-status ${getStatusClass(ticket.status)}">
+                                            ${getStatusLabel(ticket.status)}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="ticket-title">
+
+                                        ${getCategoryEmoji(ticket.category)}
+
+                                        ${escapeHTML(ticket.title)}
+
+                                    </div>
+
+
+                                    <div class="ticket-info">
+
+                                        <div class="ticket-info-item">
+
+                                            <div class="ticket-info-label">
+                                                Cliente
+                                            </div>
+
+                                            <div>
+                                                ${escapeHTML(ticket.name)}
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="ticket-info-item">
+
+                                            <div class="ticket-info-label">
+                                                Projeto
+                                            </div>
+
+                                            <div>
+                                                ${escapeHTML(ticket.project || '-')}
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="ticket-info-item">
+
+                                            <div class="ticket-info-label">
+                                                Email
+                                            </div>
+
+                                            <div
+                                                style="
+                                                    word-break: break-all;
+                                                "
+                                            >
+                                                ${escapeHTML(ticket.email)}
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="ticket-info-item">
+
+                                            <div class="ticket-info-label">
+                                                Criado
+                                            </div>
+
+                                            <div>
+                                                ${escapeHTML(ticket.createdAt || '-')}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="ticket-desc">
+
+                                        "${escapeHTML(ticket.description)}"
+
+                                    </div>
+
+
+                                    ${
+                                        ticket.attachments
+                                        ? `
+                                            <div
+                                                style="
+                                                    font-size: 0.85rem;
+                                                    color: var(--text-muted);
+                                                    margin-bottom: 10px;
+                                                "
+                                            >
+                                                📎
+                                                ${escapeHTML(ticket.attachments)}
+                                            </div>
+                                        `
+                                        : ''
+                                    }
+
+
+                                    <div class="ticket-actions">
+
+                                        <button
+                                            class="action-btn accept"
+                                            type="button"
+                                            onclick="assumeTicket('${ticketId}')"
+                                        >
+                                            ✓ Assumir Ticket
+                                        </button>
+
+
+                                        <button
+                                            class="action-btn"
+                                            type="button"
+                                            onclick="openChat('${ticketId}')"
+                                        >
+                                            💬 Conversar
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            `;
+
+                        })
+                        .join('');
+
+            } catch (error) {
+
+                console.error(
+                    'Erro ao renderizar novos tickets:',
+                    error
+                );
+
+                container.innerHTML = `
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            ⚠️
+                        </div>
+
+                        <p>
+                            Não foi possível carregar os tickets.
+                        </p>
+
+                    </div>
+                `;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           ASSUMIR TICKET
+        ===================================================== */
+
+        async function assumeTicket(
+            ticketId
+        ) {
+
+            if (!ticketId) return;
+
+
+            try {
+
+                const response =
+                    await apiFetch(
+                        '/api/tickets/update',
+                        {
+                            method: 'PATCH',
+
+                            body:
+                                JSON.stringify({
+                                    id:
+                                        ticketId,
+
+                                    status:
+                                        'pending'
+                                })
+                        }
+                    );
+
+
+                if (!response) return;
+
+
+                if (!response.ok) {
+
+                    const text =
+                        await response.text();
+
+                    throw new Error(
+                        `HTTP ${response.status}: ${text}`
+                    );
+
+                }
+
+
+                showNotification(
+                    `✓ Ticket #${ticketId} assumido com sucesso!`
+                );
+
+
+                await refreshAll();
+
+
+            } catch (error) {
+
+                console.error(
+                    'Erro ao assumir ticket:',
+                    error
+                );
+
+                showNotification(
+                    '❌ Não foi possível assumir o ticket.'
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           TODAS AS CONVERSAS
+        ===================================================== */
+
+        async function renderAllChats() {
+
+            const container =
+                document.getElementById(
+                    'adminChatsContainer'
+                );
+
+
+            if (!container) return;
+
+
+            try {
+
+                const tickets =
+                    await getTickets();
+
+
+                if (!tickets) return;
+
+
+                const activeTickets =
+                    tickets.filter(
+                        ticket =>
+                            ticket.status !==
+                            'closed'
+                    );
+
+
+                if (!activeTickets.length) {
+
+                    container.innerHTML = `
+                        <div class="empty-state">
+
+                            <div class="empty-state-icon">
+                                💬
+                            </div>
+
+                            <p>
+                                Nenhuma conversa disponível
+                                no momento.
+                            </p>
+
+                        </div>
+                    `;
+
+                    return;
+
+                }
+
+
+                container.innerHTML =
+                    activeTickets
+                        .map(ticket => {
+
+                            const id =
+                                escapeHTML(
+                                    ticket.id
+                                );
+
+
+                            return `
+                                <div class="ticket-card">
+
+                                    <div class="ticket-header">
+
+                                        <span class="ticket-id">
+                                            #${id}
+                                        </span>
+
+                                        <span class="ticket-status ${getStatusClass(ticket.status)}">
+                                            ${getStatusLabel(ticket.status)}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="ticket-title">
+
+                                        ${getCategoryEmoji(ticket.category)}
+
+                                        ${escapeHTML(ticket.title)}
+
+                                    </div>
+
+
+                                    <div class="ticket-info">
+
+                                        <div class="ticket-info-item">
+
+                                            <div class="ticket-info-label">
+                                                Cliente
+                                            </div>
+
+                                            <div>
+                                                ${escapeHTML(ticket.name)}
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="ticket-info-item">
+
+                                            <div class="ticket-info-label">
+                                                Email
+                                            </div>
+
+                                            <div
+                                                style="
+                                                    word-break: break-all;
+                                                "
+                                            >
+                                                ${escapeHTML(ticket.email)}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="ticket-desc">
+
+                                        "${escapeHTML(ticket.description)}"
+
+                                    </div>
+
+
+                                    <div class="ticket-actions">
+
+                                        <button
+                                            class="action-btn"
+                                            type="button"
+                                            onclick="openChat('${id}')"
+                                        >
+                                            💬 Abrir Chat
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            `;
+
+                        })
+                        .join('');
+
+            } catch (error) {
+
+                console.error(
+                    'Erro ao renderizar conversas:',
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           TICKETS FECHADOS
+        ===================================================== */
+
+        async function renderClosedTickets() {
+
+            const container =
+                document.getElementById(
+                    'adminClosedContainer'
+                );
+
+
+            if (!container) return;
+
+
+            try {
+
+                const tickets =
+                    await getTickets();
+
+
+                if (!tickets) return;
+
+
+                const closedTickets =
+                    tickets.filter(
+                        ticket =>
+                            ticket.status ===
+                            'closed'
+                    );
+
+
+                if (!closedTickets.length) {
+
+                    container.innerHTML = `
+                        <div class="empty-state">
+
+                            <div class="empty-state-icon">
+                                📦
+                            </div>
+
+                            <p>
+                                Nenhum ticket fechado
+                                no momento.
+                            </p>
+
+                        </div>
+                    `;
+
+                    return;
+
+                }
+
+
+                container.innerHTML =
+                    closedTickets
+                        .map(ticket => {
+
+                            const id =
+                                escapeHTML(
+                                    ticket.id
+                                );
+
+
+                            return `
+                                <div class="ticket-card">
+
+                                    <div class="ticket-header">
+
+                                        <span class="ticket-id">
+                                            #${id}
+                                        </span>
+
+                                        <span class="ticket-status status-closed">
+                                            ✅ Fechado
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="ticket-title">
+
+                                        ${getCategoryEmoji(ticket.category)}
+
+                                        ${escapeHTML(ticket.title)}
+
+                                    </div>
+
+
+                                    <div class="ticket-info">
+
+                                        <div class="ticket-info-item">
+
+                                            <div class="ticket-info-label">
+                                                Cliente
+                                            </div>
+
+                                            <div>
+                                                ${escapeHTML(ticket.name)}
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="ticket-info-item">
+
+                                            <div class="ticket-info-label">
+                                                Email
+                                            </div>
+
+                                            <div
+                                                style="
+                                                    word-break: break-all;
+                                                "
+                                            >
+                                                ${escapeHTML(ticket.email)}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="ticket-desc">
+
+                                        "${escapeHTML(ticket.description)}"
+
+                                    </div>
+
+
+                                    <div class="ticket-actions">
+
+                                        <button
+                                            class="action-btn"
+                                            type="button"
+                                            onclick="openChat('${id}')"
+                                        >
+                                            📜 Ver Transcript
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            `;
+
+                        })
+                        .join('');
+
+            } catch (error) {
+
+                console.error(
+                    'Erro ao renderizar tickets fechados:',
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           ATUALIZAR TUDO
+        ===================================================== */
+
+        async function refreshAll() {
+
+            await updateStats();
+
+            await renderNewTickets();
+
+
+            const activeSection =
+                document.querySelector(
+                    '.admin-section.active'
+                );
+
+
+            if (!activeSection) return;
+
+
+            if (
+                activeSection.id ===
+                'chats'
+            ) {
+
+                await renderAllChats();
+
+            }
+
+
+            if (
+                activeSection.id ===
+                'closed'
+            ) {
+
+                await renderClosedTickets();
+
+            }
+
+        }
+
+
+        /* =====================================================
+           ABRIR CHAT
+        ===================================================== */
+
+        async function openChat(
+            ticketId
+        ) {
+
+            if (!ticketId) return;
+
+
+            activeTicketId =
+                ticketId;
+
+            selectedFile =
+                null;
+
+
+            const modal =
+                document.getElementById(
+                    'chatModal'
+                );
+
+
+            const messages =
+                document.getElementById(
+                    'chatMessages'
+                );
+
+
+            const inputArea =
+                document.getElementById(
+                    'chatInputArea'
+                );
+
+
+            const closeTicketBtn =
+                document.getElementById(
+                    'closeTicketBtn'
+                );
+
+
+            const chatTitle =
+                document.getElementById(
+                    'chatTitle'
+                );
+
+
+            const chatInput =
+                document.getElementById(
+                    'chatInput'
+                );
+
+
+            messages.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Carregando conversa...</p>
+                </div>
+            `;
+
+
+            chatTitle.textContent =
+                `💬 Chat - Ticket #${ticketId}`;
+
+
+            modal.style.display =
+                'flex';
+
+
+            inputArea.style.display =
+                'flex';
+
+
+            closeTicketBtn.style.display =
+                'block';
+
+
+            chatInput.value =
+                '';
+
+
+            try {
+
+                const response =
+                    await apiFetch(
+                        '/api/tickets'
+                    );
+
+
+                if (!response) return;
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `HTTP ${response.status}`
+                    );
+
+                }
+
+
+                const tickets =
+                    await response.json();
+
+
+                const ticket =
+                    tickets.find(
+                        item =>
+                            String(item.id) ===
+                            String(ticketId)
+                    );
+
+
+                if (
+                    ticket &&
+                    ticket.status ===
+                    'closed'
+                ) {
+
+                    inputArea.style.display =
+                        'none';
+
+                    closeTicketBtn.style.display =
+                        'none';
+
+                    chatTitle.textContent =
+                        `📜 Transcript - Ticket #${ticketId} (Fechado)`;
+
+                }
+
+
+                const msgResponse =
+                    await apiFetch(
+                        `/api/tickets/${encodeURIComponent(ticketId)}/messages`
+                    );
+
+
+                if (!msgResponse) return;
+
+
+                if (!msgResponse.ok) {
+
+                    throw new Error(
+                        `HTTP ${msgResponse.status}`
+                    );
+
+                }
+
+
+                const messageList =
+                    await msgResponse.json();
+
+
+                messages.innerHTML =
+                    '';
+
+
+                if (
+                    Array.isArray(
+                        messageList
+                    )
+                ) {
+
+                    messageList.forEach(
+                        appendMessage
+                    );
+
+                }
+
+
+                if (
+                    !messageList ||
+                    !messageList.length
+                ) {
+
+                    messages.innerHTML = `
+                        <div class="empty-state">
+
+                            <div class="empty-state-icon">
+                                💬
+                            </div>
+
+                            <p>
+                                Nenhuma mensagem nesta conversa.
+                            </p>
+
+                        </div>
+                    `;
+
+                }
+
+
+                setTimeout(() => {
+
+                    messages.scrollTop =
+                        messages.scrollHeight;
+
+
+                    if (
+                        inputArea.style.display !==
+                        'none'
+                    ) {
+
+                        chatInput.focus();
+
+                    }
+
+                }, 100);
+
+            } catch (error) {
+
+                console.error(
+                    'Erro ao carregar chat:',
+                    error
+                );
+
+
+                messages.innerHTML = `
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            ⚠️
+                        </div>
+
+                        <p>
+                            Erro ao carregar a conversa.
+                        </p>
+
+                    </div>
+                `;
+
+
+                showNotification(
+                    '❌ Erro ao carregar a conversa.'
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           FECHAR CHAT
+        ===================================================== */
+
+        function closeChat() {
+
+            const modal =
+                document.getElementById(
+                    'chatModal'
+                );
+
+
+            modal.style.display =
+                'none';
+
+
+            activeTicketId =
+                null;
+
+
+            selectedFile =
+                null;
+
+
+            document.getElementById(
+                'chatInput'
+            ).value =
+                '';
+
+
+            document.getElementById(
+                'chatFile'
+            ).value =
+                '';
+
+
+            document.getElementById(
+                'chatMessages'
+            ).innerHTML =
+                '';
+
+        }
+
+
+        /* =====================================================
+           FECHAR TICKET
+        ===================================================== */
+
+        async function closeTicket() {
+
+            if (!activeTicketId) {
+
+                showNotification(
+                    '⚠️ Nenhum ticket selecionado.'
+                );
+
+                return;
+
+            }
+
+
+            const confirmed =
+                confirm(
+                    `Tem certeza que deseja fechar o ticket #${activeTicketId}?`
+                );
+
+
+            if (!confirmed) return;
+
+
+            const ticketId =
+                activeTicketId;
+
+
+            try {
+
+                const response =
+                    await apiFetch(
+                        '/api/tickets/update',
+                        {
+                            method:
+                                'PATCH',
+
+                            body:
+                                JSON.stringify({
+                                    id:
+                                        ticketId,
+
+                                    status:
+                                        'closed'
+                                })
+                        }
+                    );
+
+
+                if (!response) return;
+
+
+                if (!response.ok) {
+
+                    const text =
+                        await response.text();
+
+                    throw new Error(
+                        `HTTP ${response.status}: ${text}`
+                    );
+
+                }
+
+
+                showNotification(
+                    `✓ Ticket #${ticketId} fechado com sucesso!`
+                );
+
+
+                closeChat();
+
+
+                await refreshAll();
+
+
+            } catch (error) {
+
+                console.error(
+                    'Erro ao fechar o ticket:',
+                    error
+                );
+
+
+                showNotification(
+                    '❌ Erro ao fechar o ticket.'
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           ARQUIVO
+        ===================================================== */
+
+        function handleFileSelect() {
+
+            const input =
+                document.getElementById(
+                    'chatFile'
+                );
+
+
+            const file =
+                input.files &&
+                input.files[0];
+
+
+            if (!file) {
+
+                selectedFile =
+                    null;
+
+                return;
+
+            }
+
+
+            const MAX_FILE_SIZE =
+                10 * 1024 * 1024;
+
+
+            if (
+                file.size >
+                MAX_FILE_SIZE
+            ) {
+
+                input.value =
+                    '';
+
+                selectedFile =
+                    null;
+
+                showNotification(
+                    '❌ O arquivo deve ter no máximo 10 MB.'
+                );
+
+                return;
+
+            }
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                event => {
+
+                    selectedFile = {
+
+                        data:
+                            event.target.result,
+
+                        name:
+                            file.name,
+
+                        type:
+                            file.type
+
+                    };
+
+
+                    showNotification(
+                        `📎 Arquivo selecionado: ${file.name}`
+                    );
+
+                };
+
+
+            reader.onerror =
+                () => {
+
+                    selectedFile =
+                        null;
+
+                    input.value =
+                        '';
+
+                    showNotification(
+                        '❌ Não foi possível ler o arquivo.'
+                    );
+
+                };
+
+
+            reader.readAsDataURL(
+                file
+            );
+
+        }
+
+
+        /* =====================================================
+           ENVIAR MENSAGEM
+        ===================================================== */
+
+        async function sendChatMessage() {
+
+            if (!activeTicketId) {
+
+                showNotification(
+                    '⚠️ Nenhum ticket aberto.'
+                );
+
+                return;
+
+            }
+
+
+            const input =
+                document.getElementById(
+                    'chatInput'
+                );
+
+
+            const text =
+                input.value.trim();
+
+
+            if (
+                !text &&
+                !selectedFile
+            ) {
+
+                return;
+
+            }
+
+
+            const messageData = {
+
+                id:
+                    activeTicketId,
+
+                sender:
+                    'admin',
+
+                text:
+                    text,
+
+                file:
+                    selectedFile
+                    ? selectedFile.data
+                    : null,
+
+                fileName:
+                    selectedFile
+                    ? selectedFile.name
+                    : null,
+
+                fileType:
+                    selectedFile
+                    ? selectedFile.type
+                    : null
+
+            };
+
+
+            try {
+
+                const response =
+                    await apiFetch(
+                        `/api/tickets/${encodeURIComponent(activeTicketId)}/messages`,
+                        {
+                            method:
+                                'POST',
+
+                            body:
+                                JSON.stringify(
+                                    messageData
+                                )
+                        }
+                    );
+
+
+                if (!response) return;
+
+
+                if (!response.ok) {
+
+                    const textResponse =
+                        await response.text();
+
+                    throw new Error(
+                        `HTTP ${response.status}: ${textResponse}`
+                    );
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    data.success ===
+                    false
+                ) {
+
+                    throw new Error(
+                        data.error ||
+                        'Erro ao enviar mensagem.'
+                    );
+
+                }
+
+
+                input.value =
+                    '';
+
+                selectedFile =
+                    null;
+
+
+                document.getElementById(
+                    'chatFile'
+                ).value =
+                    '';
+
+
+                if (
+                    data.message &&
+                    (!socket ||
+                    !data.broadcasted)
+                ) {
+
+                    appendMessage(
+                        data.message
+                    );
+
+                }
+
+
+                input.focus();
+
+
+            } catch (error) {
+
+                console.error(
+                    'Erro ao enviar mensagem:',
+                    error
+                );
+
+
+                showNotification(
+                    '❌ Não foi possível enviar a mensagem.'
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           APPEND MESSAGE
+        ===================================================== */
+
+        function appendMessage(
+            msg
+        ) {
+
+            if (!msg) return;
+
+
+            const container =
+                document.getElementById(
+                    'chatMessages'
+                );
+
+
+            if (!container) return;
+
+
+            /*
+             * Se a mensagem recebida for exatamente
+             * a mesma que já está na tela, evitamos
+             * duplicação.
+             */
+
+            const messageKey =
+                msg.id ||
+                `${msg.timestamp || ''}-${msg.text || ''}-${msg.fileName || ''}`;
+
+
+            if (
+                messageKey &&
+                container.querySelector(
+                    `[data-message-id="${CSS.escape(String(messageKey))}"]`
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * Remove estado vazio/loading.
+             */
+
+            const empty =
+                container.querySelector(
+                    '.empty-state'
+                );
+
+            if (empty) {
+
+                empty.remove();
+
+            }
+
+
+            const loading =
+                container.querySelector(
+                    '.loading-state'
+                );
+
+            if (loading) {
+
+                loading.remove();
+
+            }
+
+
+            const div =
+                document.createElement(
+                    'div'
+                );
+
+
+            div.className =
+                `message ${
+                    msg.sender === 'admin'
+                    ? 'admin'
+                    : 'user'
+                }`;
+
+
+            if (messageKey) {
+
+                div.dataset.messageId =
+                    String(messageKey);
+
+            }
+
+
+            const info =
+                document.createElement(
+                    'span'
+                );
+
+
+            info.className =
+                'message-info';
+
+
+            const sender =
+                msg.sender === 'admin'
+                ? 'Administrador'
+                : 'Cliente';
+
+
+            info.textContent =
+                `${sender} • ${msg.timestamp || ''}`;
+
+
+            div.appendChild(
+                info
+            );
+
+
+            if (msg.text) {
+
+                const text =
+                    document.createElement(
+                        'div'
+                    );
+
+
+                text.textContent =
+                    msg.text;
+
+
+                div.appendChild(
+                    text
+                );
+
+            }
+
+
+            if (msg.file) {
+
+                if (
+                    msg.fileType &&
+                    msg.fileType.startsWith(
+                        'image/'
+                    )
+                ) {
+
+                    const image =
+                        document.createElement(
+                            'img'
+                        );
+
+
+                    image.src =
+                        msg.file;
+
+
+                    image.className =
+                        'message-image';
+
+
+                    image.alt =
+                        msg.fileName ||
+                        'Imagem enviada';
+
+
+                    image.onclick =
+                        () => {
+
+                            window.open(
+                                image.src,
+                                '_blank'
+                            );
+
+                        };
+
+
+                    div.appendChild(
+                        image
+                    );
+
+                } else {
+
+                    const link =
+                        document.createElement(
+                            'a'
+                        );
+
+
+                    link.href =
+                        msg.file;
+
+
+                    link.download =
+                        msg.fileName ||
+                        'arquivo';
+
+
+                    link.className =
+                        'message-file';
+
+
+                    link.textContent =
+                        `📎 ${
+                            msg.fileName ||
+                            'Arquivo'
+                        }`;
+
+
+                    link.target =
+                        '_blank';
+
+
+                    div.appendChild(
+                        link
+                    );
+
+                }
+
+            }
+
+
+            container.appendChild(
+                div
+            );
+
+
+            container.scrollTop =
+                container.scrollHeight;
+
+        }
+
+
+        /* =====================================================
+           SOCKET.IO
+        ===================================================== */
+
+        function initSocket() {
+
+            if (socket) {
+
+                return;
+
+            }
+
+
+            if (
+                typeof io !==
+                'function'
+            ) {
+
+                console.error(
+                    'Socket.IO não foi carregado.'
+                );
+
+                setConnectionStatus(
+                    false,
+                    'Socket indisponível'
+                );
+
+                return;
+
+            }
+
+
+            socket =
+                io(
+                    API_URL,
+                    {
+                        transports: [
+                            'websocket',
+                            'polling'
+                        ],
+
+                        reconnection: true,
+
+                        reconnectionAttempts:
+                            Infinity,
+
+                        reconnectionDelay:
+                            1000,
+
+                        reconnectionDelayMax:
+                            5000
+                    }
+                );
+
+
+            socket.on(
+                'connect',
+                () => {
+
+                    console.log(
+                        'Socket conectado:',
+                        socket.id
+                    );
+
+
+                    setConnectionStatus(
+                        true,
+                        'Online'
+                    );
+
+
+                    const adminName =
+                        localStorage.getItem(
+                            'adminName'
+                        ) ||
+                        'Administrador';
+
+
+                    const adminEmail =
+                        localStorage.getItem(
+                            'adminEmail'
+                        ) ||
+                        '';
+
+
+                    socket.emit(
+                        'identify',
+                        {
+                            name:
+                                adminName,
+
+                            email:
+                                adminEmail,
+
+                            role:
+                                'admin'
+                        }
+                    );
+
+
+                    /*
+                     * Mesmo conectado pelo Socket,
+                     * atualizamos os tickets para garantir
+                     * sincronização.
+                     */
+
+                    refreshAll();
+
+                }
+            );
+
+
+            socket.on(
+                'disconnect',
+                reason => {
+
+                    console.warn(
+                        'Socket desconectado:',
+                        reason
+                    );
+
+
+                    setConnectionStatus(
+                        false,
+                        'Socket desconectado'
+                    );
+
+                }
+            );
+
+
+            socket.on(
+                'connect_error',
+                error => {
+
+                    console.error(
+                        'Erro Socket.IO:',
+                        error
+                    );
+
+
+                    setConnectionStatus(
+                        false,
+                        'Reconectando...'
+                    );
+
+                }
+            );
+
+
+            socket.on(
+                'new-ticket',
+                ticket => {
+
+                    console.log(
+                        'Novo ticket recebido:',
+                        ticket
+                    );
+
+
+                    showNotification(
+                        `🆕 Novo Ticket Recebido: #${ticket.id}`
+                    );
+
+
+                    refreshAll();
+
+                }
+            );
+
+
+            socket.on(
+                'ticket-created',
+                ticket => {
+
+                    console.log(
+                        'Ticket criado:',
+                        ticket
+                    );
+
+
+                    showNotification(
+                        `🆕 Novo Ticket Recebido: #${ticket.id}`
+                    );
+
+
+                    refreshAll();
+
+                }
+            );
+
+
+            socket.on(
+                'ticket-updated',
+                ticket => {
+
+                    console.log(
+                        'Ticket atualizado:',
+                        ticket
+                    );
+
+
+                    refreshAll();
+
+                }
+            );
+
+
+            socket.on(
+                'ticket-message',
+                data => {
+
+                    console.log(
+                        'Mensagem recebida:',
+                        data
+                    );
+
+
+                    if (
+                        activeTicketId &&
+                        data &&
+                        String(
+                            activeTicketId
+                        ) ===
+                        String(
+                            data.ticketId
+                        )
+                    ) {
+
+                        appendMessage(
+                            data.message
+                        );
+
+                    }
+
+
+                    if (
+                        data &&
+                        data.ticketId
+                    ) {
+
+                        showNotification(
+                            `💬 Mensagem no Ticket #${data.ticketId}`
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           POLLING
+        ===================================================== */
+
+        function startAutoRefresh() {
+
+            if (
+                ticketsRefreshInterval
+            ) {
+
+                clearInterval(
+                    ticketsRefreshInterval
+                );
+
+            }
+
+
+            /*
+             * O Socket.IO cuida do tempo real.
+             * Este intervalo funciona como fallback.
+             *
+             * Assim, mesmo que o evento new-ticket
+             * não seja emitido pelo backend, o painel
+             * encontrará o pedido em até 5 segundos.
+             */
+
+            ticketsRefreshInterval =
+                setInterval(
+                    async () => {
+
+                        try {
+
+                            const tickets =
+                                await getTickets();
+
+
+                            if (!tickets) {
+                                return;
+                            }
+
+
+                            const snapshot =
+                                JSON.stringify(
+                                    tickets
+                                );
+
+
+                            if (
+                                snapshot !==
+                                lastTicketsSnapshot
+                            ) {
+
+                                const hadPrevious =
+                                    Boolean(
+                                        lastTicketsSnapshot
+                                    );
+
+
+                                lastTicketsSnapshot =
+                                    snapshot;
+
+
+                                if (
+                                    hadPrevious
+                                ) {
+
+                                    const openCount =
+                                        tickets.filter(
+                                            ticket =>
+                                                ticket.status ===
+                                                'open'
+                                        ).length;
+
+
+                                    showNotification(
+                                        `🔄 Tickets atualizados • ${openCount} aberto(s)`
+                                    );
+
+                                }
+
+
+                                await updateStats();
+
+                                await renderNewTickets();
+
+
+                                const activeSection =
+                                    document.querySelector(
+                                        '.admin-section.active'
+                                    );
+
+
+                                if (
+                                    activeSection &&
+                                    activeSection.id ===
+                                    'chats'
+                                ) {
+
+                                    await renderAllChats();
+
+                                }
+
+
+                                if (
+                                    activeSection &&
+                                    activeSection.id ===
+                                    'closed'
+                                ) {
+
+                                    await renderClosedTickets();
+
+                                }
+
+                            }
+
+                        } catch (error) {
+
+                            console.error(
+                                'Erro no auto-refresh:',
+                                error
+                            );
+
+                        }
+
+                    },
+                    5000
+                );
+
+        }
+
+
+        /* =====================================================
+           LOGOUT / LIMPAR SESSÃO
+        ===================================================== */
+
+        function logout() {
+
+            if (socket) {
+
+                socket.disconnect();
+
+                socket = null;
+
+            }
+
+
+            localStorage.removeItem(
+                'adminLoggedIn'
+            );
+
+            localStorage.removeItem(
+                'adminToken'
+            );
+
+            localStorage.removeItem(
+                'adminEmail'
+            );
+
+            localStorage.removeItem(
+                'adminName'
+            );
+
+
+            if (timeInterval) {
+
+                clearInterval(
+                    timeInterval
+                );
+
+                timeInterval =
+                    null;
+
+            }
+
+
+            if (
+                ticketsRefreshInterval
+            ) {
+
+                clearInterval(
+                    ticketsRefreshInterval
+                );
+
+                ticketsRefreshInterval =
+                    null;
+
+            }
+
+
+            showNotification(
+                '✓ Sessão local encerrada.'
+            );
+
+
+            /*
+             * O painel continua aberto porque não possui
+             * página de login própria.
+             *
+             * Se o backend exigir autenticação,
+             * as próximas requisições retornarão 401.
+             */
+
+        }
+
+
+        /* =====================================================
+           ESC
+        ===================================================== */
+
+        document.addEventListener(
+            'keydown',
+            event => {
+
+                if (
+                    event.key ===
+                    'Escape'
+                ) {
+
+                    const modal =
+                        document.getElementById(
+                            'chatModal'
+                        );
+
+
+                    if (
+                        modal &&
+                        modal.style.display ===
+                        'flex'
+                    ) {
+
+                        closeChat();
+
+                    }
+
+                }
+
+
+                if (
+                    event.key ===
+                    'Enter' &&
+                    document.activeElement &&
+                    document.activeElement.id ===
+                    'chatInput'
+                ) {
+
+                    event.preventDefault();
+
+                    sendChatMessage();
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           CLICK FORA DO CHAT
+        ===================================================== */
+
+        document
+            .getElementById(
+                'chatModal'
+            )
+            .addEventListener(
+                'click',
+                event => {
+
+                    if (
+                        event.target.id ===
+                        'chatModal'
+                    ) {
+
+                        closeChat();
+
+                    }
+
+                }
+            );
+
+
+        /* =====================================================
+           INICIALIZAÇÃO
+        ===================================================== */
+
+        async function initAdminPanel() {
+
+            console.log(
+                'Inicializando painel admin...'
+            );
+
+
+            const savedName =
+                localStorage.getItem(
+                    'adminName'
+                );
+
+
+            const nameElement =
+                document.getElementById(
+                    'adminNameDisplay'
+                );
+
+
+            if (
+                nameElement &&
+                savedName
+            ) {
+
+                nameElement.textContent =
+                    savedName;
+
+            }
+
+
+            updateTime();
+
+
+            if (!timeInterval) {
+
+                timeInterval =
+                    setInterval(
+                        updateTime,
+                        1000
+                    );
+
+            }
+
+
+            /*
+             * Primeiro tenta buscar diretamente da API.
+             */
+
+            try {
+
+                const tickets =
+                    await getTickets();
+
+
+                if (tickets) {
+
+                    lastTicketsSnapshot =
+                        JSON.stringify(
+                            tickets
+                        );
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    'Erro inicial ao buscar tickets:',
+                    error
+                );
+
+            }
+
+
+            /*
+             * Depois inicia Socket.IO.
+             */
+
+            initSocket();
+
+
+            /*
+             * Inicia fallback de atualização.
+             */
+
+            startAutoRefresh();
+
+
+            /*
+             * Renderização inicial.
+             */
+
+            await updateStats();
+
+            await renderNewTickets();
+
+        }
+
+
+        /* =====================================================
+           LOAD
+        ===================================================== */
+
+        window.addEventListener(
+            'load',
+            () => {
+
+                console.log(
+                    'Painel carregado.'
+                );
+
+
+                initAdminPanel();
+
+            }
+        );
+
+
+        /* =====================================================
+           UNLOAD
+        ===================================================== */
+
+        window.addEventListener(
+            'beforeunload',
+            () => {
+
+                if (timeInterval) {
+
+                    clearInterval(
+                        timeInterval
+                    );
+
+                }
+
+
+                if (
+                    ticketsRefreshInterval
+                ) {
+
+                    clearInterval(
+                        ticketsRefreshInterval
+                    );
+
+                }
+
+
+                if (socket) {
+
+                    socket.disconnect();
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>
