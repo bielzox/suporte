@@ -1559,7 +1559,38 @@
                 font-size: 2.5rem;
             }
         }
-    </style>
+    
+/* ===== AJUSTE CARDS DE USUÁRIOS ===== */
+#adminUsersContainer {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+#adminUsersContainer .ticket-card,
+#adminUsersContainer .user-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 22px;
+    border-radius: 20px;
+}
+
+#adminUsersContainer img {
+    max-width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#adminUsersContainer p,
+#adminUsersContainer span {
+    word-break: break-word;
+}
+
+#adminUsersContainer button {
+    width: 100%;
+    margin-top: 10px;
+}
+</style>
 </head>
 
 <body onload="checkAdminAuth()">
@@ -2188,18 +2219,24 @@
                     <h2 class="section-title">👤 Meu Perfil Administrativo</h2>
                     <div class="profile-container">
                         <div class="profile-card">
-                            <img id="adminProfileImg" src="" class="profile-img" alt="Admin Profile">
+                            <div id="adminProfileImageContainer" style="position: relative; display: inline-block;">
+                                <img id="adminProfileImg" src="" class="profile-img" alt="Admin Profile">
+                                <label for="adminProfileImageInput" style="position: absolute; bottom: 0; right: 0; background: var(--accent); color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; border: 2px solid #000;">
+                                    📷
+                                    <input type="file" id="adminProfileImageInput" style="display: none;" onchange="updateAdminProfileImage(this)">
+                                </label>
+                            </div>
                             <h3 id="adminProfileName" style="font-size: 1.5rem; margin-bottom: 10px;">Administrador</h3>
                             <p id="adminProfileEmail" style="color: var(--text-muted);">admin@email.com</p>
 
-                            <form class="profile-form" onsubmit="handleProfileSave(event)">
+                            <form class="profile-form" onsubmit="handleAdminProfileSave(event)">
                                 <div class="form-group">
                                     <label>Nome</label>
                                     <input type="text" id="editAdminName" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Imagem (URL)</label>
-                                    <input type="text" id="editAdminImg" placeholder="https://...">
+                                    <label>Username</label>
+                                    <input type="text" id="editAdminUsername" required>
                                 </div>
                                 <button type="submit" class="profile-save-btn">💾 Salvar Alterações</button>
                             </form>
@@ -2222,6 +2259,23 @@
                                     <button class="profile-save-btn" onclick="changeAdminPassword()">🔑 Alterar Senha</button>
                                 </div>
                             </div>
+
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); text-align: left;">
+                                <h4 style="margin-bottom: 15px; color: var(--text-muted); font-size: 1rem;">Sessões Ativas</h4>
+                                <div id="adminSessionsList" style="display: flex; flex-direction: column; gap: 10px;">
+                                    <!-- Sessões serão inseridas aqui -->
+                                </div>
+                                <button class="submit-btn" style="background: rgba(248, 113, 113, 0.2); color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.3); margin-top: 15px; width: 100%;" onclick="revokeAdminSessions()">
+                                    🚫 Encerrar Todas as Sessões
+                                </button>
+                            </div>
+
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); text-align: left;">
+                                <h4 style="margin-bottom: 15px; color: var(--danger); font-size: 1rem;">Zona de Perigo</h4>
+                                <button class="submit-btn" style="background: var(--danger); color: #fff; border: none; width: 100%;" onclick="deleteAdminAccount()">
+                                    🗑️ Excluir Minha Conta Permanentemente
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2237,7 +2291,7 @@
         <div class="section">
 
             <h2 class="section-title">
-                👥 Lista de Usuários e Códigos Vitalícios
+                👥 Lista de Usuários
             </h2>
 
             <div class="tickets-grid" id="adminUsersContainer">
@@ -3517,47 +3571,28 @@
             if (event && event.currentTarget) {
                 event.currentTarget.classList.add("active");
             }
-        }
 
-            if (button) {
-
-                button.classList.add(
-                    'active'
-                );
-
-            }
-
-
-            if (sectionId === 'dashboard') {
-
+            if (tabName === 'dashboard') {
                 updateStats();
-
                 renderNewTickets();
-
             }
-
-
-            if (sectionId === 'chats') {
-
+            if (tabName === 'chats') {
                 renderAllChats();
-
             }
-
-
-            if (sectionId === 'closed') {
-
+            if (tabName === 'closed') {
                 renderClosedTickets();
-
             }
-
-            if (sectionId === 'users') {
+            if (tabName === 'users') {
                 renderUsers();
             }
-
-            if (sectionId === 'profile') {
+            if (tabName === 'reviews') {
+                renderReviews();
+            }
+            if (tabName === 'profile') {
                 renderAdminProfile();
-            
+            }
         }
+
 
 
         /* =====================================================
@@ -3652,16 +3687,16 @@
                 bug:
                     '🐛',
 
-                feature:
+                Solicitação:
                     '✨',
 
-                maintenance:
+                Manutenção:
                     '🔧',
 
-                update:
+                Atualização:
                     '📦',
 
-                other:
+                Outro:
                     '📝'
 
             };
@@ -5791,6 +5826,53 @@
            RENDERIZAR USUÁRIOS
         ===================================================== */
 
+        async function renderReviews() {
+            const container = document.getElementById('adminReviewsContainer');
+            if (!container) return;
+
+            try {
+                const response = await apiFetch('/api/reviews');
+                if (!response || !response.ok) throw new Error('Erro ao carregar avaliações');
+
+                const data = await response.json();
+                if (!data || !data.success) throw new Error('Resposta da API inválida');
+
+                if (!data.reviews || data.reviews.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⭐</div>
+                            <p>Nenhuma avaliação encontrada.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = data.reviews.map(rev => {
+                    const stars = "⭐".repeat(rev.rating) + "☆".repeat(5 - rev.rating);
+                    return `
+                        <div class="ticket-card">
+                            <div class="ticket-header">
+                                <span style="font-weight:bold; color:#fff;">${escapeHTML(rev.username)}</span>
+                                <span style="color:var(--accent); font-weight:bold;">${stars}</span>
+                            </div>
+                            <div class="ticket-desc">${escapeHTML(rev.comment)}</div>
+                            <div class="ticket-date" style="font-size:0.7rem; color:var(--text-muted); margin-top:10px;">
+                                ${new Date(rev.createdAt).toLocaleString('pt-BR')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Erro ao renderizar avaliações:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>Erro ao carregar avaliações.</p>
+                    </div>
+                `;
+            }
+        }
+
         async function renderUsers() {
             const container = document.getElementById('adminUsersContainer');
             if (!container) return;
@@ -5846,32 +5928,20 @@
                             <div class="ticket-title" style="font-size: 1.4rem; margin-bottom: 15px;">
                                 👤 ${escapeHTML(user.name)}
                             </div>
-                            <div class="ticket-info">
-                                <div class="ticket-info-item">
-                                    <div class="ticket-info-label">Email</div>
-                                    <div style="word-break: break-all; font-weight: 500;">${escapeHTML(user.email)}</div>
-                                </div>
-                                <div class="ticket-info-item">
-                                    <div class="ticket-info-label">Senha</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; opacity: 0.8;">${escapeHTML(user.password)}</div>
-                                </div>
-                                <div class="ticket-info-item">
-                                    <div class="ticket-info-label">Código Temp (5min)</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--warning);">
-                                        ${escapeHTML(user.tempCode)}
+                                <div class="ticket-info">
+                                    <div class="ticket-info-item">
+                                        <div class="ticket-info-label">Nome de Usuário</div>
+                                        <div style="font-weight: 600; color: var(--accent);">${escapeHTML(user.username)}</div>
+                                    </div>
+                                    <div class="ticket-info-item">
+                                        <div class="ticket-info-label">Email</div>
+                                        <div style="word-break: break-all; font-weight: 500;">${escapeHTML(user.email)}</div>
+                                    </div>
+                                    <div class="ticket-info-item">
+                                        <div class="ticket-info-label">Data de Registro</div>
+                                        <div style="font-weight: 500;">${escapeHTML(user.createdAt || 'N/A')}</div>
                                     </div>
                                 </div>
-                                <div class="ticket-info-item">
-                                    <div class="ticket-info-label">Código Vitalício</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--accent);">
-                                        ${escapeHTML(user.lifetimeCode)}
-                                    </div>
-                                </div>
-                                <div class="ticket-info-item">
-                                    <div class="ticket-info-label">Data de Registro</div>
-                                    <div>${escapeHTML(user.createdAt)}</div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 `).join('');
@@ -5891,46 +5961,68 @@
            ===================================================== */
 
         async function renderAdminProfile() {
+            loadAdminProfile();
+        }
+
+        async function loadAdminProfile() {
             try {
                 const response = await apiFetch('/api/admin/profile');
                 if (!response || !response.ok) throw new Error('Erro ao carregar perfil do administrador');
 
-                const admin = await response.json();
-                if (!admin) return;
+                const data = await response.json();
+                if (!data || !data.profile) throw new Error('Dados de perfil não encontrados');
 
-                document.getElementById('adminProfileImg').src = admin.image || 'https://via.placeholder.com/120';
-                document.getElementById('adminProfileName').textContent = admin.name || 'Administrador';
-                document.getElementById('adminProfileEmail').textContent = admin.email || 'admin@email.com';
+                const p = data.profile;
+                document.getElementById('adminProfileImg').src = p.profileImage || 'https://via.placeholder.com/120';
+                document.getElementById('adminProfileName').textContent = p.name || 'Administrador';
+                document.getElementById('adminProfileEmail').textContent = p.email || 'admin@email.com';
+                document.getElementById('editAdminName').value = p.name || '';
+                document.getElementById('editAdminUsername').value = p.username || '';
 
-                document.getElementById('editAdminName').value = admin.name || '';
-                document.getElementById('editAdminImg').value = admin.image || '';
-
+                // Carregar sessões
+                const sessionRes = await apiFetch('/api/admin/sessions');
+                if (sessionRes && sessionRes.ok) {
+                    const sessionData = await sessionRes.json();
+                    const sessionsList = document.getElementById('adminSessionsList');
+                    if (sessionData.success && sessionData.sessions) {
+                        sessionsList.innerHTML = sessionData.sessions.map(s => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem;">
+                                <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80%;">
+                                    <div style="font-weight:600; color:${s.current ? 'var(--accent)' : 'var(--text-main)'}">
+                                        ${s.current ? '📍 Esta Sessão' : '📱 Outro Dispositivo'}
+                                    </div>
+                                    <div style="color:var(--text-muted); font-size:0.7rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.userAgent}</div>
+                                    <div style="color:var(--text-muted); font-size:0.7rem;">${s.ip} • ${new Date(s.loginAt).toLocaleString()}</div>
+                                </div>
+                            </div>
+                        `).join('') || '<p style="color:var(--text-muted); font-size:0.8rem;">Nenhuma sessão ativa.</p>';
+                    } else {
+                        sessionsList.innerHTML = '<p style="color:var(--text-muted); font-size:0.8rem;">Não foi possível carregar as sessões.</p>';
+                    }
+                }
             } catch (error) {
-                console.error('Erro ao renderizar perfil admin:', error);
+                console.error('Erro ao carregar perfil admin:', error);
                 showNotification('❌ Erro ao carregar dados do perfil.');
             }
         }
 
-        async function handleProfileSave(event) {
+        async function handleAdminProfileSave(event) {
             event.preventDefault();
-
-            const name = document.getElementById('editAdminName').value;
-            const image = document.getElementById('editAdminImg').value;
+            const name = document.getElementById('editAdminName').value.trim();
+            const username = document.getElementById('editAdminUsername').value.trim();
+            const profileImage = document.getElementById('adminProfileImg').src;
 
             try {
                 const response = await apiFetch('/api/admin/profile', {
                     method: 'PUT',
-                    body: JSON.stringify({ name, image })
+                    body: JSON.stringify({ name, username, profileImage })
                 });
-
                 if (!response || !response.ok) throw new Error('Erro ao salvar perfil');
 
                 const result = await response.json();
                 if (result.success) {
                     showNotification('✓ Perfil atualizado com sucesso!');
-                    await renderAdminProfile();
-
-                    // Atualiza também o nome no cabeçalho do painel
+                    await loadAdminProfile();
                     document.getElementById('adminNameDisplay').textContent = name;
                     localStorage.setItem('adminName', name);
                 } else {
@@ -5938,6 +6030,58 @@
                 }
             } catch (error) {
                 console.error('Erro ao salvar perfil admin:', error);
+                showNotification(`❌ ${error.message}`);
+            }
+        }
+
+        async function updateAdminProfileImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('adminProfileImg').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function revokeAdminSessions() {
+            if (!confirm('Deseja realmente encerrar todas as sessões? Você será deslogado de todos os aparelhos.')) return;
+            try {
+                const response = await apiFetch('/api/admin/sessions/revoke-all', {
+                    method: 'POST'
+                });
+                if (!response || !response.ok) throw new Error('Erro ao encerrar sessões');
+
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('✓ Todas as sessões foram encerradas. Fazendo logout...');
+                    setTimeout(() => logoutAdmin(), 2000);
+                } else {
+                    throw new Error(result.error || 'Erro ao encerrar sessões');
+                }
+            } catch (error) {
+                console.error('Erro ao encerrar sessões admin:', error);
+                showNotification(`❌ ${error.message}`);
+            }
+        }
+
+        async function deleteAdminAccount() {
+            if (!confirm('⚠️ ATENÇÃO: Esta ação é irreversível. Todos os seus dados administrativos serão apagados permanentemente. Tem certeza?')) return;
+            try {
+                const response = await apiFetch('/api/admin/account', {
+                    method: 'DELETE'
+                });
+                if (!response || !response.ok) throw new Error('Erro ao excluir conta');
+
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('✓ Sua conta administrativa foi excluída com sucesso.');
+                    setTimeout(() => logoutAdmin(), 2000);
+                } else {
+                    throw new Error(result.error || 'Erro ao excluir conta');
+                }
+            } catch (error) {
+                console.error('Erro ao excluir conta admin:', error);
                 showNotification(`❌ ${error.message}`);
             }
         }
@@ -5963,6 +6107,7 @@
                     body: JSON.stringify({ oldPassword, newPassword, confirmPassword })
                 });
                 if (!response || !response.ok) throw new Error('Erro ao alterar senha');
+
                 const result = await response.json();
                 if (result.success) {
                     showNotification('✓ Senha administrativa alterada com sucesso!');
@@ -5973,7 +6118,7 @@
                     throw new Error(result.error || 'Não foi possível alterar a senha.');
                 }
             } catch (error) {
-                console.error(error);
+                console.error('Erro ao alterar senha admin:', error);
                 showNotification(`❌ ${error.message}`);
             }
         }

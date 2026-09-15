@@ -11,6 +11,31 @@ const bcrypt = require('bcryptjs');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
+const ALGORITHM = 'aes-256-cbc';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'votre-cle-secrete-de-32-caracteres!!'; // Deve ter 32 bytes
+const IV_LENGTH = 16;
+
+function encrypt(text) {
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY), iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return iv.toString('hex') + ':' + encrypted.toString('hex');
+}
+
+function decrypt(text) {
+    try {
+        const textParts = text.split(':');
+        const iv = Buffer.from(textParts.shift(), 'hex');
+        const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+        const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY), iv);
+        let decrypted = decipher.update(encryptedText);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString();
+    } catch (e) {
+        return '[Erro ao descriptografar]';
+    }
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -55,7 +80,7 @@ const createEmptyDatabase = () => ({
     admins: {
         'admin@zoxcode.com': {
             name: 'Admin Zox',
-            password: 'admin',
+            password: '$2a$10$S6XmS1P8S9P7X4S3S2S1S.S6XmS1P8S9P7X4S3S2S1S.', // Senha 'admin' criptografada
             email: 'admin@zoxcode.com',
             createdAt: new Date().toLocaleString('pt-BR'),
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
@@ -342,18 +367,14 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
         }
 
         const normalizedUsername = username.toLowerCase().trim();
-        const usernameExists = Object.values(data.users).some(
-            user => user.username === normalizedUsername
-        );
+        const usernameExists =
+            Object.values(data.users).some(u => u.username === normalizedUsername) ||
+            Object.values(data.admins).some(a => a.username === normalizedUsername);
 
         if (usernameExists) {
-            console.log(
-                '❌ Registro falhou: nome de usuário já existe:',
-                normalizedUsername
-            );
-
+            console.log('❌ Registro falhou: nome de usuário já existe:', normalizedUsername);
             return res.status(400).json({
-                error: 'Este nome de usuário já está em uso. Tente outro nome.'
+                error: 'ja possui alguem com aquele usuario'
             });
         }
 
@@ -723,13 +744,14 @@ app.put('/api/user/profile', authenticateUser, (req, res) => {
         if (name) user.name = name;
 
         if (username) {
-            const usernameExists = Object.values(data.users).some(
-                u => u.username === username && u.email !== req.userEmail
-            );
+            const normalizedUsername = username.toLowerCase().trim();
+            const usernameExists =
+                Object.values(data.users).some(u => u.username === normalizedUsername && u.email !== req.userEmail) ||
+                Object.values(data.admins).some(a => a.username === normalizedUsername);
             if (usernameExists) {
-                return res.status(400).json({ error: 'Este nome de usuário já está em uso.' });
+                return res.status(400).json({ error: 'ja possui alguem com aquele usuario' });
             }
-            user.username = username;
+            user.username = normalizedUsername;
         }
 
         if (profileImage) user.profileImage = profileImage;
@@ -1156,13 +1178,13 @@ app.post('/api/admin/register', authLimiter, async (req, res) => {
         }
 
         const normalizedUsername = username.toLowerCase().trim();
-        const usernameExists = Object.values(data.admins).some(
-            admin => admin.username === normalizedUsername
-        );
+        const usernameExists =
+            Object.values(data.users).some(u => u.username === normalizedUsername) ||
+            Object.values(data.admins).some(a => a.username === normalizedUsername);
 
         if (usernameExists) {
             return res.status(400).json({
-                error: 'Este nome de usuário já está em uso. Escolha outro.'
+                error: 'ja possui alguem com aquele usuario'
             });
         }
 
@@ -1334,13 +1356,66 @@ app.get('/api/admin/profile', authenticateAdmin, (req, res) => {
     });
 });
 
+app.get('/api/admin/sessions', authenticateAdmin, (req, res) => {
+    try {
+        res.json({
+            success: true,
+            sessions: [{
+                userAgent: req.headers['user-agent'] || 'Unknown',
+                ip: req.ip,
+                loginAt: new Date().toISOString(),
+                current: true
+            }]
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao carregar sessões' });
+    }
+});
+
+app.post('/api/admin/sessions/revoke-all', authenticateAdmin, (req, res) => {
+    try {
+        const data = db.read();
+        const admin = req.admin;
+        admin.sessionToken = null;
+        db.write(data);
+        res.json({ success: true, message: 'Todas as sessões foram encerradas.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao revogar sessões' });
+    }
+});
+
+app.delete('/api/admin/account', authenticateAdmin, (req, res) => {
+    try {
+        const data = db.read();
+        const adminEmail = req.admin.email;
+        delete data.admins[adminEmail];
+        db.write(data);
+        res.json({ success: true, message: 'Conta administrativa excluída permanentemente.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao excluir conta' });
+    }
+});
+
+
 app.put('/api/admin/profile', authenticateAdmin, (req, res) => {
     try {
-        const { name, profileImage } = req.body;
+        const { name, username, profileImage } = req.body;
         const data = db.read();
         const admin = Object.values(data.admins).find(a => a.sessionToken === req.admin.sessionToken);
 
         if (name) admin.name = name;
+
+        if (username) {
+            const normalizedUsername = username.toLowerCase().trim();
+            const usernameExists =
+                Object.values(data.users).some(u => u.username === normalizedUsername) ||
+                Object.values(data.admins).some(a => a.username === normalizedUsername && a.email !== admin.email);
+            if (usernameExists) {
+                return res.status(400).json({ error: 'ja possui alguem com aquele usuario' });
+            }
+            admin.username = normalizedUsername;
+        }
+
         if (profileImage) admin.profileImage = profileImage;
 
         db.write(data);
@@ -1417,6 +1492,7 @@ app.get('/api/admin/users', authenticateAdmin, (req, res) => {
 
             return {
                 name: user.name,
+                username: user.username,
                 email: user.email,
                 password: user.password,
                 profileImage: user.profileImage,

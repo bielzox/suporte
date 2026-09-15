@@ -1123,7 +1123,110 @@
                 height: 47px;
             }
         }
-    </style>
+    
+/* ===== AJUSTE VISUAL PERFIL ===== */
+.profile-style-card,
+.modal-content,
+.user-card,
+.profile-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 45px -15px rgba(0,0,0,.65);
+    padding: 22px;
+}
+
+.profile-style-card input,
+.modal-content input,
+.user-card input {
+    background: rgba(0,0,0,.4);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 11px;
+    color: #fff;
+    padding: 11px 14px;
+}
+
+.profile-style-card button,
+.modal-content button,
+.user-card button {
+    border-radius: 11px;
+    transition: .3s ease;
+    font-weight: 700;
+}
+
+.profile-style-card button:hover,
+.modal-content button:hover,
+.user-card button:hover {
+    transform: translateY(-2px);
+}
+
+
+/* ===== PERFIL PREMIUM IGUAL AO MODELO ===== */
+#perfil .form-section {
+    max-width: 480px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 22px;
+    padding: 28px 32px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 45px -15px rgba(0,0,0,.65);
+    gap: 22px !important;
+}
+
+#perfil #profileImageContainer img {
+    width: 120px !important;
+    height: 120px !important;
+    border: 3px solid var(--accent) !important;
+    box-shadow: 0 0 25px rgba(74,222,128,.25);
+}
+
+#perfil h3 {
+    font-size: 1rem !important;
+    color: var(--text-muted) !important;
+    text-align: left;
+    font-weight: 600;
+}
+
+#perfil .form-group {
+    margin-bottom: 14px;
+}
+
+#perfil .form-group label {
+    font-size: .72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+#perfil input {
+    height: 42px;
+    background: rgba(0,0,0,.45);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+#perfil .submit-btn {
+    height: 40px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+}
+
+#perfil #sessionsList > div {
+    background: rgba(0,0,0,.35);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+#perfil .danger {
+    background: var(--danger);
+}
+
+</style>
 </head>
 
 <body>
@@ -3604,7 +3707,7 @@
                 const data = await res.json();
                 if (data.success) {
                     const p = data.profile;
-                    document.getElementById('welcomeUser').textContent = `Olá, ${p.username}`;
+                    document.getElementById('welcomeUser').textContent = `Olá ${p.username}`;
                     document.getElementById('profileImg').src = p.profileImage;
                     document.getElementById('profileName').value = p.name;
                     document.getElementById('profileUsername').value = p.username;
@@ -3710,6 +3813,7 @@
         }
 
         async function changePassword() {
+            const email = localStorage.getItem('userEmail');
             const oldPassword = document.getElementById('userOldPassword').value;
             const newPassword = document.getElementById('userNewPassword').value;
             const confirmPassword = document.getElementById('userConfirmPassword').value;
@@ -3732,7 +3836,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': token
                     },
-                    body: JSON.stringify({ oldPassword, newPassword, confirmPassword })
+                    body: JSON.stringify({ email, oldPassword, newPassword, confirmPassword })
                 });
                 const data = await res.json();
                 if (data.success) {
