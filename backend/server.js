@@ -606,7 +606,17 @@ app.put('/api/user/profile', authenticateUser, (req, res) => {
         const user = data.users[req.userEmail];
 
         if (name) user.name = name;
-        if (username) user.username = username;
+
+        if (username) {
+            const usernameExists = Object.values(data.users).some(
+                u => u.username === username && u.email !== req.userEmail
+            );
+            if (usernameExists) {
+                return res.status(400).json({ error: 'Este nome de usuário já está em uso.' });
+            }
+            user.username = username;
+        }
+
         if (profileImage) user.profileImage = profileImage;
 
         db.write(data);
