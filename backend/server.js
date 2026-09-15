@@ -321,9 +321,25 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
             });
         }
 
+        const username = name.toLowerCase().replace(/\s+/g, '_');
+        const usernameExists = Object.values(data.users).some(
+            user => user.username === username
+        );
+
+        if (usernameExists) {
+            console.log(
+                '❌ Registro falhou: nome de usuário já existe:',
+                username
+            );
+
+            return res.status(400).json({
+                error: 'Este nome de usuário já está em uso. Tente outro nome.'
+            });
+        }
+
         data.users[normalizedEmail] = {
             name,
-            username: name.toLowerCase().replace(/\s+/g, '_'),
+            username,
             email: normalizedEmail,
             password: password,
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + normalizedEmail,
