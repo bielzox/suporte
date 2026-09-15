@@ -1000,6 +1000,22 @@ io.on('connection', (socket) => {
 });
 
 // ============================================================
+// ARQUIVOS DO SITE
+// ============================================================
+
+const FRONTEND_DIR = path.join(__dirname, '..');
+
+app.use(express.static(FRONTEND_DIR));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(FRONTEND_DIR, 'suporte.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(FRONTEND_DIR, 'suporte-admin.html'));
+});
+
+// ============================================================
 // TRATAMENTO DE ERROS
 // ============================================================
 
