@@ -47,7 +47,39 @@ const io = new Server(server, {
     }
 });
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdn.socket.io"
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://fonts.googleapis.com"
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com"
+        ],
+        connectSrc: [
+          "'self'",
+          "https://suporte-88uc.onrender.com/",
+          "wss://suporte-88uc.onrender.com"
+        ],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:"
+        ]
+      }
+    }
+  })
+);
 app.use(cors());
 
 /*
