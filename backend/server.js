@@ -406,7 +406,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
             100000 + Math.random() * 900000
         ).toString();
 
-        const expiresAt = Date.now() + 5 * 60 * 1000;
+        const expiresAt = Date.now() + 2 * 60 * 1000;
 
         data.codes[normalizedEmail] = {
             code,
