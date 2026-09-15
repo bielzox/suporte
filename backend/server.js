@@ -124,7 +124,7 @@ const createEmptyDatabase = () => ({
     admins: {
         'leogabriel2662@gmail.com': {
             name: 'Admin Zox',
-            password: '$2a$10$S6XmS1P8S9P7X4S3S2S1S.S6XmS1P8S9P7X4S3S2S1S.', // Senha 'admin' criptografada
+            password: '$2b$10$vjnTqsbMliJn68jf9zP/O.4K.78gtbYl4UvQ/jJ.enTO2fHltHkSq', // Senha 'admin' criptografada
             email: 'leogabriel2662@gmail.com',
             createdAt: new Date().toLocaleString('pt-BR'),
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
