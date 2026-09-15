@@ -62,7 +62,8 @@ const createEmptyDatabase = () => ({
         }
     },
     codes: {},
-    messages: {}
+    messages: {},
+    reviews: []
 });
 
 const db = {
@@ -103,6 +104,10 @@ const db = {
 
             if (!data.messages || typeof data.messages !== 'object') {
                 data.messages = {};
+            }
+
+            if (!Array.isArray(data.reviews)) {
+                data.reviews = [];
             }
 
             return data;
@@ -694,6 +699,57 @@ app.delete('/api/user/account', authenticateUser, (req, res) => {
         res.json({ success: true, message: 'Conta excluída permanentemente.' });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao excluir conta' });
+    }
+});
+
+// ============================================================
+// AVALIAÇÕES (REVIEWS)
+// ============================================================
+
+app.get('/api/reviews', (req, res) => {
+    try {
+        const data = db.read();
+        res.json({
+            success: true,
+            reviews: data.reviews
+        });
+    } catch (error) {
+        console.error('❌ Erro ao carregar avaliações:', error);
+        res.status(500).json({ error: 'Erro interno ao carregar avaliações' });
+    }
+});
+
+app.post('/api/reviews', authenticateUser, (req, res) => {
+    try {
+        const { rating, comment } = req.body;
+
+        if (rating === undefined || rating === null) {
+            return res.status(400).json({ error: 'A nota é obrigatória' });
+        }
+
+        const numRating = parseInt(rating);
+        if (isNaN(numRating) || numRating < 0 || numRating > 5) {
+            return res.status(400).json({ error: 'A nota deve ser um número entre 0 e 5' });
+        }
+
+        const data = db.read();
+        const newReview = {
+            username: req.user.username || req.user.name,
+            rating: numRating,
+            comment: comment ? String(comment).trim() : '',
+            createdAt: new Date().toISOString()
+        };
+
+        data.reviews.push(newReview);
+        db.write(data);
+
+        res.json({
+            success: true,
+            message: 'Avaliação enviada com sucesso!'
+        });
+    } catch (error) {
+        console.error('❌ Erro ao salvar avaliação:', error);
+        res.status(500).json({ error: 'Erro interno ao processar avaliação' });
     }
 });
 

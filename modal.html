@@ -370,6 +370,52 @@
             color: #fff;
         }
 
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 2rem;
+            color: var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffca28;
+        }
+
+        .discord-embed {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(88, 101, 242, 0.05);
+            border: 1px solid rgba(88, 101, 242, 0.2);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            backdrop-filter: var(--glass);
+        }
+
+        .discord-embed a {
+            color: #5865F2;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .discord-embed a:hover {
+            color: #fff;
+        }
+
         /* =====================================================
            PAINEL DO USUÁRIO
            ===================================================== */
@@ -1496,6 +1542,20 @@
 
                 <button
                     class="tab-button"
+                    onclick="switchTab(event, 'avaliar')"
+                >
+                    ⭐ Avaliar
+                </button>
+
+                <button
+                    class="tab-button"
+                    onclick="switchTab(event, 'avaliacoes')"
+                >
+                    📋 Avaliações
+                </button>
+
+                <button
+                    class="tab-button"
                     onclick="switchTab(event, 'faq')"
                 >
                     ❓ FAQ
@@ -1763,6 +1823,65 @@
             </div>
 
 
+            </div>
+
+            <!-- =================================================
+                 AVALIAR
+                 ================================================= -->
+
+            <div
+                id="avaliar"
+                class="tab-content"
+            >
+                <div class="form-section">
+                    <div class="panel-header">
+                        <h2>⭐ Avalie nosso Serviço</h2>
+                        <p>Sua opinião é muito importante para nós!</p>
+                    </div>
+
+                    <div class="error-message" id="reviewErrorMessage"></div>
+                    <div class="success-message" id="reviewSuccessMessage"></div>
+
+                    <form onsubmit="submitReview(event)" class="login-form">
+                        <div class="form-group" style="align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                            <label>Sua Nota:</label>
+                            <div class="star-rating">
+                                <input type="radio" name="rating" value="0" id="star0"><label for="star0">☆</label>
+                                <input type="radio" name="rating" value="1" id="star1"><label for="star1">☆</label>
+                                <input type="radio" name="rating" value="2" id="star2"><label for="star2">☆</label>
+                                <input type="radio" name="rating" value="3" id="star3"><label for="star3">☆</label>
+                                <input type="radio" name="rating" value="4" id="star4"><label for="star4">☆</label>
+                                <input type="radio" name="rating" value="5" id="star5"><label for="star5">☆</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reviewComment">Descrição</label>
+                            <textarea id="reviewComment" placeholder="Conte-nos como foi sua experiência..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-btn">Enviar Avaliação</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- =================================================
+                 AVALIAÇÕES
+                 ================================================= -->
+
+            <div
+                id="avaliacoes"
+                class="tab-content"
+            >
+                <div class="header">
+                    <h1>📋 Avaliações dos Usuários</h1>
+                    <p>Veja o que as pessoas estão dizendo sobre nosso suporte</p>
+                </div>
+                <div class="tickets-list" id="reviewsList">
+                    <!-- Avaliações serão inseridas aqui -->
+                </div>
+            </div>
+
             <!-- =================================================
                  FAQ
                  ================================================= -->
@@ -1935,6 +2054,11 @@
             <!-- =================================================
                  CHAT MODAL
                  ================================================= -->
+
+            <div class="discord-embed" style="max-width: 1200px; margin: 20px auto; text-align: center; padding: 20px; background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.3); border-radius: 15px; backdrop-filter: blur(10px);">
+                <span style="font-size: 1.1rem; color: var(--text-main);">Entre no nosso Discord para suporte rápido: </span>
+                <a href="https://discord.gg/2QDNg8gH7s" target="_blank" style="color: #5865F2; font-weight: bold; text-decoration: underline;">discord.gg/2QDNg8gH7s</a>
+            </div>
 
             <div
                 class="chat-modal"
@@ -4272,6 +4396,99 @@
             }
         );
 
+
+        /* =====================================================
+           AVALIAÇÕES
+           ===================================================== */
+
+        async function submitReview(event) {
+            event.preventDefault();
+
+            const btn = event.target.querySelector(".submit-btn");
+            const originalText = btn.textContent;
+
+            const rating = document.querySelector('input[name="rating"]:checked')?.value;
+            const comment = document.getElementById("reviewComment").value.trim();
+
+            if (!rating) {
+                showError("Por favor, selecione uma nota", "reviewErrorMessage");
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Enviando...";
+
+                const userEmail = localStorage.getItem("userEmail");
+                const token = localStorage.getItem("userToken");
+
+                const res = await fetch("http://localhost:3000/api/reviews", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify({
+                        email: userEmail,
+                        rating: parseInt(rating),
+                        comment
+                    })
+                });
+
+                const data = await parseResponse(res);
+
+                if (data.success) {
+                    showSuccess("✓ Avaliação enviada com sucesso!", "reviewSuccessMessage");
+                    setTimeout(() => {
+                        switchTab(null, 'avaliacoes');
+                        loadReviews();
+                    }, 1500);
+                } else {
+                    showError(data.error || "Não foi possível enviar a avaliação.", "reviewErrorMessage");
+                }
+            } catch (err) {
+                console.error(err);
+                showError("Erro ao conectar com o servidor", "reviewErrorMessage");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        async function loadReviews() {
+            const container = document.getElementById("reviewsList");
+            if (!container) return;
+
+            try {
+                const res = await fetch("http://localhost:3000/api/reviews");
+                const data = await parseResponse(res);
+
+                if (data.success) {
+                    container.innerHTML = "";
+                    if (data.reviews.length === 0) {
+                        container.innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column: 1/-1;">Nenhuma avaliação encontrada.</p>';
+                        return;
+                    }
+
+                    data.reviews.forEach(rev => {
+                        const stars = "⭐".repeat(rev.rating) + "☆".repeat(5 - rev.rating);
+                        const card = document.createElement("div");
+                        card.className = "ticket";
+                        card.innerHTML = `
+                            <div class="ticket-header">
+                                <span style="font-weight:bold; color:#fff;">${escapeHTML(rev.username)}</span>
+                                <span style="color:var(--accent); font-weight:bold;">${stars}</span>
+                            </div>
+                            <div class="ticket-desc">${escapeHTML(rev.comment)}</div>
+                            <div class="ticket-date">${new Date(rev.createdAt).toLocaleString('pt-BR')}</div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            } catch (err) {
+                console.error("Erro ao carregar avaliações:", err);
+            }
+        }
 
         /* =====================================================
            INICIALIZAÇÃO

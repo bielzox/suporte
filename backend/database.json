@@ -35,9 +35,15 @@
           "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
           "ip": "::1",
           "loginAt": "2026-09-15T13:56:09.896Z"
+        },
+        {
+          "token": "b5f30b512c2b5143dadabd7f7e19ab40a5f79de26234ba4c938834aafe36bc2b",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 (Admin Login)",
+          "ip": "::1",
+          "loginAt": "2026-09-15T14:48:08.463Z"
         }
       ],
-      "sessionToken": "40341b53b8d9a8c3d8c96378c73ccfe38bed593626a451171b4837b20e4f55b3"
+      "sessionToken": "b5f30b512c2b5143dadabd7f7e19ab40a5f79de26234ba4c938834aafe36bc2b"
     },
     "leogabriel2662@gmail.com": {
       "name": "gabriel",
@@ -53,9 +59,15 @@
           "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
           "ip": "::1",
           "loginAt": "2026-09-15T14:06:06.840Z"
+        },
+        {
+          "token": "6dc04449f1a2e636de7569e8b77d97f33412ef3565b47b8485b80d8d9d6f5e6a",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 (Admin Login)",
+          "ip": "::1",
+          "loginAt": "2026-09-15T14:45:21.815Z"
         }
       ],
-      "sessionToken": "0ef0510cef2cb3e79204701377d5dfbe43893d084811d0d4472ab02f223c4044"
+      "sessionToken": "6dc04449f1a2e636de7569e8b77d97f33412ef3565b47b8485b80d8d9d6f5e6a"
     }
   },
   "codes": {
@@ -77,6 +89,23 @@
       "profileImage": "https://api.dicebear.com/7.x/avataaars/svg?seed=testadmin@example.com",
       "createdAt": "15/09/2026, 11:19:27",
       "sessionToken": "aebc5bbb3c7fc2e93dcdae00c72182c0412e7d4846bf24483f1aff8f5698ea37"
+    },
+    "leogabriel2662@gmail.com": {
+      "name": "Leonardo",
+      "username": "[adm] biel",
+      "email": "leogabriel2662@gmail.com",
+      "password": "$2b$10$1aqrYZ8Ng6Cj0p29UHSigu1lJHdRq15SkU1AvVdf2EUWIJKUounO2",
+      "profileImage": "https://api.dicebear.com/7.x/avataaars/svg?seed=leogabriel2662@gmail.com",
+      "createdAt": "15/09/2026, 11:30:19",
+      "sessionToken": "c883b9063cfa4bbedd70c18fd4971c678b0f1282ab66603bbda2e7ca57532152"
     }
-  }
+  },
+  "reviews": [
+    {
+      "username": "bielzox",
+      "rating": 0,
+      "comment": "Suporte muito bom, atendimento perfeito",
+      "createdAt": "2026-09-15T14:48:34.756Z"
+    }
+  ]
 }
