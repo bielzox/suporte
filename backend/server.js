@@ -48,47 +48,47 @@ const io = new Server(server, {
 });
 
 app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
 
-        scriptSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "https://cdn.socket.io"
-        ],
+                scriptSrc: [
+                    "'self'",
+                    "'unsafe-inline'",
+                    "https://cdn.socket.io"
+                ],
 
-        scriptSrcAttr: [
-          "'unsafe-inline'"
-        ],
+                scriptSrcAttr: [
+                    "'unsafe-inline'"
+                ],
 
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "https://fonts.googleapis.com"
-        ],
+                styleSrc: [
+                    "'self'",
+                    "'unsafe-inline'",
+                    "https://fonts.googleapis.com"
+                ],
 
-        fontSrc: [
-          "'self'",
-          "https://fonts.gstatic.com"
-        ],
+                fontSrc: [
+                    "'self'",
+                    "https://fonts.gstatic.com"
+                ],
 
-        connectSrc: [
-          "'self'",
-          "https://suporte-88uc.onrender.com",
-          "wss://suporte-88uc.onrender.com",
-          "https://cdn.socket.io"
-        ],
+                connectSrc: [
+                    "'self'",
+                    "https://suporte-88uc.onrender.com",
+                    "wss://suporte-88uc.onrender.com",
+                    "https://cdn.socket.io"
+                ],
 
-        imgSrc: [
-          "'self'",
-          "data:",
-          "blob:"
-        ]
-      }
-    }
-  })
+                imgSrc: [
+                    "'self'",
+                    "data:",
+                    "blob:"
+                ]
+            }
+        }
+    })
 );
 app.use(cors());
 
@@ -202,10 +202,15 @@ const db = {
 // ============================================================
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
@@ -2005,13 +2010,11 @@ io.on('connection', (socket) => {
 
     socket.on('identify', (userData) => {
         console.log(
-            `👤 Conectado: ${
-                userData?.name ||
-                userData?.email ||
-                'usuário'
-            } | função: ${
-                userData?.role ||
-                'não informada'
+            `👤 Conectado: ${userData?.name ||
+            userData?.email ||
+            'usuário'
+            } | função: ${userData?.role ||
+            'não informada'
             }`
         );
     });
