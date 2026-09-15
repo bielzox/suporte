@@ -742,6 +742,13 @@
             padding: 20px;
         }
 
+        .auth-container {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            justify-content: center;
+        }
+
         .login-box {
             background: rgba(15, 15, 15, 0.6);
             border: 1px solid var(--border);
@@ -750,15 +757,47 @@
             backdrop-filter: var(--glass);
             box-shadow: var(--shadow);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
             animation: fadeIn 0.4s ease;
         }
 
-        .login-box h2 {
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-            font-weight: 800;
+        .auth-tabs {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 22px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px;
+            border-radius: 13px;
+            border: 1px solid var(--border);
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 9px;
+            transition: var(--transition);
+        }
+
+        .auth-tab-btn.active {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .auth-content.active {
+            display: block;
         }
 
         .login-form {
@@ -767,20 +806,20 @@
             gap: 15px;
         }
 
-        .login-form .form-group {
+        .form-group {
             display: flex;
             flex-direction: column;
             gap: 5px;
             text-align: left;
         }
 
-        .login-form label {
+        .form-group label {
             font-size: 0.8rem;
             color: var(--text-muted);
             text-transform: uppercase;
         }
 
-        .login-form input {
+        .form-group input {
             padding: 12px;
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border);
@@ -790,7 +829,7 @@
             transition: var(--transition);
         }
 
-        .login-form input:focus {
+        .form-group input:focus {
             border-color: var(--accent);
         }
 
@@ -808,6 +847,93 @@
         .login-btn:hover {
             background: var(--accent);
             transform: translateY(-2px);
+        }
+
+        .error-message,
+        .success-message {
+            padding: 10px 12px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+            margin-bottom: 14px;
+            font-size: 0.82rem;
+        }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            color: #fca5a5;
+        }
+
+        .success-message {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .code-input {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 22px 0;
+        }
+
+        .code-digit {
+            width: 43px;
+            height: 55px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #fff;
+            transition: var(--transition);
+        }
+
+        .code-digit:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .code-timer {
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin: 15px 0;
+        }
+
+        .code-timer span {
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        .resend-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+
+        .resend-btn:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .toggle-auth button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .toggle-auth button:hover {
+            color: #fff;
         }
 
         /* Profile Section */
@@ -876,7 +1002,7 @@
         .profile-save-btn:hover {
             transform: translateY(-2px);
             filter: brightness(1.1);
-        }
+        
             display: flex;
             align-items: center;
             gap: 15px;
@@ -1515,19 +1641,304 @@
 
     <!-- LOGIN SCREEN -->
     <div class="login-screen" id="loginScreen">
-        <div class="login-box">
-            <h2>👨‍💼 Admin Login</h2>
-            <form class="login-form" onsubmit="handleAdminLogin(event)">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="adminEmailInput" required placeholder="admin@zoxcode.com">
+        <div class="auth-container">
+            <div class="login-box">
+                <div class="auth-tabs" id="authTabs">
+                    <button class="auth-tab-btn active" onclick="switchAuthTab('login')">
+                        Entrar
+                    </button>
+
+                    <button class="auth-tab-btn" onclick="switchAuthTab('register')">
+                        Registrar
+                    </button>
+
+                    <button class="auth-tab-btn" onclick="switchAuthTab('recover')">
+                        Recuperar
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" id="adminPasswordInput" required placeholder="••••••••">
+
+                <!-- LOGIN -->
+                <div id="login-content" class="auth-content active">
+                    <h1>
+                        🔒 <span class="gradient-text">Acesso Admin</span>
+                    </h1>
+
+                    <p>
+                        Entre com sua conta administrativa
+                    </p>
+
+                    <div class="error-message" id="errorMessage"></div>
+                    <div class="success-message" id="successMessage"></div>
+
+                    <form
+                        class="login-form"
+                        id="loginFormContainer"
+                        onsubmit="handleAdminLogin(event)"
+                    >
+                        <div class="form-group">
+                            <label for="adminEmailInput">Email</label>
+                            <input
+                                type="email"
+                                id="adminEmailInput"
+                                placeholder="admin@zoxcode.com"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="adminPasswordInput">Senha</label>
+                            <input
+                                type="password"
+                                id="adminPasswordInput"
+                                placeholder="Sua senha"
+                                required
+                            >
+                        </div>
+
+                        <div style="text-align:right;margin-bottom:5px;">
+                            <a
+                                href="#"
+                                onclick="switchAuthTab('recover'); return false;"
+                                style="
+                                    color:var(--text-muted);
+                                    font-size:0.8rem;
+                                    text-decoration:none;
+                                    transition:var(--transition);
+                                "
+                            >
+                                Recuperar Senha
+                            </a>
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            Entrar no Painel
+                        </button>
+                    </form>
                 </div>
-                <button type="submit" class="login-btn">Entrar no Painel</button>
-            </form>
+
+                <!-- REGISTRO -->
+                <div id="register-content" class="auth-content">
+                    <h1>🆕 Criar Conta Admin</h1>
+
+                    <p>
+                        Crie sua conta de administrador
+                    </p>
+
+                    <div class="error-message" id="registerErrorMessage"></div>
+                    <div class="success-message" id="registerSuccessMessage"></div>
+
+                    <form
+                        class="login-form"
+                        id="registerFormContainer"
+                        onsubmit="handleAdminRegister(event)"
+                    >
+                        <div class="form-group">
+                            <label for="registerName">Nome</label>
+                            <input
+                                type="text"
+                                id="registerName"
+                                placeholder="Seu Nome Completo"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="registerUsername">Nome de Usuário</label>
+                            <input
+                                type="text"
+                                id="registerUsername"
+                                placeholder="ex: admin_zox"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerEmail">Email</label>
+                            <input
+                                type="email"
+                                id="registerEmail"
+                                placeholder="admin@email.com"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerPassword">Senha</label>
+                            <input
+                                type="password"
+                                id="registerPassword"
+                                placeholder="Crie uma senha"
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            Criar Conta Admin
+                        </button>
+                    </form>
+                </div>
+
+                <!-- RECUPERAÇÃO -->
+                <div id="recover-content" class="auth-content">
+                    <h1>🔑 Recuperar Senha Admin</h1>
+
+                    <p>
+                        Insira seu email para receber o código de recuperação
+                    </p>
+
+                    <div class="error-message" id="forgotErrorMessage"></div>
+                    <div class="success-message" id="forgotSuccessMessage"></div>
+
+                    <form
+                        class="login-form"
+                        onsubmit="handleAdminForgotPassword(event)"
+                    >
+                        <div class="form-group">
+                            <label for="forgotEmail">Email</label>
+
+                            <input
+                                type="email"
+                                id="forgotEmail"
+                                placeholder="admin@email.com"
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            Enviar Código
+                        </button>
+                    </form>
+                </div>
+
+                <!-- VERIFICAÇÃO -->
+                <div id="verification-content" class="auth-content">
+                    <h1 id="verifyTitle">
+                        ✉️ Verificar Email Admin
+                    </h1>
+
+                    <p id="verifyEmail"></p>
+
+                    <div class="error-message" id="verifyErrorMessage"></div>
+                    <div class="success-message" id="verifySuccessMessage"></div>
+
+                    <form
+                        class="login-form"
+                        id="verificationForm"
+                        onsubmit="handleAdminVerificationSubmit(event)"
+                    >
+                        <p
+                            style="
+                                text-align:center;
+                                color:rgba(255,255,255,0.7);
+                                font-size:0.82rem;
+                                margin-bottom:10px;
+                            "
+                        >
+                            Digite o código de 6 dígitos enviado para seu email
+                        </p>
+
+                        <div class="code-input" id="codeInputContainer">
+                            <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                            <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                            <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                            <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                            <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                            <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        </div>
+
+                        <div class="code-timer" id="verifyTimer">
+                            Código expira em:
+                            <span id="timer">05:00</span>
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            Verificar Código
+                        </button>
+
+                        <button
+                            type="button"
+                            class="resend-btn"
+                            id="resendBtn"
+                            onclick="resendAdminCode()"
+                        >
+                            Reenviar código
+                        </button>
+                    </form>
+
+                    <div class="toggle-auth">
+                        <button
+                            type="button"
+                            onclick="backToAdminAuth()"
+                            style="margin-top:15px;"
+                        >
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NOVA SENHA -->
+                <div id="reset-password-content" class="auth-content">
+                    <h1>🆕 Nova Senha Admin</h1>
+
+                    <p>
+                        Crie sua nova senha de acesso administrativo
+                    </p>
+
+                    <div
+                        class="error-message"
+                        id="resetPasswordErrorMessage"
+                    ></div>
+
+                    <div
+                        class="success-message"
+                        id="resetPasswordSuccessMessage"
+                    ></div>
+
+                    <form
+                        class="login-form"
+                        onsubmit="handleAdminResetPasswordSubmit(event)"
+                    >
+                        <div class="form-group">
+                            <label for="newPassword">
+                                Nova Senha
+                            </label>
+
+                            <input
+                                type="password"
+                                id="newPassword"
+                                placeholder="Sua nova senha"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">
+                                Confirmar Nova Senha
+                            </label>
+
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                placeholder="Confirme a nova senha"
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            Alterar Senha
+                        </button>
+                    </form>
+
+                    <div class="toggle-auth">
+                        <button
+                            type="button"
+                            onclick="backToAdminAuth()"
+                            style="margin-top:15px;"
+                        >
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2028,6 +2439,863 @@
         /* =====================================================
            AUTENTICAÇÃO ADMIN
            ===================================================== */
+        let adminTimerInterval = null;
+        let adminCurrentEmail = null;
+
+        function switchAuthTab(tabId) {
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .querySelectorAll(".auth-tab-btn")
+                .forEach(btn => {
+                    btn.classList.remove("active");
+                });
+
+            const target =
+                document.getElementById(`${tabId}-content`);
+
+            if (target) {
+                target.classList.add("active");
+            }
+
+            const buttons =
+                document.querySelectorAll(".auth-tab-btn");
+
+            if (tabId === "login" && buttons[0]) {
+                buttons[0].classList.add("active");
+            }
+
+            if (tabId === "register" && buttons[1]) {
+                buttons[1].classList.add("active");
+            }
+
+            if (tabId === "recover" && buttons[2]) {
+                buttons[2].classList.add("active");
+            }
+
+            clearAdminErrors();
+        }
+
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+
+            const btn =
+                event.target.querySelector(".login-btn");
+
+            const originalText =
+                btn.textContent;
+
+            const email =
+                document
+                    .getElementById("adminEmailInput")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("adminPasswordInput")
+                    .value;
+
+            if (!email || !password) {
+                showAdminError(
+                    "Por favor, preencha todos os campos",
+                    "errorMessage"
+                );
+
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Aguarde...";
+
+                const res = await apiFetch(
+                    "/api/admin/login",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email,
+                            password
+                        })
+                    }
+                );
+
+                const data =
+                    await parseAdminResponse(res);
+
+                if (data.success) {
+                    adminCurrentEmail = email;
+
+                    showAdminVerificationForm("2fa");
+
+                    showAdminSuccess(
+                        `✓ Código enviado para ${email}`,
+                        "verifySuccessMessage"
+                    );
+
+                } else {
+                    showAdminError(
+                        data.error ||
+                        "Não foi possível realizar o login.",
+                        "errorMessage"
+                    );
+                }
+
+            } catch (err) {
+                console.error(err);
+
+                showAdminError(
+                    "Erro ao conectar com o servidor. Verifique se o backend está rodando em http://localhost:3000",
+                    "errorMessage"
+                );
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        async function handleAdminRegister(event) {
+            event.preventDefault();
+
+            const btn =
+                event.target.querySelector(".login-btn");
+
+            const originalText =
+                btn.textContent;
+
+            const name =
+                document
+                    .getElementById("registerName")
+                    .value
+                    .trim();
+
+            const username =
+                document
+                    .getElementById("registerUsername")
+                    .value
+                    .trim();
+
+            const email =
+                document
+                    .getElementById("registerEmail")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("registerPassword")
+                    .value;
+
+            if (!name || !username || !email || !password) {
+                showAdminError(
+                    "Por favor, preencha todos os campos",
+                    "registerErrorMessage"
+                );
+
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Registrando...";
+
+                const res = await apiFetch(
+                    "/api/admin/register",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            name,
+                            username,
+                            email,
+                            password
+                        })
+                    }
+                );
+
+                const data =
+                    await parseAdminResponse(res);
+
+                if (data.success) {
+                    showAdminSuccess(
+                        "✓ Conta admin criada com sucesso! Agora faça login.",
+                        "registerSuccessMessage"
+                    );
+
+                    setTimeout(() => {
+                        switchAuthTab("login");
+                    }, 2000);
+
+                } else {
+                    showAdminError(
+                        data.error ||
+                        "Não foi possível criar a conta.",
+                        "registerErrorMessage"
+                    );
+                }
+
+            } catch (err) {
+                console.error(err);
+
+                showAdminError(
+                    "Erro ao conectar com o servidor",
+                    "registerErrorMessage"
+                );
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        async function handleAdminForgotPassword(event) {
+            event.preventDefault();
+
+            const btn =
+                event.target.querySelector(".login-btn");
+
+            const originalText =
+                btn.textContent;
+
+            const email =
+                document
+                    .getElementById("forgotEmail")
+                    .value
+                    .trim();
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Enviando...";
+
+                const res = await apiFetch(
+                    "/api/admin/forgot-password",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email
+                        })
+                    }
+                );
+
+                const data =
+                    await parseAdminResponse(res);
+
+                if (res.ok && data.success !== false) {
+                    showAdminSuccess(
+                        data.message ||
+                        "Código enviado.",
+                        "forgotSuccessMessage"
+                    );
+
+                    adminCurrentEmail = email;
+
+                    setTimeout(() => {
+                        showAdminVerificationForm("reset");
+                    }, 1500);
+
+                } else {
+                    showAdminError(
+                        data.error ||
+                        "Não foi possível enviar o código.",
+                        "forgotErrorMessage"
+                    );
+                }
+
+            } catch (err) {
+                console.error(err);
+
+                showAdminError(
+                    "Erro ao conectar com o servidor",
+                    "forgotErrorMessage"
+                );
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        async function handleAdminVerificationSubmit(event) {
+            event.preventDefault();
+
+            const codeDigits =
+                Array.from(
+                    document.querySelectorAll(".code-digit")
+                ).map(el => el.value);
+
+            const enteredCode =
+                codeDigits.join("");
+
+            if (enteredCode.length !== 6) {
+                showAdminError(
+                    "Digite o código completo",
+                    "verifyErrorMessage"
+                );
+
+                return;
+            }
+
+            const isReset =
+                document
+                    .getElementById("verifyTitle")
+                    .textContent
+                    .includes("Recuperação");
+
+            try {
+                if (isReset) {
+                    window.pendingAdminResetCode =
+                        enteredCode;
+
+                    showAdminResetPasswordForm();
+
+                } else {
+                    const res = await apiFetch(
+                        "/api/admin/verify-code",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                email: adminCurrentEmail,
+                                code: enteredCode
+                            })
+                        }
+                    );
+
+                    const data =
+                        await parseAdminResponse(res);
+
+                    if (data.success) {
+                        showAdminSuccess(
+                            "✓ Código verificado com sucesso!",
+                            "verifySuccessMessage"
+                        );
+
+                        setTimeout(() => {
+                            clearInterval(adminTimerInterval);
+
+                            localStorage.setItem(
+                                "adminToken",
+                                data.token || ""
+                            );
+
+                            localStorage.setItem(
+                                "adminName",
+                                data.name || ""
+                            );
+
+                            localStorage.setItem(
+                                "adminEmail",
+                                data.email || ""
+                            );
+
+                            document.getElementById(
+                                "loginScreen"
+                            ).style.display = "none";
+
+                            document.getElementById(
+                                "adminPanel"
+                            ).style.display = "block";
+
+                            initAdminPanel();
+                        }, 1200);
+
+                    } else {
+                        showAdminError(
+                            data.error ||
+                            "Código inválido.",
+                            "verifyErrorMessage"
+                        );
+                    }
+                }
+
+                } catch (err) {
+                    console.error(err);
+
+                    showAdminError(
+                        "Erro ao conectar com o servidor",
+                        "verifyErrorMessage"
+                    );
+                }
+        }
+
+        async function resendAdminCode() {
+            if (!adminCurrentEmail) {
+                return;
+            }
+
+            const password = prompt(
+                "Para reenviar o código, confirme sua senha:"
+            );
+
+            if (!password) {
+                return;
+            }
+
+            try {
+                const res = await apiFetch(
+                    "/api/admin/login",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email: adminCurrentEmail,
+                            password
+                        })
+                    }
+                );
+
+                const data =
+                    await parseAdminResponse(res);
+
+                if (data.success) {
+                    showAdminSuccess(
+                        "✓ Código reenviado!",
+                        "verifySuccessMessage"
+                    );
+
+                    clearAdminCodeInputs(
+                        "codeInputContainer"
+                    );
+
+                    startAdminCodeTimer();
+
+                    focusFirstAdminCodeInput(
+                        "codeInputContainer"
+                    );
+
+                } else {
+                    showAdminError(
+                        data.error ||
+                        "Não foi possível reenviar o código.",
+                        "verifyErrorMessage"
+                    );
+                }
+
+            } catch (err) {
+                console.error(err);
+
+                showAdminError(
+                    "Erro ao reenviar código",
+                    "verifyErrorMessage"
+                );
+            }
+        }
+
+        function backToAdminAuth() {
+            clearInterval(adminTimerInterval);
+
+            adminTimerInterval = null;
+
+            document.getElementById(
+                "authTabs"
+            ).style.display = "flex";
+
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .getElementById("login-content")
+                .classList.add("active");
+
+            document
+                .querySelectorAll(".auth-tab-btn")
+                .forEach(btn => {
+                    btn.classList.remove("active");
+                });
+
+            document
+                .querySelector(".auth-tab-btn")
+                ?.classList.add("active");
+
+            clearAdminErrors();
+
+            clearAdminCodeInputs(
+                "codeInputContainer"
+            );
+        }
+
+        async function handleAdminResetPasswordSubmit(event) {
+            event.preventDefault();
+
+            const btn =
+                event.target.querySelector(".login-btn");
+
+            const originalText =
+                btn.textContent;
+
+            const newPassword =
+                document
+                    .getElementById("newPassword")
+                    .value;
+
+            const confirmPassword =
+                document
+                    .getElementById("confirmPassword")
+                    .value;
+
+            if (newPassword !== confirmPassword) {
+                showAdminError(
+                    "As senhas não coincidem",
+                    "resetPasswordErrorMessage"
+                );
+
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Alterando...";
+
+                const res = await apiFetch(
+                    "/api/admin/reset-password",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email: adminCurrentEmail,
+                            code: window.pendingAdminResetCode,
+                            newPassword
+                        })
+                    }
+                );
+
+                const data =
+                    await parseAdminResponse(res);
+
+                if (res.ok && data.success !== false) {
+                    showAdminSuccess(
+                        data.message ||
+                        "Senha alterada com sucesso.",
+                        "resetPasswordSuccessMessage"
+                    );
+
+                    setTimeout(() => {
+                        backToAdminAuth();
+                    }, 1500);
+
+                } else {
+                    showAdminError(
+                        data.error ||
+                        "Não foi possível alterar a senha.",
+                        "resetPasswordErrorMessage"
+                    );
+                }
+
+            } catch (err) {
+                console.error(err);
+
+                showAdminError(
+                    "Erro ao conectar com o servidor",
+                    "resetPasswordErrorMessage"
+                );
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        function showAdminVerificationForm(type) {
+            document.getElementById("authTabs").style.display =
+                "none";
+
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .getElementById("verification-content")
+                .classList.add("active");
+
+            if (type === "2fa") {
+                document.getElementById("verifyTitle").textContent =
+                    "✉️ Verificar Email Admin";
+            } else {
+                document.getElementById("verifyTitle").textContent =
+                    "✉️ Verificar Recuperação Admin";
+            }
+
+            document.getElementById("verifyEmail").textContent =
+                `Código enviado para: ${adminCurrentEmail}`;
+
+            clearAdminCodeInputs("codeInputContainer");
+
+            startAdminCodeTimer();
+
+            focusFirstAdminCodeInput("codeInputContainer");
+        }
+
+        function showAdminResetPasswordForm() {
+            clearInterval(adminTimerInterval);
+
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .getElementById("reset-password-content")
+                .classList.add("active");
+        }
+
+        function startAdminCodeTimer() {
+            clearInterval(adminTimerInterval);
+
+            let remainingTime = 120;
+
+            const updateTimer = () => {
+                const minutes =
+                    Math.floor(remainingTime / 60);
+
+                const seconds =
+                    remainingTime % 60;
+
+                const timerEl =
+                    document.getElementById("timer");
+
+                if (timerEl) {
+                    timerEl.textContent =
+                        `${minutes
+                            .toString()
+                            .padStart(2, "0")
+                        }:${
+                            seconds
+                                .toString()
+                                .padStart(2, "0")
+                        }`;
+                }
+
+                if (remainingTime <= 0) {
+                    clearInterval(adminTimerInterval);
+
+                    showAdminError(
+                        "Código expirado. Solicite um novo.",
+                        "verifyErrorMessage"
+                    );
+                } else {
+                    remainingTime--;
+                }
+            };
+
+            updateTimer();
+
+            adminTimerInterval =
+                setInterval(updateTimer, 1000);
+        }
+
+        function clearAdminCodeInputs(containerId) {
+            const container =
+                document.getElementById(containerId);
+
+            if (!container) {
+                return;
+            }
+
+            container
+                .querySelectorAll(".code-digit")
+                .forEach(input => {
+                    input.value = "";
+                });
+        }
+
+        function focusFirstAdminCodeInput(containerId) {
+            const container =
+                document.getElementById(containerId);
+
+            if (!container) {
+                return;
+            }
+
+            const first =
+                container.querySelector(".code-digit");
+
+            if (first) {
+                first.focus();
+            }
+        }
+
+        document.addEventListener(
+            "input",
+            event => {
+                if (
+                    event.target.classList.contains(
+                        "code-digit"
+                    )
+                ) {
+                    event.target.value =
+                        event.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 1);
+
+                    if (
+                        event.target.value.length === 1
+                    ) {
+                        const nextInput =
+                            event.target
+                                .nextElementSibling;
+
+                        if (
+                            nextInput &&
+                            nextInput.classList.contains(
+                                "code-digit"
+                            )
+                        ) {
+                            nextInput.focus();
+                        }
+                    }
+                }
+            }
+        );
+
+        document.addEventListener(
+            "keydown",
+            event => {
+                if (
+                    event.target.classList.contains(
+                        "code-digit"
+                    ) &&
+                    event.key === "Backspace" &&
+                    event.target.value === ""
+                ) {
+                    const prevInput =
+                        event.target
+                            .previousElementSibling;
+
+                    if (
+                        prevInput &&
+                        prevInput.classList.contains(
+                            "code-digit"
+                        )
+                    ) {
+                        prevInput.focus();
+                    }
+                }
+            }
+        );
+
+        function showAdminError(
+            message,
+            elementId = "errorMessage"
+        ) {
+            const errorEl =
+                document.getElementById(elementId);
+
+            if (!errorEl) {
+                return;
+            }
+
+            errorEl.textContent =
+                message || "Ocorreu um erro.";
+
+            errorEl.style.display =
+                "block";
+
+            setTimeout(() => {
+                errorEl.style.display =
+                    "none";
+            }, 5000);
+        }
+
+        function showAdminSuccess(
+            message,
+            elementId = "successMessage"
+        ) {
+            const successEl =
+                document.getElementById(elementId);
+
+            if (!successEl) {
+                return;
+            }
+
+            successEl.textContent =
+                message ||
+                "Operação realizada com sucesso.";
+
+            successEl.style.display =
+                "block";
+
+            setTimeout(() => {
+                successEl.style.display =
+                    "none";
+            }, 5000);
+        }
+
+        function clearAdminErrors() {
+            const ids = [
+                "errorMessage",
+                "successMessage",
+                "registerErrorMessage",
+                "registerSuccessMessage",
+                "forgotErrorMessage",
+                "forgotSuccessMessage",
+                "verifyErrorMessage",
+                "verifySuccessMessage",
+                "resetPasswordErrorMessage",
+                "resetPasswordSuccessMessage"
+            ];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        }
+
+        async function parseAdminResponse(response) {
+            const text =
+                await response.text();
+
+            if (!text) {
+                return {
+                    success: response.ok
+                };
+            }
+
+            try {
+                return JSON.parse(text);
+            } catch {
+                return {
+                    success: response.ok,
+                    message: text,
+                    error: response.ok ? null : text
+                };
+            }
+        }
+
         function checkAdminAuth() {
             const token = localStorage.getItem('adminToken');
             if (!token) {
@@ -2036,44 +3304,6 @@
             } else {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
-            }
-        }
-
-        async function handleAdminLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('adminEmailInput').value;
-            const password = document.getElementById('adminPasswordInput').value;
-            const btn = event.target.querySelector('.login-btn');
-
-            try {
-                btn.disabled = true;
-                btn.textContent = 'Autenticando...';
-
-                const response = await apiFetch('/api/admin/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ email, password })
-                });
-
-                if (!response || !response.ok) throw new Error('Credenciais inválidas');
-                const data = await response.json();
-
-                if (data.success) {
-                    localStorage.setItem('adminToken', data.token);
-                    localStorage.setItem('adminName', data.name);
-                    localStorage.setItem('adminEmail', data.email);
-
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('adminPanel').style.display = 'block';
-
-                    document.getElementById('adminNameDisplay').textContent = data.name;
-
-                    initAdminPanel();
-                }
-            } catch (error) {
-                alert(error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Entrar no Painel';
             }
         }
 

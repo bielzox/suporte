@@ -93,6 +93,10 @@ const db = {
                 data.users = {};
             }
 
+            if (!data.admins || typeof data.admins !== 'object') {
+                data.admins = {};
+            }
+
             if (!data.codes || typeof data.codes !== 'object') {
                 data.codes = {};
             }
@@ -465,7 +469,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
                     </h1>
 
                     <p>
-                        Este código expira em 5 minutos.
+                        Este código expira em 2 minutos.
                     </p>
                 </div>
             `
@@ -804,23 +808,156 @@ function authenticateAdmin(req, res, next) {
 // AUTENTICAÇÃO DO ADMIN
 // ============================================================
 
-app.post('/api/admin/login', authLimiter, (req, res) => {
+app.post('/api/admin/login', authLimiter, async (req, res) => {
     try {
-        const { email, password } = req.body;
+        console.log(
+            '🔑 Tentativa de login admin para:',
+            req.body.email
+        );
+
+        const {
+            email,
+            password
+        } = req.body;
+
         if (!email || !password) {
-            return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+            return res.status(400).json({
+                error: 'Email e senha são obrigatórios'
+            });
         }
 
         const normalizedEmail = normalizeEmail(email);
         const data = db.read();
         const admin = data.admins[normalizedEmail];
 
-        if (!admin || admin.password !== password) {
-            return res.status(401).json({ error: 'Credenciais administrativas incorretas' });
+        if (!admin) {
+            console.log(
+                '❌ Credenciais admin incorretas:',
+                normalizedEmail
+            );
+
+            return res.status(401).json({
+                error: 'Email ou senha incorretos'
+            });
         }
 
-        const sessionToken = crypto.randomBytes(32).toString('hex');
+        const match = await bcrypt.compare(password, admin.password);
+
+        if (!match) {
+            console.log(
+                '❌ Credenciais admin incorretas:',
+                normalizedEmail
+            );
+
+            return res.status(401).json({
+                error: 'Email ou senha incorretos'
+            });
+        }
+
+        const code = Math.floor(
+            100000 + Math.random() * 900000
+        ).toString();
+
+        const expiresAt = Date.now() + 2 * 60 * 1000;
+
+        data.codes[normalizedEmail] = {
+            code,
+            expiresAt
+        };
+
+        db.write(data);
+
+        console.log(
+            `📧 Enviando código admin para ${normalizedEmail}...`
+        );
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: normalizedEmail,
+            subject: 'Seu Código de Acesso Admin - Suporte',
+            text: `Seu código de verificação administrativa é: ${code}`,
+            html: `
+                <div style="font-family:sans-serif;text-align:center;">
+                    <h2 style="color:#333;">
+                        Verificação Administrativa
+                    </h2>
+
+                    <p>
+                        Olá ${admin.name},
+                        use o código abaixo para entrar no painel:
+                    </p>
+
+                    <h1 style="color:#4ade80;font-size:32px;">
+                        ${code}
+                    </h1>
+
+                    <p>
+                        Este código expira em 2 minutos.
+                    </p>
+                </div>
+            `
+        });
+
+        console.log('✅ Email admin enviado com sucesso!');
+
+        res.json({
+            success: true,
+            message: 'Código de verificação enviado ao seu email'
+        });
+    } catch (error) {
+        console.error(
+            '❌ Erro no login admin:',
+            error
+        );
+
+        res.status(500).json({
+            error: 'Falha ao enviar email'
+        });
+    }
+});
+
+app.post('/api/admin/verify-code', authLimiter, (req, res) => {
+    try {
+        const {
+            email,
+            code
+        } = req.body;
+
+        if (!email || !code) {
+            return res.status(400).json({
+                error: 'Email e código são obrigatórios'
+            });
+        }
+
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+        const storedCode = data.codes[normalizedEmail];
+
+        if (
+            !storedCode ||
+            storedCode.code !== code ||
+            Date.now() > storedCode.expiresAt
+        ) {
+            return res.status(400).json({
+                error: 'Código inválido ou expirado'
+            });
+        }
+
+        if (!data.admins[normalizedEmail]) {
+            return res.status(404).json({
+                error: 'Administrador não encontrado'
+            });
+        }
+
+        const sessionToken = crypto
+            .randomBytes(32)
+            .toString('hex');
+
+        const admin = data.admins[normalizedEmail];
         admin.sessionToken = sessionToken;
+
+        delete data.codes[normalizedEmail];
+
         db.write(data);
 
         res.json({
@@ -830,8 +967,206 @@ app.post('/api/admin/login', authLimiter, (req, res) => {
             email: admin.email
         });
     } catch (error) {
-        console.error('❌ Erro no login admin:', error);
-        res.status(500).json({ error: 'Erro interno no login administrativo' });
+        console.error(
+            '❌ Erro na verificação do código admin:',
+            error
+        );
+
+        res.status(500).json({
+            error: 'Erro interno na verificação'
+        });
+    }
+});
+
+app.post('/api/admin/register', authLimiter, async (req, res) => {
+    try {
+        const {
+            name,
+            username,
+            email,
+            password
+        } = req.body;
+
+        if (!name || !username || !email || !password) {
+            return res.status(400).json({
+                error: 'Todos os campos são obrigatórios'
+            });
+        }
+
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+
+        if (data.admins[normalizedEmail]) {
+            return res.status(400).json({
+                error: 'Este email já está registrado como administrador'
+            });
+        }
+
+        const normalizedUsername = username.toLowerCase().trim();
+        const usernameExists = Object.values(data.admins).some(
+            admin => admin.username === normalizedUsername
+        );
+
+        if (usernameExists) {
+            return res.status(400).json({
+                error: 'Este nome de usuário já está em uso. Escolha outro.'
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        data.admins[normalizedEmail] = {
+            name,
+            username: normalizedUsername,
+            email: normalizedEmail,
+            password: hashedPassword,
+            profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + normalizedEmail,
+            createdAt: new Date().toLocaleString('pt-BR'),
+            sessionToken: null
+        };
+
+        db.write(data);
+
+        res.json({
+            success: true,
+            message: 'Administrador registrado com sucesso!'
+        });
+    } catch (error) {
+        console.error(
+            '❌ Erro interno no registro admin:',
+            error
+        );
+
+        res.status(500).json({
+            error: 'Erro interno ao processar registro admin'
+        });
+    }
+});
+
+app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                error: 'Email é obrigatório'
+            });
+        }
+
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+
+        if (!data.admins[normalizedEmail]) {
+            return res.status(404).json({
+                error: 'Email administrativo não encontrado'
+            });
+        }
+
+        const code = Math.floor(
+            100000 + Math.random() * 900000
+        ).toString();
+
+        const expiresAt = Date.now() + 15 * 60 * 1000;
+
+        data.codes[normalizedEmail] = {
+            code,
+            expiresAt
+        };
+
+        db.write(data);
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: normalizedEmail,
+            subject: 'Recuperação de Senha Admin - Suporte',
+            text: `Seu código de recuperação de senha administrativa é: ${code}`,
+            html: `
+                <div style="font-family:sans-serif;text-align:center;">
+                    <h2 style="color:#333;">Recuperação de Senha Admin</h2>
+
+                    <p>
+                        Olá ${data.admins[normalizedEmail].name},
+                        use o código abaixo para redefinir sua senha administrativa:
+                    </p>
+
+                    <h1 style="color:#4ade80;font-size:32px;">
+                        ${code}
+                    </h1>
+
+                    <p>
+                        Este código expira em 15 minutos.
+                    </p>
+                </div>
+            `
+        });
+
+        res.json({
+            success: true,
+            message: 'Código de recuperação enviado ao seu email!'
+        });
+    } catch (error) {
+        console.error(
+            '❌ Erro ao enviar email de recuperação admin:',
+            error
+        );
+
+        res.status(500).json({
+            error: 'Falha ao enviar email'
+        });
+    }
+});
+
+app.post('/api/admin/reset-password', authLimiter, async (req, res) => {
+    try {
+        const {
+            email,
+            code,
+            newPassword
+        } = req.body;
+
+        if (!email || !code || !newPassword) {
+            return res.status(400).json({
+                error: 'Todos os campos são obrigatórios'
+            });
+        }
+
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+        const storedCode = data.codes[normalizedEmail];
+
+        if (
+            !storedCode ||
+            storedCode.code !== code ||
+            Date.now() > storedCode.expiresAt
+        ) {
+            return res.status(400).json({
+                error: 'Código inválido ou expirado'
+            });
+        }
+
+        if (!data.admins[normalizedEmail]) {
+            return res.status(404).json({
+                error: 'Administrador não encontrado'
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        data.admins[normalizedEmail].password = hashedPassword;
+
+        delete data.codes[normalizedEmail];
+
+        db.write(data);
+
+        res.json({
+            success: true,
+            message: 'Senha administrativa alterada com sucesso!'
+        });
+    } catch (error) {
+        console.error('❌ Erro ao redefinir senha admin:', error);
+
+        res.status(500).json({
+            error: 'Erro interno ao redefinir senha admin'
+        });
     }
 });
 
