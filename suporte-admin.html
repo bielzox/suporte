@@ -2203,6 +2203,25 @@
                                 </div>
                                 <button type="submit" class="profile-save-btn">💾 Salvar Alterações</button>
                             </form>
+
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); text-align: left;">
+                                <h4 style="margin-bottom: 15px; color: var(--text-muted); font-size: 1rem;">Alterar Senha</h4>
+                                <div class="profile-form" style="grid-template-columns: 1fr; gap: 10px;">
+                                    <div class="form-group">
+                                        <label>Senha Atual</label>
+                                        <input type="password" id="adminOldPassword" placeholder="Sua senha atual">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nova Senha</label>
+                                        <input type="password" id="adminNewPassword" placeholder="Nova senha">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Confirmar Nova Senha</label>
+                                        <input type="password" id="adminConfirmPassword" placeholder="Confirme a nova senha">
+                                    </div>
+                                    <button class="profile-save-btn" onclick="changeAdminPassword()">🔑 Alterar Senha</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3537,7 +3556,7 @@
 
             if (sectionId === 'profile') {
                 renderAdminProfile();
-            }
+            
         }
 
 
@@ -5809,6 +5828,13 @@
                                         🔑 Entrar como Usuário
                                     </button>
                                     <button
+                                        class="action-btn"
+                                        style="padding: 4px 10px; font-size: 0.7rem; background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);"
+                                        onclick="resetUserPassword('${escapeHTML(user.email)}')"
+                                    >
+                                        🔄 Resetar Senha
+                                    </button>
+                                    <button
                                         class="action-btn close-ticket"
                                         style="padding: 4px 10px; font-size: 0.7rem;"
                                         onclick="removeUser('${escapeHTML(user.email)}')"
@@ -5916,6 +5942,42 @@
             }
         }
 
+        async function changeAdminPassword() {
+            const oldPassword = document.getElementById('adminOldPassword').value;
+            const newPassword = document.getElementById('adminNewPassword').value;
+            const confirmPassword = document.getElementById('adminConfirmPassword').value;
+
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                showNotification('⚠️ Por favor, preencha todos os campos.');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showNotification('⚠️ As novas senhas não coincidem.');
+                return;
+            }
+
+            try {
+                const response = await apiFetch('/api/admin/change-password', {
+                    method: 'POST',
+                    body: JSON.stringify({ oldPassword, newPassword, confirmPassword })
+                });
+                if (!response || !response.ok) throw new Error('Erro ao alterar senha');
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('✓ Senha administrativa alterada com sucesso!');
+                    document.getElementById('adminOldPassword').value = '';
+                    document.getElementById('adminNewPassword').value = '';
+                    document.getElementById('adminConfirmPassword').value = '';
+                } else {
+                    throw new Error(result.error || 'Não foi possível alterar a senha.');
+                }
+            } catch (error) {
+                console.error(error);
+                showNotification(`❌ ${error.message}`);
+            }
+        }
+
 
         async function loginAsUser(email, lifetimeCode) {
             try {
@@ -5959,6 +6021,30 @@
             } catch (error) {
                 console.error('Erro ao remover usuário:', error);
                 showNotification('❌ Erro ao remover usuário.');
+            }
+        }
+
+        async function resetUserPassword(email) {
+            if (!email) return;
+            const newPassword = prompt(`Digite a nova senha para o usuário ${email}:`);
+            if (!newPassword) return;
+            if (newPassword.length < 4) {
+                showNotification('⚠️ A senha deve ter pelo menos 4 caracteres.');
+                return;
+            }
+
+            try {
+                const response = await apiFetch('/api/admin/reset-user-password', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, newPassword })
+                });
+                if (!response || !response.ok) throw new Error('Erro ao resetar senha');
+                const result = await response.json();
+                showNotification(`✓ ${result.message}`);
+                await renderUsers();
+            } catch (error) {
+                console.error('Erro ao resetar senha do usuário:', error);
+                showNotification(`❌ ${error.message}`);
             }
         }
 

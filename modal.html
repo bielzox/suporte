@@ -1788,6 +1788,23 @@
                     </div>
 
                     <div style="width: 100%; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-muted);">Alterar Senha</h3>
+                        <div class="form-group" style="text-align: left;">
+                            <label for="userOldPassword">Senha Atual</label>
+                            <input type="password" id="userOldPassword" placeholder="Sua senha atual">
+                        </div>
+                        <div class="form-group" style="text-align: left;">
+                            <label for="userNewPassword">Nova Senha</label>
+                            <input type="password" id="userNewPassword" placeholder="Nova senha">
+                        </div>
+                        <div class="form-group" style="text-align: left;">
+                            <label for="userConfirmPassword">Confirmar Nova Senha</label>
+                            <input type="password" id="userConfirmPassword" placeholder="Confirme a nova senha">
+                        </div>
+                        <button class="submit-btn" onclick="changePassword()">🔑 Alterar Senha</button>
+                    </div>
+
+                    <div style="width: 100%; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
                         <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-muted);">Sessões Ativas</h3>
                         <div id="sessionsList" style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
                             <!-- Sessões serão inseridas aqui -->
@@ -3162,11 +3179,6 @@
             }
 
             document.getElementById(
-                "welcomeUser"
-            ).textContent =
-                `Olá, ${email}`;
-
-            document.getElementById(
                 "email"
             ).value = email;
 
@@ -3592,6 +3604,7 @@
                 const data = await res.json();
                 if (data.success) {
                     const p = data.profile;
+                    document.getElementById('welcomeUser').textContent = `Olá, ${p.username}`;
                     document.getElementById('profileImg').src = p.profileImage;
                     document.getElementById('profileName').value = p.name;
                     document.getElementById('profileUsername').value = p.username;
@@ -3693,6 +3706,46 @@
                 }
             } catch (err) {
                 alert('Erro ao excluir conta.');
+            }
+        }
+
+        async function changePassword() {
+            const oldPassword = document.getElementById('userOldPassword').value;
+            const newPassword = document.getElementById('userNewPassword').value;
+            const confirmPassword = document.getElementById('userConfirmPassword').value;
+            const token = localStorage.getItem('userToken');
+
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('As novas senhas não coincidem.');
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:3000/api/user/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({ oldPassword, newPassword, confirmPassword })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Senha alterada com sucesso!');
+                    document.getElementById('userOldPassword').value = '';
+                    document.getElementById('userNewPassword').value = '';
+                    document.getElementById('userConfirmPassword').value = '';
+                } else {
+                    alert('Erro: ' + (data.error || 'Não foi possível alterar a senha.'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao conectar com o servidor.');
             }
         }
 

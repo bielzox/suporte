@@ -601,8 +601,101 @@ function authenticateUser(req, res, next) {
 }
 
 // ============================================================
-// PERFIL E CONFIGURAÇÕES DO USUÁRIO
+// ALTERAR SENHA DO USUÁRIO
 // ============================================================
+
+app.post('/api/user/change-password', authenticateUser, async (req, res) => {
+    try {
+        const { oldPassword, newPassword, confirmPassword } = req.body;
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ error: 'As novas senhas não coincidem' });
+        }
+
+        const data = db.read();
+        const user = data.users[req.userEmail];
+
+        const match = await bcrypt.compare(oldPassword, user.password);
+        if (!match) {
+            return res.status(401).json({ error: 'A senha atual está incorreta' });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        db.write(data);
+
+        res.json({ success: true, message: 'Senha alterada com sucesso!' });
+    } catch (error) {
+        console.error('❌ Erro ao alterar senha do usuário:', error);
+        res.status(500).json({ error: 'Erro interno ao alterar senha' });
+    }
+});
+
+// ============================================================
+// ALTERAR SENHA DO ADMIN
+// ============================================================
+
+app.post('/api/admin/change-password', authenticateAdmin, async (req, res) => {
+    try {
+        const { oldPassword, newPassword, confirmPassword } = req.body;
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ error: 'As novas senhas não coincidem' });
+        }
+
+        const data = db.read();
+        const admin = Object.values(data.admins).find(a => a.sessionToken === req.admin.sessionToken);
+
+        const match = await bcrypt.compare(oldPassword, admin.password);
+        if (!match) {
+            return res.status(401).json({ error: 'A senha atual está incorreta' });
+        }
+
+        admin.password = await bcrypt.hash(newPassword, 10);
+        db.write(data);
+
+        res.json({ success: true, message: 'Senha administrativa alterada com sucesso!' });
+    } catch (error) {
+        console.error('❌ Erro ao alterar senha do admin:', error);
+        res.status(500).json({ error: 'Erro interno ao alterar senha' });
+    }
+});
+
+// ============================================================
+// ADMIN RESETAR SENHA DE USUÁRIO
+// ============================================================
+
+app.post('/api/admin/reset-user-password', authenticateAdmin, async (req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+
+        if (!email || !newPassword) {
+            return res.status(400).json({ error: 'Email e nova senha são obrigatórios' });
+        }
+
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+
+        if (!data.users[normalizedEmail]) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        data.users[normalizedEmail].password = await bcrypt.hash(newPassword, 10);
+        db.write(data);
+
+        res.json({ success: true, message: `Senha do usuário ${normalizedEmail} resetada com sucesso!` });
+    } catch (error) {
+        console.error('❌ Erro ao resetar senha do usuário:', error);
+        res.status(500).json({ error: 'Erro interno ao resetar senha' });
+    }
+});
 
 app.get('/api/user/profile', authenticateUser, (req, res) => {
     try {
