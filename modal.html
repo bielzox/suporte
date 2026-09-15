@@ -1,0 +1,4299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suporte & Manutenção - Leonardo Gabriel</title>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-deep: #050505;
+            --bg-dark: #0f0f0f;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --accent: #4ade80;
+            --accent-rgb: 74, 222, 128;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: blur(20px);
+            --shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.65);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #111, var(--bg-deep));
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 24px 20px;
+            line-height: 1.5;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+        }
+
+        button {
+            user-select: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1550px;
+            margin: 0 auto;
+        }
+
+        /* =====================================================
+           LOGIN / AUTENTICAÇÃO
+           ===================================================== */
+
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            inset: 0;
+            background: var(--bg-deep);
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .auth-container {
+            display: none;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .auth-container.active {
+            display: flex;
+            justify-content: center;
+        }
+
+        .login-box {
+            background: rgba(15, 15, 15, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px 36px;
+            backdrop-filter: var(--glass);
+            box-shadow: var(--shadow);
+            width: 100%;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-box h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+.gradient-text {
+    background: linear-gradient(to bottom, #ffffff, #aaaaaa);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+        .login-box p {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 17px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-left: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 11px 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            color: #fff;
+            font-size: 0.88rem;
+            transition: var(--transition);
+        }
+
+        .form-group input {
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .login-btn {
+            padding: 13px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 11px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 5px;
+        }
+
+        .login-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(var(--accent-rgb), 0.25);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 22px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px;
+            border-radius: 13px;
+            border: 1px solid var(--border);
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 9px;
+            transition: var(--transition);
+        }
+
+        .auth-tab-btn.active {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .auth-content.active {
+            display: block;
+        }
+
+        .error-message,
+        .success-message {
+            padding: 10px 12px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+            margin-bottom: 14px;
+            font-size: 0.82rem;
+        }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            color: #fca5a5;
+        }
+
+        .success-message {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .ticket-success {
+            display: none;
+            margin-bottom: 18px;
+            padding: 15px 17px;
+            border-radius: 13px;
+            background: rgba(74, 222, 128, 0.10);
+            border: 1px solid rgba(74, 222, 128, 0.28);
+            color: #86efac;
+            text-align: center;
+            font-size: 0.86rem;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .ticket-success strong {
+            color: #4ade80;
+            font-weight: 800;
+        }
+
+        .ticket-error {
+            display: none;
+            margin-bottom: 18px;
+            padding: 15px 17px;
+            border-radius: 13px;
+            background: rgba(248, 113, 113, 0.10);
+            border: 1px solid rgba(248, 113, 113, 0.25);
+            color: #fca5a5;
+            text-align: center;
+            font-size: 0.86rem;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .code-input {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 22px 0;
+        }
+
+        .code-digit {
+            width: 43px;
+            height: 55px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #fff;
+            transition: var(--transition);
+        }
+
+        .code-digit:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+        }
+
+        .code-timer {
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin: 15px 0;
+        }
+
+        .code-timer span {
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        .resend-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+
+        .resend-btn:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .toggle-auth button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .toggle-auth button:hover {
+            color: #fff;
+        }
+
+        /* =====================================================
+           PAINEL DO USUÁRIO
+           ===================================================== */
+
+        .user-panel {
+            display: none;
+        }
+
+        .user-info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 9px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            backdrop-filter: var(--glass);
+        }
+
+        .logout-btn {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            color: #fca5a5;
+            padding: 7px 14px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: rgba(248, 113, 113, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* =====================================================
+           CABEÇALHO
+           ===================================================== */
+
+        .header {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* =====================================================
+           ABAS
+           ===================================================== */
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 9px 17px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: var(--transition);
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-button:hover {
+            color: #fff;
+        }
+
+        .tab-button.active {
+            color: #fff;
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(7px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =====================================================
+           ÁREA PRINCIPAL DO SUPORTE
+           ===================================================== */
+
+        .form-section {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 21px 27px;
+            backdrop-filter: var(--glass);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .form-section .form-group {
+            margin-bottom: 14px;
+            gap: 5px;
+        }
+
+        .form-section .form-group label {
+            font-size: 0.8rem;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--text-main);
+        }
+
+        .form-section .form-group input,
+        .form-section .form-group select,
+        .form-section .form-group textarea {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.87rem;
+        }
+
+        .form-section textarea {
+            min-height: 105px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .submit-btn {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 3px;
+        }
+
+        .submit-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* =====================================================
+           TICKETS
+           ===================================================== */
+
+        .tickets-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 17px;
+            width: 100%;
+        }
+
+        .ticket {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 18px;
+            backdrop-filter: var(--glass);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .ticket:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--bg-card-hover);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .ticket-id {
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 7px;
+            border-radius: 5px;
+        }
+
+        .ticket-status {
+            padding: 3px 9px;
+            border-radius: 100px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .status-open {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+
+        .status-closed {
+            background: rgba(148, 163, 184, 0.15);
+            color: #cbd5e1;
+            border-color: rgba(148, 163, 184, 0.3);
+        }
+
+        .ticket-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 7px;
+            color: #fff;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .ticket-desc {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            border-left: 3px solid var(--border);
+            margin-bottom: 10px;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .ticket-date {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 7px;
+        }
+
+        .ticket-actions .chat-btn {
+            flex: 1;
+            padding: 9px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 0.78rem;
+        }
+
+        .ticket-actions .chat-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* =====================================================
+           FAQ
+           ===================================================== */
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            backdrop-filter: var(--glass);
+            transition: var(--transition);
+        }
+
+        .faq-item:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .faq-question {
+            padding: 13px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.84rem;
+            transition: var(--transition);
+        }
+
+        .faq-question:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .faq-icon {
+            font-size: 0.9rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 16px 14px;
+            color: var(--text-muted);
+            line-height: 1.55;
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* =====================================================
+           CHAT MODAL
+           ===================================================== */
+
+        .chat-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: #111;
+            width: 95%;
+            max-width: 900px;
+            height: 82vh;
+            border-radius: 22px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .chat-header {
+            padding: 17px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #0a0a0a;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 11px 14px;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            position: relative;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .message.admin {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border);
+            color: #fff;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: rgba(var(--accent-rgb), 0.15);
+            border: 1px solid rgba(var(--accent-rgb), 0.3);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-info {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            display: block;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .message-file {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 8px 11px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(var(--accent-rgb), 0.1);
+        }
+
+        .message-image {
+            display: block;
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .chat-input-area {
+            padding: 13px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 9px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: #fff;
+            outline: none;
+            transition: var(--transition);
+            font-size: 0.84rem;
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+        }
+
+        .chat-input-area .chat-btn {
+            background: #fff;
+            border: none;
+            color: #000;
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .chat-input-area .chat-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .close-chat {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        .close-chat:hover {
+            color: var(--danger);
+        }
+
+        /* =====================================================
+           SCROLLBAR
+           ===================================================== */
+
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #080808;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* =====================================================
+           RESPONSIVIDADE
+           ===================================================== */
+
+        @media (max-width: 1000px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .form-section {
+                max-width: 100%;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px 9px;
+            }
+
+            .login-box {
+                padding: 22px 20px;
+                border-radius: 20px;
+            }
+
+            .login-box h1 {
+                font-size: 1.6rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .header {
+                margin-bottom: 14px;
+            }
+
+            .header h1 {
+                font-size: 1.45rem;
+            }
+
+            .header p {
+                font-size: 0.78rem;
+            }
+
+            .user-info-bar {
+                padding: 8px 12px;
+            }
+
+            .tabs {
+                gap: 3px;
+                margin-bottom: 14px;
+            }
+
+            .tab-button {
+                padding: 8px 10px;
+                font-size: 0.75rem;
+            }
+
+            .form-section {
+                padding: 16px;
+                border-radius: 15px;
+            }
+
+            .tickets-list {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-modal {
+                padding: 0;
+            }
+
+            .chat-container {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+            }
+
+            .chat-messages {
+                padding: 14px;
+            }
+
+            .chat-input-area {
+                padding: 10px;
+            }
+
+            .message {
+                max-width: 88%;
+            }
+
+            .code-digit {
+                width: 39px;
+                height: 50px;
+                font-size: 1.35rem;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .login-box {
+                padding: 20px 15px;
+            }
+
+            .auth-tabs {
+                gap: 4px;
+            }
+
+            .auth-tab-btn {
+                font-size: 0.72rem;
+            }
+
+            .user-info-bar {
+                font-size: 0.78rem;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .tabs {
+                justify-content: stretch;
+            }
+
+            .tab-button {
+                flex: 1;
+                padding: 8px 5px;
+                font-size: 0.7rem;
+            }
+
+            .form-section {
+                padding: 14px;
+            }
+
+            .code-input {
+                gap: 5px;
+            }
+
+            .code-digit {
+                width: 36px;
+                height: 47px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         LOGIN SCREEN
+         ===================================================== -->
+
+    <div class="login-screen" id="loginScreen">
+
+        <div class="login-box auth-container active">
+
+            <div class="auth-tabs" id="authTabs">
+                <button class="auth-tab-btn active" onclick="switchAuthTab('login')">
+                    Entrar
+                </button>
+
+                <button class="auth-tab-btn" onclick="switchAuthTab('register')">
+                    Registrar
+                </button>
+
+                <button class="auth-tab-btn" onclick="switchAuthTab('recover')">
+                    Recuperar
+                </button>
+            </div>
+
+            <!-- LOGIN -->
+
+            <div id="login-content" class="auth-content active">
+
+                <h1>
+                    🔒 <span class="gradient-text">Acesso ao Suporte</span>
+                </h1>
+
+                <p>
+                    Entre com sua conta para gerenciar seus tickets
+                </p>
+
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <form
+                    class="login-form"
+                    id="loginFormContainer"
+                    onsubmit="handleLogin(event)"
+                >
+
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input
+                            type="email"
+                            id="loginEmail"
+                            placeholder="seu@email.com"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Senha</label>
+                        <input
+                            type="password"
+                            id="loginPassword"
+                            placeholder="Sua senha"
+                            required
+                        >
+                    </div>
+
+                    <div style="text-align:right;margin-bottom:5px;">
+                        <a
+                            href="#"
+                            onclick="switchAuthTab('recover'); return false;"
+                            style="
+                                color:var(--text-muted);
+                                font-size:0.8rem;
+                                text-decoration:none;
+                                transition:var(--transition);
+                            "
+                        >
+                            Recuperar Senha
+                        </a>
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Entrar
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- REGISTRO -->
+
+            <div id="register-content" class="auth-content">
+
+                <h1>🆕 Criar Conta</h1>
+
+                <p>
+                    Crie sua conta de usuário
+                </p>
+
+                <div class="error-message" id="registerErrorMessage"></div>
+                <div class="success-message" id="registerSuccessMessage"></div>
+
+                <form
+                    class="login-form"
+                    id="registerFormContainer"
+                    onsubmit="handleRegister(event)"
+                >
+
+                    <div class="form-group">
+                        <label for="registerName">Nome</label>
+                        <input
+                            type="text"
+                            id="registerName"
+                            placeholder="Seu Nome Completo"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input
+                            type="email"
+                            id="registerEmail"
+                            placeholder="seu@email.com"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPassword">Senha</label>
+                        <input
+                            type="password"
+                            id="registerPassword"
+                            placeholder="Crie uma senha"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Criar Conta
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- RECUPERAÇÃO -->
+
+            <div id="recover-content" class="auth-content">
+
+                <h1>🔑 Recuperar Senha</h1>
+
+                <p>
+                    Insira seu email para receber o código de recuperação
+                </p>
+
+                <div class="error-message" id="forgotErrorMessage"></div>
+                <div class="success-message" id="forgotSuccessMessage"></div>
+
+                <form
+                    class="login-form"
+                    onsubmit="handleForgotPassword(event)"
+                >
+
+                    <div class="form-group">
+                        <label for="forgotEmail">Email</label>
+
+                        <input
+                            type="email"
+                            id="forgotEmail"
+                            placeholder="seu@email.com"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Enviar Código
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- VERIFICAÇÃO -->
+
+            <div id="verification-content" class="auth-content">
+
+                <h1 id="verifyTitle">
+                    ✉️ Verificar Email
+                </h1>
+
+                <p id="verifyEmail"></p>
+
+                <div class="error-message" id="verifyErrorMessage"></div>
+                <div class="success-message" id="verifySuccessMessage"></div>
+
+                <form
+                    class="login-form"
+                    id="verificationForm"
+                    onsubmit="handleVerificationSubmit(event)"
+                >
+
+                    <p
+                        style="
+                            text-align:center;
+                            color:rgba(255,255,255,0.7);
+                            font-size:0.82rem;
+                            margin-bottom:10px;
+                        "
+                    >
+                        Digite o código de 6 dígitos enviado para seu email
+                    </p>
+
+                    <div class="code-input" id="codeInputContainer">
+
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+
+                    </div>
+
+                    <div class="code-timer" id="verifyTimer">
+                        Código expira em:
+                        <span id="timer">05:00</span>
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Verificar Código
+                    </button>
+
+                    <button
+                        type="button"
+                        class="resend-btn"
+                        id="resendBtn"
+                        onclick="resendCode()"
+                    >
+                        Reenviar código
+                    </button>
+
+                </form>
+
+                <div class="toggle-auth">
+                    <button
+                        type="button"
+                        onclick="backToAuth()"
+                        style="margin-top:15px;"
+                    >
+                        ← Voltar
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- NOVA SENHA -->
+
+            <div id="reset-password-content" class="auth-content">
+
+                <h1>🆕 Nova Senha</h1>
+
+                <p>
+                    Crie sua nova senha de acesso
+                </p>
+
+                <div
+                    class="error-message"
+                    id="resetPasswordErrorMessage"
+                ></div>
+
+                <div
+                    class="success-message"
+                    id="resetPasswordSuccessMessage"
+                ></div>
+
+                <form
+                    class="login-form"
+                    onsubmit="handleResetPasswordSubmit(event)"
+                >
+
+                    <div class="form-group">
+                        <label for="newPassword">
+                            Nova Senha
+                        </label>
+
+                        <input
+                            type="password"
+                            id="newPassword"
+                            placeholder="Sua nova senha"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            Confirmar Nova Senha
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Confirme a nova senha"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Alterar Senha
+                    </button>
+
+                </form>
+
+                <div class="toggle-auth">
+                    <button
+                        type="button"
+                        onclick="backToAuth()"
+                        style="margin-top:15px;"
+                    >
+                        ← Voltar
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         USER PANEL
+         ===================================================== -->
+
+    <div class="user-panel" id="userPanel">
+
+        <div class="container">
+
+            <!-- BARRA DO USUÁRIO -->
+
+            <div class="user-info-bar">
+
+                <div
+                    id="welcomeUser"
+                    style="
+                        font-weight:600;
+                        color:rgba(255,255,255,0.9);
+                    "
+                >
+                    Olá, Usuário
+                </div>
+
+                <button
+                    class="logout-btn"
+                    onclick="logout()"
+                >
+                    Sair
+                </button>
+
+            </div>
+
+
+            <!-- CABEÇALHO -->
+
+            <div class="header">
+
+                <h1>
+                    🔧 Suporte & Manutenção
+                </h1>
+
+                <p>
+                    Abra um ticket ou consulte as perguntas frequentes
+                </p>
+
+            </div>
+
+
+            <!-- ABAS -->
+
+            <div class="tabs">
+
+                <button
+                    class="tab-button active"
+                    onclick="switchTab(event, 'novo-ticket')"
+                >
+                    ➕ Novo Ticket
+                </button>
+
+                <button
+                    class="tab-button"
+                    onclick="switchTab(event, 'meus-tickets')"
+                >
+                    📋 Meus Tickets
+                </button>
+
+                <button
+                    class="tab-button"
+                    onclick="switchTab(event, 'perfil')"
+                >
+                    👤 Perfil
+                </button>
+
+                <button
+                    class="tab-button"
+                    onclick="switchTab(event, 'conversas')"
+                >
+                    💬 Conversas
+                </button>
+
+                <button
+                    class="tab-button"
+                    onclick="switchTab(event, 'faq')"
+                >
+                    ❓ FAQ
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 NOVO TICKET
+                 ================================================= -->
+
+            <div
+                id="novo-ticket"
+                class="tab-content active"
+            >
+
+                <div class="form-section">
+
+                    <!-- SUCESSO -->
+
+                    <div
+                        class="ticket-success"
+                        id="ticketSuccessMessage"
+                    >
+                        ✅ <strong>Ticket enviado com sucesso!</strong><br>
+                        Seu ticket foi registrado.
+                        <br>
+                        ID do ticket:
+                        <strong id="ticketId"></strong>
+                    </div>
+
+                    <!-- ERRO -->
+
+                    <div
+                        class="ticket-error"
+                        id="ticketErrorMessage"
+                    ></div>
+
+                    <form
+                        id="ticketForm"
+                        onsubmit="submitTicket(event)"
+                    >
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+
+                                <label for="name">
+                                    Seu Nome *
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    required
+                                    placeholder="João Silva"
+                                >
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label for="email">
+                                    Email *
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    required
+                                    placeholder="seu@email.com"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="category">
+                                Categoria *
+                            </label>
+
+                            <select
+                                id="category"
+                                name="category"
+                                required
+                            >
+
+                                <option value="">
+                                    Selecione uma categoria
+                                </option>
+
+                                <option value="bug">
+                                    🐛 Relato de Bug
+                                </option>
+
+                                <option value="feature">
+                                    ✨ Solicitação de Recurso
+                                </option>
+
+                                <option value="maintenance">
+                                    🔧 Manutenção
+                                </option>
+
+                                <option value="update">
+                                    📦 Update/Atualização
+                                </option>
+
+                                <option value="other">
+                                    📝 Outro
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="project">
+                                Nome do Projeto *
+                            </label>
+
+                            <input
+                                type="text"
+                                id="project"
+                                name="project"
+                                required
+                                placeholder="Ex: Zox Code, KB Store, etc"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="title">
+                                Título *
+                            </label>
+
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                required
+                                placeholder="Resumo do problema"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="description">
+                                Descrição Detalhada *
+                            </label>
+
+                            <textarea
+                                id="description"
+                                name="description"
+                                required
+                                placeholder="Descreva o problema em detalhes..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="submit-btn"
+                            id="submitTicketButton"
+                        >
+                            📤 Enviar Ticket
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 MEUS TICKETS
+                 ================================================= -->
+
+            <div
+                id="meus-tickets"
+                class="tab-content"
+            >
+
+                <div
+                    class="tickets-list"
+                    id="ticketsList"
+                ></div>
+
+            </div>
+
+
+            <!-- PERFIL / CONFIGURAÇÕES -->
+
+            <div
+                id="perfil"
+                class="tab-content"
+            >
+                <div class="form-section" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px;">
+                    <div id="profileImageContainer" style="position: relative;">
+                        <img id="profileImg" src="" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; background: #222;">
+                        <label for="profileImageInput" style="position: absolute; bottom: 0; right: 0; background: var(--accent); color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; border: 2px solid #000;">
+                            📷
+                            <input type="file" id="profileImageInput" style="display: none;" onchange="updateProfileImage(this)">
+                        </label>
+                    </div>
+
+                    <div style="width: 100%;">
+                        <div class="form-group" style="text-align: left;">
+                            <label for="profileName">Nome</label>
+                            <input type="text" id="profileName" placeholder="Seu nome">
+                        </div>
+                        <div class="form-group" style="text-align: left;">
+                            <label for="profileUsername">Nome de Usuário</label>
+                            <input type="text" id="profileUsername" placeholder="seu_usuario">
+                        </div>
+                        <button class="submit-btn" onclick="saveProfile()">💾 Salvar Alterações</button>
+                    </div>
+
+                    <div style="width: 100%; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-muted);">Sessões Ativas</h3>
+                        <div id="sessionsList" style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                            <!-- Sessões serão inseridas aqui -->
+                        </div>
+                        <button class="submit-btn" style="background: rgba(248, 113, 113, 0.2); color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.3); margin-top: 15px;" onclick="revokeAllSessions()">
+                            🚫 Encerrar Todas as Sessões
+                        </button>
+                    </div>
+
+                    <div style="width: 100%; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--danger);">Zona de Perigo</h3>
+                        <button class="submit-btn" style="background: var(--danger); color: #fff; border: none;" onclick="deleteAccount()">
+                            🗑️ Excluir Minha Conta Permanentemente
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =================================================
+                 CONVERSAS
+                 ================================================= -->
+
+            <div
+                id="conversas"
+                class="tab-content"
+            >
+
+                <div
+                    class="tickets-list"
+                    id="chatsList"
+                ></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 FAQ
+                 ================================================= -->
+
+            <div
+                id="faq"
+                class="tab-content"
+            >
+
+                <div id="faqList">
+
+                    <div class="faq-item">
+
+                        <div
+                            class="faq-question"
+                            onclick="toggleFaq(this)"
+                        >
+                            <span>
+                                Como abro um novo ticket de suporte?
+                            </span>
+
+                            <span class="faq-icon">
+                                ▼
+                            </span>
+                        </div>
+
+                        <div class="faq-answer">
+                            Clique na aba "Novo Ticket" acima e preencha o formulário com os dados solicitados. Descreva seu problema de forma clara e detalhada para que possamos ajudá-lo melhor.
+                        </div>
+
+                    </div>
+
+
+                    <div class="faq-item">
+
+                        <div
+                            class="faq-question"
+                            onclick="toggleFaq(this)"
+                        >
+                            <span>
+                                Qual é o tempo médio de resposta?
+                            </span>
+
+                            <span class="faq-icon">
+                                ▼
+                            </span>
+                        </div>
+
+                        <div class="faq-answer">
+                            O tempo de resposta pode variar conforme a quantidade de solicitações e a complexidade de cada problema. Nossa equipe responderá assim que possível.
+                        </div>
+
+                    </div>
+
+
+                    <div class="faq-item">
+
+                        <div
+                            class="faq-question"
+                            onclick="toggleFaq(this)"
+                        >
+                            <span>
+                                Vocês oferecem suporte 24/7?
+                            </span>
+
+                            <span class="faq-icon">
+                                ▼
+                            </span>
+                        </div>
+
+                        <div class="faq-answer">
+                            Você pode abrir tickets a qualquer hora. Nossa equipe analisará as solicitações e responderá assim que possível. Para assuntos urgentes, entre em contato via Discord.
+                        </div>
+
+                    </div>
+
+
+                    <div class="faq-item">
+
+                        <div
+                            class="faq-question"
+                            onclick="toggleFaq(this)"
+                        >
+                            <span>
+                                Posso acompanhar meu ticket em tempo real?
+                            </span>
+
+                            <span class="faq-icon">
+                                ▼
+                            </span>
+                        </div>
+
+                        <div class="faq-answer">
+                            Sim! Você pode acompanhar o status do ticket na aba "Meus Tickets" e conversar diretamente com a equipe através do chat do ticket.
+                        </div>
+
+                    </div>
+
+
+                    <div class="faq-item">
+
+                        <div
+                            class="faq-question"
+                            onclick="toggleFaq(this)"
+                        >
+                            <span>
+                                E se meu problema não for resolvido no primeiro contato?
+                            </span>
+
+                            <span class="faq-icon">
+                                ▼
+                            </span>
+                        </div>
+
+                        <div class="faq-answer">
+                            Sem problemas! Você pode adicionar comentários ao seu ticket com mais informações. Continuaremos investigando e oferecendo suporte até que o problema seja completamente resolvido.
+                        </div>
+
+                    </div>
+
+
+                    <div class="faq-item">
+
+                        <div
+                            class="faq-question"
+                            onclick="toggleFaq(this)"
+                        >
+                            <span>
+                                Como contato o suporte via Discord?
+                            </span>
+
+                            <span class="faq-icon">
+                                ▼
+                            </span>
+                        </div>
+
+                        <div class="faq-answer">
+                            Você pode entrar em nosso Discord (https://discord.gg/uqnUaapRBa) e abrir um ticket no canal de suporte. Um membro da equipe responderá assim que possível!
+                        </div>
+
+                    </div>
+
+
+                    <div class="faq-item">
+
+                        <div
+                            class="faq-question"
+                            onclick="toggleFaq(this)"
+                        >
+                            <span>
+                                Posso contratar suporte customizado?
+                            </span>
+
+                            <span class="faq-icon">
+                                ▼
+                            </span>
+                        </div>
+
+                        <div class="faq-answer">
+                            Sim! Oferecemos pacotes de suporte customizado, manutenção proativa e atendimento personalizado. Entre em contato via Discord ou email para mais informações.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CHAT MODAL
+                 ================================================= -->
+
+            <div
+                class="chat-modal"
+                id="chatModal"
+            >
+
+                <div class="chat-container">
+
+                    <div class="chat-header">
+
+                        <h3 id="chatTitle">
+                            Chat - Ticket #ID
+                        </h3>
+
+                        <button
+                            class="close-chat"
+                            onclick="closeChat()"
+                            aria-label="Fechar chat"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="chat-messages"
+                        id="chatMessages"
+                    ></div>
+
+
+                    <div class="chat-input-area">
+
+                        <label
+                            class="chat-btn"
+                            style="cursor:pointer;"
+                            title="Anexar arquivo"
+                        >
+                            📎
+
+                            <input
+                                type="file"
+                                id="chatFile"
+                                style="display:none;"
+                                onchange="handleFileSelect()"
+                            >
+                        </label>
+
+                        <input
+                            type="text"
+                            class="chat-input"
+                            id="chatInput"
+                            placeholder="Digite sua mensagem..."
+                            onkeypress="if(event.key === 'Enter') sendChatMessage()"
+                        >
+
+                        <button
+                            class="chat-btn"
+                            id="sendChatBtn"
+                            onclick="sendChatMessage()"
+                            title="Enviar mensagem"
+                        >
+                            🚀
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script>
+
+        let timerInterval = null;
+        let currentEmail = null;
+        let isLogin = true;
+        let socket = null;
+        let activeTicketId = null;
+        let selectedFile = null;
+
+
+        /* =====================================================
+           SEGURANÇA / HTML
+           ===================================================== */
+
+        function escapeHTML(str) {
+
+            if (!str) {
+                return "";
+            }
+
+            const p = document.createElement("p");
+
+            p.textContent = String(str);
+
+            return p.innerHTML;
+        }
+
+
+        /* =====================================================
+           AUTENTICAÇÃO
+           ===================================================== */
+
+        function switchAuthTab(tabId) {
+
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .querySelectorAll(".auth-tab-btn")
+                .forEach(btn => {
+                    btn.classList.remove("active");
+                });
+
+            const target =
+                document.getElementById(`${tabId}-content`);
+
+            if (target) {
+                target.classList.add("active");
+            }
+
+            const buttons =
+                document.querySelectorAll(".auth-tab-btn");
+
+            if (tabId === "login" && buttons[0]) {
+                buttons[0].classList.add("active");
+            }
+
+            if (tabId === "register" && buttons[1]) {
+                buttons[1].classList.add("active");
+            }
+
+            if (tabId === "recover" && buttons[2]) {
+                buttons[2].classList.add("active");
+            }
+
+            clearErrors();
+        }
+
+
+        async function handleLogin(event) {
+
+            event.preventDefault();
+
+            const btn =
+                event.target.querySelector(".login-btn");
+
+            const originalText =
+                btn.textContent;
+
+            const email =
+                document
+                    .getElementById("loginEmail")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("loginPassword")
+                    .value;
+
+            if (!email || !password) {
+
+                showError(
+                    "Por favor, preencha todos os campos",
+                    "errorMessage"
+                );
+
+                return;
+            }
+
+            try {
+
+                btn.disabled = true;
+                btn.textContent = "Aguarde...";
+
+                const res = await fetch(
+                    "http://localhost:3000/api/auth/login",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email,
+                            password
+                        })
+                    }
+                );
+
+                const data =
+                    await parseResponse(res);
+
+                if (data.success) {
+
+                    currentEmail = email;
+
+                    showVerificationForm("2fa");
+
+                    showSuccess(
+                        `✓ Código enviado para ${email}`,
+                        "verifySuccessMessage"
+                    );
+
+                } else {
+
+                    showError(
+                        data.error ||
+                        "Não foi possível realizar o login.",
+                        "errorMessage"
+                    );
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+                showError(
+                    "Erro ao conectar com o servidor. Verifique se o backend está rodando em http://localhost:3000",
+                    "errorMessage"
+                );
+
+            } finally {
+
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+
+        async function handleRegister(event) {
+
+            event.preventDefault();
+
+            const btn =
+                event.target.querySelector(".login-btn");
+
+            const originalText =
+                btn.textContent;
+
+            const name =
+                document
+                    .getElementById("registerName")
+                    .value
+                    .trim();
+
+            const email =
+                document
+                    .getElementById("registerEmail")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("registerPassword")
+                    .value;
+
+            if (!name || !email || !password) {
+
+                showError(
+                    "Por favor, preencha todos os campos",
+                    "registerErrorMessage"
+                );
+
+                return;
+            }
+
+            try {
+
+                btn.disabled = true;
+                btn.textContent = "Criando conta...";
+
+                const res = await fetch(
+                    "http://localhost:3000/api/auth/register",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            name,
+                            email,
+                            password
+                        })
+                    }
+                );
+
+                const data =
+                    await parseResponse(res);
+
+                if (data.success) {
+
+                    showSuccess(
+                        "✓ Conta criada com sucesso! Agora faça login.",
+                        "registerSuccessMessage"
+                    );
+
+                    setTimeout(() => {
+                        switchAuthTab("login");
+                    }, 2000);
+
+                } else {
+
+                    showError(
+                        data.error ||
+                        "Não foi possível criar a conta.",
+                        "registerErrorMessage"
+                    );
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+                showError(
+                    "Erro ao conectar com o servidor",
+                    "registerErrorMessage"
+                );
+
+            } finally {
+
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+
+        /* =====================================================
+           RESPOSTA DO SERVIDOR
+           ===================================================== */
+
+        async function parseResponse(response) {
+
+            const text =
+                await response.text();
+
+            if (!text) {
+                return {
+                    success: response.ok
+                };
+            }
+
+            try {
+
+                return JSON.parse(text);
+
+            } catch {
+
+                return {
+                    success: response.ok,
+                    message: text,
+                    error: response.ok ? null : text
+                };
+            }
+        }
+
+
+        /* =====================================================
+           VERIFICAÇÃO
+           ===================================================== */
+
+        function showVerificationForm(type) {
+
+            document.getElementById("authTabs").style.display =
+                "none";
+
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .getElementById("verification-content")
+                .classList.add("active");
+
+            if (type === "2fa") {
+
+                document.getElementById("verifyTitle").textContent =
+                    "✉️ Verificar Email";
+
+            } else {
+
+                document.getElementById("verifyTitle").textContent =
+                    "✉️ Verificar Recuperação";
+            }
+
+            document.getElementById("verifyEmail").textContent =
+                `Código enviado para: ${currentEmail}`;
+
+            clearCodeInputs("codeInputContainer");
+
+            startCodeTimer();
+
+            focusFirstCodeInput("codeInputContainer");
+        }
+
+
+        async function handleVerificationSubmit(event) {
+
+            event.preventDefault();
+
+            const codeDigits =
+                Array.from(
+                    document.querySelectorAll(".code-digit")
+                ).map(el => el.value);
+
+            const enteredCode =
+                codeDigits.join("");
+
+            if (enteredCode.length !== 6) {
+
+                showError(
+                    "Digite o código completo",
+                    "verifyErrorMessage"
+                );
+
+                return;
+            }
+
+            const isReset =
+                document
+                    .getElementById("verifyTitle")
+                    .textContent
+                    .includes("Recuperação");
+
+            try {
+
+                if (isReset) {
+
+                    window.pendingResetCode =
+                        enteredCode;
+
+                    showResetPasswordForm();
+
+                } else {
+
+                    const res = await fetch(
+                        "http://localhost:3000/api/auth/verify-code",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                email: currentEmail,
+                                code: enteredCode
+                            })
+                        }
+                    );
+
+                    const data =
+                        await parseResponse(res);
+
+                    if (data.success) {
+
+                        showSuccess(
+                            "✓ Código verificado com sucesso!",
+                            "verifySuccessMessage"
+                        );
+
+                        setTimeout(() => {
+
+                            clearInterval(timerInterval);
+
+                            localStorage.setItem(
+                                "userLoggedIn",
+                                "true"
+                            );
+
+                            localStorage.setItem(
+                                "userToken",
+                                data.token || ""
+                            );
+
+                            localStorage.setItem(
+                                "userEmail",
+                                currentEmail
+                            );
+
+                            document.getElementById(
+                                "loginScreen"
+                            ).style.display = "none";
+
+                            document.getElementById(
+                                "userPanel"
+                            ).style.display = "block";
+
+                            initUserPanel();
+
+                        }, 1200);
+
+                    } else {
+
+                        showError(
+                            data.error ||
+                            "Código inválido.",
+                            "verifyErrorMessage"
+                        );
+                    }
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+                showError(
+                    "Erro ao conectar com o servidor",
+                    "verifyErrorMessage"
+                );
+            }
+        }
+
+
+        async function resendCode() {
+
+            if (!currentEmail) {
+                return;
+            }
+
+            const password = prompt(
+                "Para reenviar o código, confirme sua senha:"
+            );
+
+            if (!password) {
+                return;
+            }
+
+            try {
+
+                const res = await fetch(
+                    "http://localhost:3000/api/auth/login",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email: currentEmail,
+                            password
+                        })
+                    }
+                );
+
+                const data =
+                    await parseResponse(res);
+
+                if (data.success) {
+
+                    showSuccess(
+                        "✓ Código reenviado!",
+                        "verifySuccessMessage"
+                    );
+
+                    clearCodeInputs(
+                        "codeInputContainer"
+                    );
+
+                    startCodeTimer();
+
+                    focusFirstCodeInput(
+                        "codeInputContainer"
+                    );
+
+                } else {
+
+                    showError(
+                        data.error ||
+                        "Não foi possível reenviar o código.",
+                        "verifyErrorMessage"
+                    );
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+                showError(
+                    "Erro ao reenviar código",
+                    "verifyErrorMessage"
+                );
+            }
+        }
+
+
+        function backToAuth() {
+
+            clearInterval(timerInterval);
+
+            timerInterval = null;
+
+            document.getElementById(
+                "authTabs"
+            ).style.display = "flex";
+
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .getElementById("login-content")
+                .classList.add("active");
+
+            document
+                .querySelectorAll(".auth-tab-btn")
+                .forEach(btn => {
+                    btn.classList.remove("active");
+                });
+
+            document
+                .querySelector(".auth-tab-btn")
+                ?.classList.add("active");
+
+            clearErrors();
+
+            clearCodeInputs(
+                "codeInputContainer"
+            );
+        }
+
+
+        /* =====================================================
+           RECUPERAÇÃO DE SENHA
+           ===================================================== */
+
+        async function handleForgotPassword(event) {
+
+            event.preventDefault();
+
+            const btn =
+                event.target.querySelector(".login-btn");
+
+            const originalText =
+                btn.textContent;
+
+            const email =
+                document
+                    .getElementById("forgotEmail")
+                    .value
+                    .trim();
+
+            try {
+
+                btn.disabled = true;
+                btn.textContent = "Enviando...";
+
+                const res = await fetch(
+                    "http://localhost:3000/api/auth/forgot-password",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email
+                        })
+                    }
+                );
+
+                const data =
+                    await parseResponse(res);
+
+                if (res.ok && data.success !== false) {
+
+                    showSuccess(
+                        data.message ||
+                        "Código enviado.",
+                        "forgotSuccessMessage"
+                    );
+
+                    currentEmail = email;
+
+                    setTimeout(() => {
+                        showVerificationForm("reset");
+                    }, 1500);
+
+                } else {
+
+                    showError(
+                        data.error ||
+                        "Não foi possível enviar o código.",
+                        "forgotErrorMessage"
+                    );
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+                showError(
+                    "Erro ao conectar com o servidor",
+                    "forgotErrorMessage"
+                );
+
+            } finally {
+
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+
+        function showResetPasswordForm() {
+
+            clearInterval(timerInterval);
+
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .getElementById("reset-password-content")
+                .classList.add("active");
+        }
+
+
+        async function handleResetPasswordSubmit(event) {
+
+            event.preventDefault();
+
+            const btn =
+                event.target.querySelector(".login-btn");
+
+            const originalText =
+                btn.textContent;
+
+            const newPassword =
+                document
+                    .getElementById("newPassword")
+                    .value;
+
+            const confirmPassword =
+                document
+                    .getElementById("confirmPassword")
+                    .value;
+
+            if (newPassword !== confirmPassword) {
+
+                showError(
+                    "As senhas não coincidem",
+                    "resetPasswordErrorMessage"
+                );
+
+                return;
+            }
+
+            try {
+
+                btn.disabled = true;
+                btn.textContent = "Alterando...";
+
+                const res = await fetch(
+                    "http://localhost:3000/api/auth/reset-password",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email: currentEmail,
+                            code: window.pendingResetCode,
+                            newPassword
+                        })
+                    }
+                );
+
+                const data =
+                    await parseResponse(res);
+
+                if (res.ok && data.success !== false) {
+
+                    showSuccess(
+                        data.message ||
+                        "Senha alterada com sucesso.",
+                        "resetPasswordSuccessMessage"
+                    );
+
+                    setTimeout(() => {
+                        backToAuth();
+                    }, 1500);
+
+                } else {
+
+                    showError(
+                        data.error ||
+                        "Não foi possível alterar a senha.",
+                        "resetPasswordErrorMessage"
+                    );
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+                showError(
+                    "Erro ao conectar com o servidor",
+                    "resetPasswordErrorMessage"
+                );
+
+            } finally {
+
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+
+        /* =====================================================
+           TIMER
+           ===================================================== */
+
+        function startCodeTimer() {
+
+            clearInterval(timerInterval);
+
+            let remainingTime = 300;
+
+            const updateTimer = () => {
+
+                const minutes =
+                    Math.floor(remainingTime / 60);
+
+                const seconds =
+                    remainingTime % 60;
+
+                const timerEl =
+                    document.getElementById("timer");
+
+                if (timerEl) {
+
+                    timerEl.textContent =
+                        `${minutes
+                            .toString()
+                            .padStart(2, "0")
+                        }:${
+                            seconds
+                                .toString()
+                                .padStart(2, "0")
+                        }`;
+                }
+
+                if (remainingTime <= 0) {
+
+                    clearInterval(timerInterval);
+
+                    showError(
+                        "Código expirado. Solicite um novo.",
+                        "verifyErrorMessage"
+                    );
+
+                } else {
+
+                    remainingTime--;
+                }
+            };
+
+            updateTimer();
+
+            timerInterval =
+                setInterval(updateTimer, 1000);
+        }
+
+
+        function clearCodeInputs(containerId) {
+
+            const container =
+                document.getElementById(containerId);
+
+            if (!container) {
+                return;
+            }
+
+            container
+                .querySelectorAll(".code-digit")
+                .forEach(input => {
+                    input.value = "";
+                });
+        }
+
+
+        function focusFirstCodeInput(containerId) {
+
+            const container =
+                document.getElementById(containerId);
+
+            if (!container) {
+                return;
+            }
+
+            const first =
+                container.querySelector(".code-digit");
+
+            if (first) {
+                first.focus();
+            }
+        }
+
+
+        document.addEventListener(
+            "input",
+            event => {
+
+                if (
+                    event.target.classList.contains(
+                        "code-digit"
+                    )
+                ) {
+
+                    event.target.value =
+                        event.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 1);
+
+                    if (
+                        event.target.value.length === 1
+                    ) {
+
+                        const nextInput =
+                            event.target
+                                .nextElementSibling;
+
+                        if (
+                            nextInput &&
+                            nextInput.classList.contains(
+                                "code-digit"
+                            )
+                        ) {
+                            nextInput.focus();
+                        }
+                    }
+                }
+            }
+        );
+
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.target.classList.contains(
+                        "code-digit"
+                    ) &&
+                    event.key === "Backspace" &&
+                    event.target.value === ""
+                ) {
+
+                    const prevInput =
+                        event.target
+                            .previousElementSibling;
+
+                    if (
+                        prevInput &&
+                        prevInput.classList.contains(
+                            "code-digit"
+                        )
+                    ) {
+                        prevInput.focus();
+                    }
+                }
+            }
+        );
+
+
+        /* =====================================================
+           MENSAGENS
+           ===================================================== */
+
+        function showError(
+            message,
+            elementId = "errorMessage"
+        ) {
+
+            const errorEl =
+                document.getElementById(elementId);
+
+            if (!errorEl) {
+                return;
+            }
+
+            errorEl.textContent =
+                message || "Ocorreu um erro.";
+
+            errorEl.style.display =
+                "block";
+
+            setTimeout(() => {
+
+                errorEl.style.display =
+                    "none";
+
+            }, 5000);
+        }
+
+
+        function showSuccess(
+            message,
+            elementId = "successMessage"
+        ) {
+
+            const successEl =
+                document.getElementById(elementId);
+
+            if (!successEl) {
+                return;
+            }
+
+            successEl.textContent =
+                message ||
+                "Operação realizada com sucesso.";
+
+            successEl.style.display =
+                "block";
+
+            setTimeout(() => {
+
+                successEl.style.display =
+                    "none";
+
+            }, 5000);
+        }
+
+
+        function clearErrors() {
+
+            const ids = [
+                "errorMessage",
+                "successMessage",
+                "registerErrorMessage",
+                "registerSuccessMessage",
+                "forgotErrorMessage",
+                "forgotSuccessMessage",
+                "verifyErrorMessage",
+                "verifySuccessMessage",
+                "resetPasswordErrorMessage",
+                "resetPasswordSuccessMessage",
+                "ticketSuccessMessage",
+                "ticketErrorMessage"
+            ];
+
+            ids.forEach(id => {
+
+                const el =
+                    document.getElementById(id);
+
+                if (el) {
+                    el.style.display = "none";
+                }
+            });
+        }
+
+
+        /* =====================================================
+           PAINEL DO USUÁRIO
+           ===================================================== */
+
+        function initUserPanel() {
+
+            const email =
+                localStorage.getItem("userEmail");
+
+            if (!email) {
+                return;
+            }
+
+            document.getElementById(
+                "welcomeUser"
+            ).textContent =
+                `Olá, ${email}`;
+
+            document.getElementById(
+                "email"
+            ).value = email;
+
+            loadProfile();
+            loadTickets();
+
+            if (!socket) {
+
+                socket =
+                    io("http://localhost:3000");
+
+                socket.emit(
+                    "identify",
+                    {
+                        email
+                    }
+                );
+
+                socket.on(
+                    "ticket-message",
+                    data => {
+
+                        if (
+                            activeTicketId ===
+                            data.ticketId
+                        ) {
+
+                            appendMessage(
+                                data.message
+                            );
+                        }
+                    }
+                );
+            }
+        }
+
+
+        function logout() {
+
+            localStorage.removeItem(
+                "userLoggedIn"
+            );
+
+            localStorage.removeItem(
+                "userToken"
+            );
+
+            localStorage.removeItem(
+                "userEmail"
+            );
+
+            clearInterval(
+                timerInterval
+            );
+
+            if (socket) {
+
+                socket.disconnect();
+
+                socket = null;
+            }
+
+            activeTicketId = null;
+
+            selectedFile = null;
+
+            document.getElementById(
+                "userPanel"
+            ).style.display = "none";
+
+            document.getElementById(
+                "loginScreen"
+            ).style.display = "flex";
+
+            document.getElementById(
+                "authTabs"
+            ).style.display = "flex";
+
+            document
+                .querySelectorAll(".auth-content")
+                .forEach(content => {
+                    content.classList.remove("active");
+                });
+
+            document
+                .getElementById("login-content")
+                .classList.add("active");
+
+            document
+                .querySelectorAll(".auth-tab-btn")
+                .forEach(btn => {
+                    btn.classList.remove("active");
+                });
+
+            document
+                .querySelector(".auth-tab-btn")
+                ?.classList.add("active");
+
+            clearErrors();
+        }
+
+
+        /* =====================================================
+           ABAS
+           ===================================================== */
+
+        function switchTab(
+            event,
+            tabName
+        ) {
+
+            document
+                .querySelectorAll(".tab-content")
+                .forEach(tab => {
+                    tab.classList.remove("active");
+                });
+
+            document
+                .querySelectorAll(".tab-button")
+                .forEach(btn => {
+                    btn.classList.remove("active");
+                });
+
+            document
+                .getElementById(tabName)
+                .classList.add("active");
+
+            event.currentTarget.classList.add("active");
+
+            if (tabName === "meus-tickets") {
+                loadTickets();
+            }
+
+            if (tabName === "conversas") {
+                loadChats();
+            }
+        }
+
+
+        /* =====================================================
+           FAQ
+           ===================================================== */
+
+        function toggleFaq(element) {
+
+            const faqItem =
+                element.parentElement;
+
+            faqItem.classList.toggle("active");
+        }
+
+
+        /* =====================================================
+           CRIAR TICKET
+           ===================================================== */
+
+        async function submitTicket(event) {
+
+            event.preventDefault();
+
+            const form =
+                document.getElementById(
+                    "ticketForm"
+                );
+
+            const button =
+                document.getElementById(
+                    "submitTicketButton"
+                );
+
+            const successMessage =
+                document.getElementById(
+                    "ticketSuccessMessage"
+                );
+
+            const errorMessage =
+                document.getElementById(
+                    "ticketErrorMessage"
+                );
+
+            const ticketId =
+                document.getElementById(
+                    "ticketId"
+                );
+
+            /* Limpa mensagens anteriores */
+
+            successMessage.style.display =
+                "none";
+
+            errorMessage.style.display =
+                "none";
+
+            /* Pega os dados do formulário */
+
+            const formData = {
+
+                name:
+                    document
+                        .getElementById("name")
+                        .value
+                        .trim(),
+
+                email:
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim(),
+
+                category:
+                    document
+                        .getElementById("category")
+                        .value,
+
+                project:
+                    document
+                        .getElementById("project")
+                        .value
+                        .trim(),
+
+                title:
+                    document
+                        .getElementById("title")
+                        .value
+                        .trim(),
+
+                description:
+                    document
+                        .getElementById("description")
+                        .value
+                        .trim()
+            };
+
+            /* Validação */
+
+            if (
+                !formData.name ||
+                !formData.email ||
+                !formData.category ||
+                !formData.project ||
+                !formData.title ||
+                !formData.description
+            ) {
+
+                errorMessage.textContent =
+                    "Preencha todos os campos obrigatórios.";
+
+                errorMessage.style.display =
+                    "block";
+
+                return;
+            }
+
+            try {
+
+                /* Bloqueia o botão durante o envio */
+
+                button.disabled = true;
+
+                button.textContent =
+                    "⏳ Enviando ticket...";
+
+                const res = await fetch(
+                    "http://localhost:3000/api/tickets/create",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Authorization":
+                                localStorage.getItem(
+                                    "userToken"
+                                ) || ""
+                        },
+
+                        body:
+                            JSON.stringify(
+                                formData
+                            )
+                    }
+                );
+
+                const data =
+                    await parseResponse(res);
+
+                console.log(
+                    "Resposta do servidor ao criar ticket:",
+                    data
+                );
+
+                /* =================================================
+                   SUCESSO
+                   ================================================= */
+
+                if (
+                    res.ok &&
+                    data.success === true
+                ) {
+
+                    const generatedTicketId =
+                        data.ticket?.id ||
+                        data.ticketId ||
+                        data.id ||
+                        "Gerado com sucesso";
+
+                    ticketId.textContent =
+                        generatedTicketId;
+
+                    successMessage.style.display =
+                        "block";
+
+                    errorMessage.style.display =
+                        "none";
+
+                    /*
+                     * Limpa os campos
+                     */
+
+                    form.reset();
+
+                    /*
+                     * Mantém o email da conta
+                     */
+
+                    document.getElementById(
+                        "email"
+                    ).value =
+                        localStorage.getItem(
+                            "userEmail"
+                        ) ||
+                        formData.email;
+
+                    /*
+                     * Atualiza os tickets
+                     */
+
+                    await loadTickets();
+
+                    /*
+                     * Volta para o topo do formulário
+                     */
+
+                    window.scrollTo({
+                        top: 0,
+                        behavior: "smooth"
+                    });
+
+                    /*
+                     * Mantém a mensagem visível
+                     * por 8 segundos
+                     */
+
+                    setTimeout(() => {
+
+                        successMessage.style.display =
+                            "none";
+
+                    }, 8000);
+
+                } else {
+
+                    /*
+                     * Se o backend retornar erro,
+                     * mostra a mensagem real.
+                     */
+
+                    const serverError =
+                        data.error ||
+                        data.message ||
+                        `O servidor recusou o ticket. Código HTTP: ${res.status}`;
+
+                    errorMessage.textContent =
+                        "❌ " + serverError;
+
+                    errorMessage.style.display =
+                        "block";
+                }
+
+            } catch (err) {
+
+                console.error(
+                    "Erro ao enviar ticket:",
+                    err
+                );
+
+                errorMessage.textContent =
+                    "❌ Não foi possível conectar ao servidor. Verifique se o backend está rodando em http://localhost:3000.";
+
+                errorMessage.style.display =
+                    "block";
+
+            } finally {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "📤 Enviar Ticket";
+            }
+        }
+
+
+        /* =====================================================
+           PERFIL E CONFIGURAÇÕES
+           ===================================================== */
+
+        async function loadProfile() {
+            const email = localStorage.getItem("userEmail");
+            const token = localStorage.getItem("userToken");
+            if (!email || !token) return;
+
+            try {
+                const res = await fetch(`http://localhost:3000/api/user/profile?email=${encodeURIComponent(email)}`, {
+                    headers: { 'Authorization': token }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const p = data.profile;
+                    document.getElementById('profileImg').src = p.profileImage;
+                    document.getElementById('profileName').value = p.name;
+                    document.getElementById('profileUsername').value = p.username;
+                }
+
+                // Carregar sessões
+                const sessionRes = await fetch(`http://localhost:3000/api/user/sessions?email=${encodeURIComponent(email)}`, {
+                    headers: { 'Authorization': token }
+                });
+                const sessionData = await sessionRes.json();
+                const sessionsList = document.getElementById('sessionsList');
+                if (sessionData.success) {
+                    sessionsList.innerHTML = sessionData.sessions.map(s => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem;">
+                            <div>
+                                <div style="font-weight:600; color:${s.current ? 'var(--accent)' : 'var(--text-main)'}">
+                                    ${s.current ? '📍 Esta Sessão' : '📱 Outro Dispositivo'}
+                                </div>
+                                <div style="color:var(--text-muted); font-size:0.7rem;">${s.userAgent}</div>
+                                <div style="color:var(--text-muted); font-size:0.7rem;">${s.ip} • ${new Date(s.loginAt).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    `).join('') || '<p style="color:var(--text-muted); font-size:0.8rem;">Nenhuma sessão ativa.</p>';
+                }
+            } catch (err) {
+                console.error('Erro ao carregar perfil:', err);
+            }
+        }
+
+        async function saveProfile() {
+            const email = localStorage.getItem("userEmail");
+            const token = localStorage.getItem("userToken");
+            const name = document.getElementById('profileName').value.trim();
+            const username = document.getElementById('profileUsername').value.trim();
+            const profileImage = document.getElementById('profileImg').src;
+
+            try {
+                const res = await fetch(`http://localhost:3000/api/user/profile?email=${encodeURIComponent(email)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({ name, username, profileImage })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Perfil atualizado com sucesso!');
+                }
+            } catch (err) {
+                alert('Erro ao salvar perfil.');
+            }
+        }
+
+        async function updateProfileImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileImg').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function revokeAllSessions() {
+            if (!confirm('Deseja realmente encerrar todas as sessões? Você será deslogado de todos os aparelhos.')) return;
+            const email = localStorage.getItem("userEmail");
+            const token = localStorage.getItem("userToken");
+
+            try {
+                const res = await fetch(`http://localhost:3000/api/user/sessions/revoke-all?email=${encodeURIComponent(email)}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': token }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Todas as sessões foram encerradas. Fazendo logout...');
+                    logout();
+                }
+            } catch (err) {
+                alert('Erro ao encerrar sessões.');
+            }
+        }
+
+        async function deleteAccount() {
+            if (!confirm('⚠️ ATENÇÃO: Esta ação é irreversível. Todos os seus dados e tickets serão apagados permanentemente. Tem certeza?')) return;
+            const email = localStorage.getItem("userEmail");
+            const token = localStorage.getItem("userToken");
+
+            try {
+                const res = await fetch(`http://localhost:3000/api/user/account?email=${encodeURIComponent(email)}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': token }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Sua conta foi excluída com sucesso.');
+                    logout();
+                }
+            } catch (err) {
+                alert('Erro ao excluir conta.');
+            }
+        }
+
+        /* =====================================================
+           TICKETS
+           ===================================================== */
+
+        async function loadTickets() {
+
+            const email =
+                localStorage.getItem(
+                    "userEmail"
+                );
+
+            if (!email) {
+                return;
+            }
+
+            try {
+
+                const res = await fetch(
+                    "http://localhost:3000/api/tickets"
+                );
+
+                const tickets =
+                    await res.json();
+
+                const userTickets =
+                    tickets.filter(
+                        ticket =>
+                            ticket.email === email
+                    );
+
+                const ticketsList =
+                    document.getElementById(
+                        "ticketsList"
+                    );
+
+                if (userTickets.length === 0) {
+
+                    ticketsList.innerHTML = `
+                        <div style="
+                            text-align:center;
+                            color:rgba(255,255,255,0.5);
+                            grid-column:1/-1;
+                            padding:30px;
+                        ">
+                            Nenhum ticket encontrado para sua conta.
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                ticketsList.innerHTML = "";
+
+                // Agrupar tickets por categoria
+                const categories = {};
+                userTickets.forEach(ticket => {
+                    const cat = ticket.category || 'Outros';
+                    if (!categories[cat]) {
+                        categories[cat] = [];
+                    }
+                    categories[cat].push(ticket);
+                });
+
+                // Renderizar cada categoria
+                for (const [category, ticketsInCat] of Object.entries(categories)) {
+                    const categorySection = document.createElement('div');
+                    categorySection.style.gridColumn = '1 / -1';
+                    categorySection.style.marginBottom = '20px';
+
+                    const categoryTitle = document.createElement('h3');
+                    categoryTitle.style.color = 'var(--accent)';
+                    categoryTitle.style.fontSize = '1.1rem';
+                    categoryTitle.style.marginBottom = '10px';
+                    categoryTitle.style.paddingLeft = '5px';
+                    categoryTitle.style.borderLeft = '3px solid var(--accent)';
+                    categoryTitle.style.display = 'flex';
+                    categoryTitle.style.alignItems = 'center';
+                    categoryTitle.style.gap = '10px';
+
+                    const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+                    categoryTitle.innerHTML = `${categoryName} <span style="background: red; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 800;">${ticketsInCat.length}</span>`;
+
+                    categorySection.appendChild(categoryTitle);
+
+                    const categoryGrid = document.createElement('div');
+                    categoryGrid.style.display = 'grid';
+                    categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+                    categoryGrid.style.gap = '17px';
+                    categoryGrid.style.marginBottom = '30px';
+
+                    ticketsInCat.forEach(ticket => {
+                        const statusClass =
+                            `status-${ticket.status}`;
+                        const statusText =
+                            ticket.status === "open"
+                                ? "🟢 Pendente"
+                                : ticket.status === "pending"
+                                    ? "⏳ Em Andamento"
+                                    : "📜 Transcript";
+                        const ticketDiv =
+                            document.createElement(
+                                "div"
+                            );
+                        ticketDiv.className =
+                            "ticket";
+                        ticketDiv.innerHTML = `
+                            <div class="ticket-header">
+                                <span class="ticket-id">
+                                    #${escapeHTML(ticket.id)}
+                                </span>
+                                <span class="ticket-status ${statusClass}">
+                                    ${statusText}
+                                </span>
+                            </div>
+                            <div class="ticket-title">
+                                ${escapeHTML(ticket.title)}
+                            </div>
+                            <div class="ticket-desc">
+                                ${escapeHTML(ticket.description)}
+                            </div>
+                            <div class="ticket-date">
+                                Criado em:
+                                ${escapeHTML(ticket.createdAt)}
+                            </div>
+                            <div class="ticket-actions">
+                                <button
+                                    class="chat-btn"
+                                    onclick="openChat('${escapeHTML(ticket.id)}')"
+                                >
+                                    ${ticket.status === "closed" ? "📜 Transcript" : "💬 Conversar"}
+                                </button>
+                            </div>
+                        `;
+                        categoryGrid.appendChild(
+                            ticketDiv
+                        );
+                    });
+
+                    categorySection.appendChild(categoryGrid);
+                    ticketsList.appendChild(
+                        categorySection
+                    );
+                }
+
+            } catch (err) {
+
+                console.error(
+                    "Erro ao carregar tickets:",
+                    err
+                );
+            }
+        }
+
+
+        /* =====================================================
+           CONVERSAS
+           ===================================================== */
+
+        async function loadChats() {
+
+            const email =
+                localStorage.getItem(
+                    "userEmail"
+                );
+
+            if (!email) {
+                return;
+            }
+
+            try {
+
+                const res = await fetch(
+                    "http://localhost:3000/api/tickets"
+                );
+
+                const tickets =
+                    await res.json();
+
+                const userTickets =
+                    tickets.filter(
+                        ticket =>
+                            ticket.email === email
+                    );
+
+                const chatsList =
+                    document.getElementById(
+                        "chatsList"
+                    );
+
+                if (userTickets.length === 0) {
+
+                    chatsList.innerHTML = `
+                        <div style="
+                            text-align:center;
+                            color:rgba(255,255,255,0.5);
+                            grid-column:1/-1;
+                            padding:30px;
+                        ">
+                            Você ainda não possui conversas.
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                chatsList.innerHTML = "";
+
+                userTickets.forEach(ticket => {
+
+                    const ticketDiv =
+                        document.createElement(
+                            "div"
+                        );
+
+                    ticketDiv.className =
+                        "ticket";
+
+                    ticketDiv.innerHTML = `
+
+                        <div class="ticket-header">
+
+                            <span class="ticket-id">
+                                #${escapeHTML(ticket.id)}
+                            </span>
+
+                            <span class="ticket-status status-pending">
+                                💬 Conversa
+                            </span>
+
+                        </div>
+
+                        <div class="ticket-title">
+                            ${escapeHTML(ticket.title)}
+                        </div>
+
+                        <div class="ticket-date">
+                            Última atualização:
+                            ${escapeHTML(ticket.createdAt)}
+                        </div>
+
+                        <div class="ticket-actions">
+
+                            <button
+                                class="chat-btn"
+                                onclick="openChat('${escapeHTML(ticket.id)}')"
+                            >
+                                Abrir Chat
+                            </button>
+
+                        </div>
+                    `;
+
+                    chatsList.appendChild(
+                        ticketDiv
+                    );
+                });
+
+            } catch (err) {
+
+                console.error(
+                    "Erro ao carregar conversas:",
+                    err
+                );
+            }
+        }
+
+
+        /* =====================================================
+           CHAT
+           ===================================================== */
+
+        async function openChat(ticketId) {
+
+            const userEmail =
+                localStorage.getItem(
+                    "userEmail"
+                );
+
+            const token =
+                localStorage.getItem(
+                    "userToken"
+                );
+
+            if (!userEmail || !token) {
+
+                alert(
+                    "Sessão expirada! Faça login novamente."
+                );
+
+                logout();
+
+                return;
+            }
+
+            activeTicketId =
+                ticketId;
+
+            document.getElementById(
+                "chatTitle"
+            ).textContent =
+                `💬 Chat - Ticket #${ticketId}`;
+
+            // Tickets fechados ficam somente para visualização (Transcript)
+            const ticketsRes = await fetch(
+                "http://localhost:3000/api/tickets"
+            );
+            const ticketsData = await ticketsRes.json();
+            const currentTicket = ticketsData.find(t => String(t.id) === String(ticketId));
+            const isClosed = currentTicket && currentTicket.status === "closed";
+
+            document.getElementById("chatInput").disabled = isClosed;
+            document.getElementById("sendChatBtn").disabled = isClosed;
+            document.getElementById("chatInput").placeholder = isClosed
+                ? "Ticket fechado. Apenas Transcript disponível."
+                : "Digite sua mensagem...";
+
+            document.getElementById(
+                "chatModal"
+            ).style.display =
+                "flex";
+
+            document.getElementById(
+                "chatMessages"
+            ).innerHTML = "";
+
+            try {
+
+                const res = await fetch(
+                    `http://localhost:3000/api/tickets/${encodeURIComponent(ticketId)}/messages?email=${encodeURIComponent(userEmail)}`,
+                    {
+                        headers: {
+                            "Authorization":
+                                token
+                        }
+                    }
+                );
+
+                if (res.status === 403) {
+
+                    alert(
+                        "Acesso negado!"
+                    );
+
+                    closeChat();
+
+                    return;
+                }
+
+                const messages =
+                    await res.json();
+
+                messages.forEach(
+                    appendMessage
+                );
+
+            } catch (err) {
+
+                console.error(
+                    "Erro ao carregar mensagens:",
+                    err
+                );
+            }
+        }
+
+
+        function closeChat() {
+
+            document.getElementById(
+                "chatModal"
+            ).style.display =
+                "none";
+
+            activeTicketId = null;
+
+            selectedFile = null;
+
+            document.getElementById(
+                "chatFile"
+            ).value = "";
+
+            document.getElementById(
+                "chatInput"
+            ).value = "";
+        }
+
+
+        /* =====================================================
+           ARQUIVO
+           ===================================================== */
+
+        function handleFileSelect() {
+
+            const file =
+                document.getElementById(
+                    "chatFile"
+                ).files[0];
+
+            if (!file) {
+                return;
+            }
+
+            const reader =
+                new FileReader();
+
+            reader.onload = event => {
+
+                selectedFile = {
+
+                    data:
+                        event.target.result,
+
+                    name:
+                        file.name,
+
+                    type:
+                        file.type
+                };
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+
+        /* =====================================================
+           ENVIAR MENSAGEM
+           ===================================================== */
+
+        async function sendChatMessage() {
+
+            if (document.getElementById("chatInput").disabled) {
+                return;
+            }
+
+            const input =
+                document.getElementById(
+                    "chatInput"
+                );
+
+            const text =
+                input.value.trim();
+
+            if (!text && !selectedFile) {
+                return;
+            }
+
+            const userEmail =
+                localStorage.getItem(
+                    "userEmail"
+                );
+
+            const token =
+                localStorage.getItem(
+                    "userToken"
+                );
+
+            if (!activeTicketId) {
+                return;
+            }
+
+            const messageData = {
+
+                id:
+                    activeTicketId,
+
+                sender:
+                    "user",
+
+                text,
+
+                email:
+                    userEmail,
+
+                file:
+                    selectedFile
+                        ? selectedFile.data
+                        : null,
+
+                fileName:
+                    selectedFile
+                        ? selectedFile.name
+                        : null,
+
+                fileType:
+                    selectedFile
+                        ? selectedFile.type
+                        : null
+            };
+
+            try {
+
+                const res = await fetch(
+                    `http://localhost:3000/api/tickets/${encodeURIComponent(activeTicketId)}/messages`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Authorization":
+                                token
+                        },
+
+                        body:
+                            JSON.stringify(
+                                messageData
+                            )
+                    }
+                );
+
+                if (res.status === 403) {
+
+                    alert(
+                        "Erro de permissão ao enviar mensagem!"
+                    );
+
+                    return;
+                }
+
+                const data =
+                    await res.json();
+
+                if (data.success) {
+
+                    input.value = "";
+
+                    selectedFile = null;
+
+                    document.getElementById(
+                        "chatFile"
+                    ).value = "";
+                }
+
+            } catch (err) {
+
+                console.error(
+                    "Erro ao enviar mensagem:",
+                    err
+                );
+            }
+        }
+
+
+        /* =====================================================
+           EXIBIR MENSAGEM
+           ===================================================== */
+
+        function appendMessage(msg) {
+
+            const container =
+                document.getElementById(
+                    "chatMessages"
+                );
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                `message ${
+                    msg.sender === "admin"
+                        ? "admin"
+                        : "user"
+                }`;
+
+            const info =
+                document.createElement(
+                    "span"
+                );
+
+            info.className =
+                "message-info";
+
+            info.textContent =
+                `${msg.sender === "admin"
+                    ? "Administrador"
+                    : "Você"} • ${
+                        msg.timestamp || ""
+                    }`;
+
+            div.appendChild(
+                info
+            );
+
+            if (msg.text) {
+
+                const textDiv =
+                    document.createElement(
+                        "div"
+                    );
+
+                textDiv.textContent =
+                    msg.text;
+
+                div.appendChild(
+                    textDiv
+                );
+            }
+
+            if (msg.file) {
+
+                if (
+                    msg.fileType &&
+                    msg.fileType.startsWith(
+                        "image/"
+                    )
+                ) {
+
+                    const img =
+                        document.createElement(
+                            "img"
+                        );
+
+                    img.src =
+                        msg.file;
+
+                    img.className =
+                        "message-image";
+
+                    img.onclick =
+                        () =>
+                            window.open(
+                                img.src,
+                                "_blank"
+                            );
+
+                    div.appendChild(
+                        img
+                    );
+
+                } else {
+
+                    const link =
+                        document.createElement(
+                            "a"
+                        );
+
+                    link.href =
+                        msg.file;
+
+                    link.download =
+                        msg.fileName ||
+                        "arquivo";
+
+                    link.className =
+                        "message-file";
+
+                    link.textContent =
+                        `📎 ${
+                            msg.fileName ||
+                            "Arquivo"
+                        }`;
+
+                    div.appendChild(
+                        link
+                    );
+                }
+            }
+
+            container.appendChild(
+                div
+            );
+
+            container.scrollTop =
+                container.scrollHeight;
+        }
+
+
+        /* =====================================================
+           FECHAR CHAT CLICANDO FORA
+           ===================================================== */
+
+        document
+            .getElementById("chatModal")
+            .addEventListener(
+                "click",
+                event => {
+
+                    if (
+                        event.target.id ===
+                        "chatModal"
+                    ) {
+                        closeChat();
+                    }
+                }
+            );
+
+
+        /* =====================================================
+           ESC PARA FECHAR CHAT
+           ===================================================== */
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Escape" &&
+                    activeTicketId
+                ) {
+                    closeChat();
+                }
+            }
+        );
+
+
+        /* =====================================================
+           INICIALIZAÇÃO
+           ===================================================== */
+
+        window.addEventListener(
+            "load",
+            () => {
+
+                if (
+                    localStorage.getItem(
+                        "userLoggedIn"
+                    ) === "true"
+                ) {
+
+                    document.getElementById(
+                        "loginScreen"
+                    ).style.display =
+                        "none";
+
+                    document.getElementById(
+                        "userPanel"
+                    ).style.display =
+                        "block";
+
+                    initUserPanel();
+
+                } else {
+
+                    document.getElementById(
+                        "loginScreen"
+                    ).style.display =
+                        "flex";
+
+                    document.getElementById(
+                        "userPanel"
+                    ).style.display =
+                        "none";
+                }
+            }
+        );
+
+    </script>
+
+</body>
+</html>

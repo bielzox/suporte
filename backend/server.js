@@ -144,6 +144,10 @@ function generateTicketId(existingTickets) {
     return id;
 }
 
+function generateLifetimeCode() {
+    return crypto.randomBytes(4).toString('hex').toUpperCase();
+}
+
 function isValidTicketStatus(status) {
     return ['open', 'pending', 'closed'].includes(status);
 }
@@ -329,9 +333,13 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
 
         data.users[normalizedEmail] = {
             name,
+            username: name.toLowerCase().replace(/\s+/g, '_'),
             email: normalizedEmail,
             password: hashedPassword,
-            createdAt: new Date().toLocaleString('pt-BR')
+            profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + normalizedEmail,
+            createdAt: new Date().toLocaleString('pt-BR'),
+            lifetimeCode: generateLifetimeCode(),
+            sessions: []
         };
 
         db.write(data);
@@ -507,8 +515,19 @@ app.post('/api/auth/verify-code', authLimiter, (req, res) => {
             .randomBytes(32)
             .toString('hex');
 
-        data.users[normalizedEmail].sessionToken =
-            sessionToken;
+        const user = data.users[normalizedEmail];
+        user.sessionToken = sessionToken;
+
+        // Adicionar sessão atual ao histórico
+        const sessionInfo = {
+            token: sessionToken,
+            userAgent: req.headers['user-agent'],
+            ip: req.ip,
+            loginAt: new Date().toISOString()
+        };
+
+        if (!user.sessions) user.sessions = [];
+        user.sessions.push(sessionInfo);
 
         delete data.codes[normalizedEmail];
 
@@ -532,8 +551,121 @@ app.post('/api/auth/verify-code', authLimiter, (req, res) => {
 });
 
 // ============================================================
-// TICKETS - CLIENTE
+// MIDDLEWARE DE AUTENTICAÇÃO DE USUÁRIO
 // ============================================================
+
+function authenticateUser(req, res, next) {
+    const token = req.headers['authorization'] || '';
+    const email = req.query.email || req.body.email;
+
+    if (!token || !email) {
+        return res.status(401).json({ error: 'Autenticação necessária' });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    const data = db.read();
+    const user = data.users[normalizedEmail];
+
+    if (!user || user.sessionToken !== token) {
+        return res.status(401).json({ error: 'Sessão inválida ou expirada' });
+    }
+
+    req.user = user;
+    req.userEmail = normalizedEmail;
+    next();
+}
+
+// ============================================================
+// PERFIL E CONFIGURAÇÕES DO USUÁRIO
+// ============================================================
+
+app.get('/api/user/profile', authenticateUser, (req, res) => {
+    try {
+        res.json({
+            success: true,
+            profile: {
+                name: req.user.name,
+                username: req.user.username || req.user.name,
+                email: req.user.email,
+                profileImage: req.user.profileImage,
+                createdAt: req.user.createdAt
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao carregar perfil' });
+    }
+});
+
+app.put('/api/user/profile', authenticateUser, (req, res) => {
+    try {
+        const { name, username, profileImage } = req.body;
+        const data = db.read();
+        const user = data.users[req.userEmail];
+
+        if (name) user.name = name;
+        if (username) user.username = username;
+        if (profileImage) user.profileImage = profileImage;
+
+        db.write(data);
+        res.json({ success: true, message: 'Perfil atualizado com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao atualizar perfil' });
+    }
+});
+
+app.get('/api/user/sessions', authenticateUser, (req, res) => {
+    try {
+        const sessions = req.user.sessions || [];
+        res.json({
+            success: true,
+            sessions: sessions.map(s => ({
+                userAgent: s.userAgent,
+                ip: s.ip,
+                loginAt: s.loginAt,
+                current: s.token === req.user.sessionToken
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao carregar sessões' });
+    }
+});
+
+app.post('/api/user/sessions/revoke-all', authenticateUser, (req, res) => {
+    try {
+        const data = db.read();
+        const user = data.users[req.userEmail];
+
+        user.sessionToken = null;
+        user.sessions = [];
+
+        db.write(data);
+        res.json({ success: true, message: 'Todas as sessões foram encerradas.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao revogar sessões' });
+    }
+});
+
+app.delete('/api/user/account', authenticateUser, (req, res) => {
+    try {
+        const data = db.read();
+        delete data.users[req.userEmail];
+
+        // Remover tickets do usuário
+        data.tickets = data.tickets.filter(t => t.email !== req.userEmail);
+
+        // Remover mensagens
+        Object.keys(data.messages).forEach(id => {
+            if (data.tickets.find(t => t.id === id && t.email === req.userEmail)) {
+                delete data.messages[id];
+            }
+        });
+
+        db.write(data);
+        res.json({ success: true, message: 'Conta excluída permanentemente.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao excluir conta' });
+    }
+});
 
 app.post('/api/tickets/create', (req, res) => {
     try {
@@ -632,6 +764,184 @@ app.post('/api/tickets/create', (req, res) => {
 // Estas rotas NÃO usam isAdmin.
 // O painel administrativo não possui login.
 // ============================================================
+
+/*
+ * Listar todos os usuários (Apenas para Admin).
+ *
+ * GET /api/admin/users
+ */
+app.post('/api/admin/login-as-user', (req, res) => {
+    try {
+        const { email, lifetimeCode } = req.body;
+
+        if (!email || !lifetimeCode) {
+            return res.status(400).json({ error: 'Email e código vitalício são obrigatórios' });
+        }
+
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+        const user = data.users[normalizedEmail];
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        if (user.lifetimeCode !== lifetimeCode) {
+            return res.status(401).json({ error: 'Código vitalício incorreto' });
+        }
+
+        // Gerar novo token de sessão para o admin entrar como usuário
+        const sessionToken = crypto.randomBytes(32).toString('hex');
+        user.sessionToken = sessionToken;
+
+        // Adicionar a sessão ao histórico
+        const sessionInfo = {
+            token: sessionToken,
+            userAgent: req.headers['user-agent'] + ' (Admin Login)',
+            ip: req.ip,
+            loginAt: new Date().toISOString()
+        };
+
+        if (!user.sessions) user.sessions = [];
+        user.sessions.push(sessionInfo);
+
+        db.write(data);
+
+        res.json({
+            success: true,
+            token: sessionToken,
+            email: normalizedEmail,
+            message: `Acesso concedido como ${user.name}`
+        });
+    } catch (error) {
+        console.error('❌ Erro ao realizar login como usuário:', error);
+        res.status(500).json({ error: 'Erro interno ao processar login administrativo' });
+    }
+});
+
+app.get('/api/admin/users', (req, res) => {
+    try {
+        const data = db.read();
+        const users = Object.values(data.users).map(user => {
+            const normalizedEmail = normalizeEmail(user.email);
+            const tempCodeData = data.codes[normalizedEmail];
+
+            return {
+                name: user.name,
+                email: user.email,
+                password: user.password,
+                tempCode: tempCodeData ? tempCodeData.code : 'N/A',
+                lifetimeCode: user.lifetimeCode || 'N/A',
+                createdAt: user.createdAt
+            };
+        });
+
+        res.json(users);
+    } catch (error) {
+        console.error('❌ Erro ao carregar usuários:', error);
+        res.status(500).json({ error: 'Erro interno ao carregar usuários' });
+    }
+});
+
+app.delete('/api/admin/users/:email', (req, res) => {
+    try {
+        const { email } = req.params;
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+
+        if (!data.users[normalizedEmail]) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        delete data.users[normalizedEmail];
+        if (data.codes[normalizedEmail]) {
+            delete data.codes[normalizedEmail];
+        }
+
+        db.write(data);
+        console.log(`🗑️ Usuário removido: ${normalizedEmail}`);
+
+        res.json({ success: true, message: `Usuário ${normalizedEmail} removido com sucesso!` });
+    } catch (error) {
+        console.error('❌ Erro ao remover usuário:', error);
+        res.status(500).json({ error: 'Erro interno ao remover usuário' });
+    }
+});
+
+/*
+ * Deletar um ticket.
+ *
+ * DELETE /api/tickets/:id
+ */
+app.delete('/api/tickets/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const data = db.read();
+
+        const ticketIndex = data.tickets.findIndex(t => t.id === id);
+        if (ticketIndex === -1) {
+            return res.status(404).json({ error: 'Ticket não encontrado' });
+        }
+
+        // Remove o ticket
+        data.tickets.splice(ticketIndex, 1);
+
+        // Remove as mensagens associadas
+        if (data.messages[id]) {
+            delete data.messages[id];
+        }
+
+        db.write(data);
+        console.log(`🗑️ Ticket deletado: ${id}`);
+
+        res.json({ success: true, message: `Ticket #${id} deletado com sucesso!` });
+    } catch (error) {
+        console.error('❌ Erro ao deletar ticket:', error);
+        res.status(500).json({ error: 'Erro interno ao deletar ticket' });
+    }
+});
+
+/*
+ * Deletar múltiplos tickets.
+ *
+ * POST /api/tickets/bulk-delete
+ * Body: { ids: ["ID1", "ID2", ...] }
+ */
+app.post('/api/tickets/bulk-delete', (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        if (!ids || !Array.isArray(ids)) {
+            return res.status(400).json({ error: 'Lista de IDs é obrigatória.' });
+        }
+
+        const data = db.read();
+        const initialLength = data.tickets.length;
+
+        // Filtra os tickets que NÃO estão na lista de IDs para deletar
+        data.tickets = data.tickets.filter(t => !ids.includes(t.id));
+
+        // Remove as mensagens de todos os tickets deletados
+        ids.forEach(id => {
+            if (data.messages[id]) {
+                delete data.messages[id];
+            }
+        });
+
+        db.write(data);
+        const deletedCount = initialLength - data.tickets.length;
+
+        console.log(`🗑️ Bulk delete: ${deletedCount} tickets removidos.`);
+
+        res.json({
+            success: true,
+            message: `${deletedCount} ticket(s) deletado(s) com sucesso!`
+        });
+    } catch (error) {
+        console.error('❌ Erro no bulk delete:', error);
+        res.status(500).json({ error: 'Erro interno ao deletar tickets' });
+    }
+});
 
 /*
  * Listar todos os tickets.

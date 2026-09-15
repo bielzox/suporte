@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Painel Admin - Suporte</title>
+    <title>Painel Admin</title>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
@@ -27,15 +27,17 @@
             --text-muted: #94a3b8;
 
             --border: rgba(255, 255, 255, 0.1);
-
             --glass: blur(20px);
-
             --shadow:
                 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-
             --transition:
                 all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Checkbox & Bulk Actions */
+            --checkbox-bg: rgba(255, 255, 255, 0.05);
+            --checkbox-accent: var(--accent);
         }
+
 
         * {
             margin: 0;
@@ -725,6 +727,69 @@
                 rgba(248, 113, 113, 0.2);
         }
 
+        /* Bulk Actions Styling */
+        .bulk-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            backdrop-filter: var(--glass);
+        }
+
+        .bulk-actions label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .bulk-actions input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .btn-delete-selected {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            color: #fca5a5;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .btn-delete-selected:hover {
+            background: rgba(248, 113, 113, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 0 10px rgba(248, 113, 113, 0.2);
+        }
+
+        .ticket-checkbox-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 2;
+        }
+
+        .ticket-checkbox-container input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+
         /* ================================
            EMPTY
         ================================= */
@@ -1379,6 +1444,14 @@
                 >
                     📁 Fechados
                 </button>
+                <button
+                    class="nav-btn"
+                    type="button"
+                    data-section="users"
+                    onclick="switchAdminSection('users', this)"
+                >
+                    👥 Usuários
+                </button>
 
             </div>
 
@@ -1488,11 +1561,20 @@
                         </span>
 
                     </h2>
-
+                    <div class="bulk-actions">
+                        <label>
+                            <input type="checkbox" id="selectAllNew" onclick="toggleSelectAll('newTicketsContainer', this)">
+                            Selecionar Todos
+                        </label>
+                        <button class="btn-delete-selected" onclick="deleteSelectedTickets('newTicketsContainer')">
+                            🗑️ Apagar Selecionados
+                        </button>
+                    </div>
                     <div
                         class="tickets-grid"
                         id="newTicketsContainer"
                     >
+
 
                         <div class="loading-state">
 
@@ -1523,11 +1605,20 @@
                     <h2 class="section-title">
                         💬 Todas as Conversas
                     </h2>
-
+                    <div class="bulk-actions">
+                        <label>
+                            <input type="checkbox" id="selectAllChats" onclick="toggleSelectAll('adminChatsContainer', this)">
+                            Selecionar Todos
+                        </label>
+                        <button class="btn-delete-selected" onclick="deleteSelectedTickets('adminChatsContainer')">
+                            🗑️ Apagar Selecionados
+                        </button>
+                    </div>
                     <div
                         class="tickets-grid"
                         id="adminChatsContainer"
                     >
+
 
                         <div class="empty-state">
 
@@ -1560,11 +1651,20 @@
                     <h2 class="section-title">
                         📁 Tickets Fechados
                     </h2>
-
+                    <div class="bulk-actions">
+                        <label>
+                            <input type="checkbox" id="selectAllClosed" onclick="toggleSelectAll('adminClosedContainer', this)">
+                            Selecionar Todos
+                        </label>
+                        <button class="btn-delete-selected" onclick="deleteSelectedTickets('adminClosedContainer')">
+                            🗑️ Apagar Selecionados
+                        </button>
+                    </div>
                     <div
                         class="tickets-grid"
                         id="adminClosedContainer"
                     >
+
 
                         <div class="empty-state">
 
@@ -1588,6 +1688,30 @@
 
     </div>
 
+
+    <!-- USERS -->
+
+    <div
+        id="users"
+        class="admin-section"
+    >
+
+        <div class="section">
+
+            <h2 class="section-title">
+                👥 Lista de Usuários e Códigos Vitalícios
+            </h2>
+
+            <div class="tickets-grid" id="adminUsersContainer">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Carregando usuários...</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
 
     <!-- CHAT MODAL -->
 
@@ -2045,6 +2169,9 @@
 
             }
 
+            if (sectionId === 'users') {
+                renderUsers();
+            }
         }
 
 
@@ -2390,6 +2517,9 @@
 
                             return `
                                 <div class="ticket-card new">
+                                    <div class="ticket-checkbox-container">
+                                        <input type="checkbox" class="ticket-checkbox" value="${ticketId}">
+                                    </div>
 
                                     <div class="ticket-header">
 
@@ -2516,6 +2646,15 @@
                                         >
                                             💬 Conversar
                                         </button>
+
+                                        <button
+                                            class="action-btn close-ticket"
+                                            type="button"
+                                            onclick="deleteTicket('${ticketId}')"
+                                        >
+                                            🗑️ Apagar
+                                        </button>
+
 
                                     </div>
 
@@ -2687,6 +2826,9 @@
 
                             return `
                                 <div class="ticket-card">
+                                    <div class="ticket-checkbox-container">
+                                        <input type="checkbox" class="ticket-checkbox" value="${id}">
+                                    </div>
 
                                     <div class="ticket-header">
 
@@ -2760,6 +2902,15 @@
                                         >
                                             💬 Abrir Chat
                                         </button>
+
+                                        <button
+                                            class="action-btn close-ticket"
+                                            type="button"
+                                            onclick="deleteTicket('${id}')"
+                                        >
+                                            🗑️ Apagar
+                                        </button>
+
 
                                     </div>
 
@@ -2847,6 +2998,9 @@
 
                             return `
                                 <div class="ticket-card">
+                                    <div class="ticket-checkbox-container">
+                                        <input type="checkbox" class="ticket-checkbox" value="${id}">
+                                    </div>
 
                                     <div class="ticket-header">
 
@@ -2980,6 +3134,12 @@
 
             }
 
+            if (
+                activeSection.id ===
+                'users'
+            ) {
+                await renderUsers();
+            }
         }
 
 
@@ -4243,6 +4403,138 @@
 
 
         /* =====================================================
+           RENDERIZAR USUÁRIOS
+        ===================================================== */
+
+        async function renderUsers() {
+            const container = document.getElementById('adminUsersContainer');
+            if (!container) return;
+
+            try {
+                const response = await apiFetch('/api/admin/users');
+                if (!response || !response.ok) throw new Error('Erro ao carregar usuários');
+
+                const users = await response.json();
+
+                if (!users || users.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <p>Nenhum usuário registrado no sistema.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = users.map(user => `
+                    <div class="ticket-card" style="border-left: 4px solid var(--accent);">
+                        <div class="ticket-header">
+                            <span class="ticket-status status-open">Usuário Ativo</span>
+                            <div style="display:flex; gap:8px;">
+                                <button
+                                    class="action-btn"
+                                    style="padding: 4px 10px; font-size: 0.7rem; background: rgba(74, 222, 128, 0.1); color: var(--accent); border-color: rgba(74, 222, 128, 0.3);"
+                                    onclick="loginAsUser('${escapeHTML(user.email)}', '${escapeHTML(user.lifetimeCode)}')"
+                                >
+                                    🔑 Entrar como Usuário
+                                </button>
+                                <button
+                                    class="action-btn close-ticket"
+                                    style="padding: 4px 10px; font-size: 0.7rem;"
+                                    onclick="removeUser('${escapeHTML(user.email)}')"
+                                >
+                                    🗑️ Remover Registro
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ticket-title" style="font-size: 1.4rem; margin-bottom: 15px;">
+                            👤 ${escapeHTML(user.name)}
+                        </div>
+                        <div class="ticket-info">
+                            <div class="ticket-info-item">
+                                <div class="ticket-info-label">Email</div>
+                                <div style="word-break: break-all; font-weight: 500;">${escapeHTML(user.email)}</div>
+                            </div>
+                            <div class="ticket-info-item">
+                                <div class="ticket-info-label">Senha (Hashed)</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; opacity: 0.8;">${escapeHTML(user.password)}</div>
+                            </div>
+                            <div class="ticket-info-item">
+                                <div class="ticket-info-label">Código Temp (5min)</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--warning);">
+                                    ${escapeHTML(user.tempCode)}
+                                </div>
+                            </div>
+                            <div class="ticket-info-item">
+                                <div class="ticket-info-label">Código Vitalício</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--accent);">
+                                    ${escapeHTML(user.lifetimeCode)}
+                                </div>
+                            </div>
+                            <div class="ticket-info-item">
+                                <div class="ticket-info-label">Data de Registro</div>
+                                <div>${escapeHTML(user.createdAt)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao renderizar usuários:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>Erro ao carregar a lista de usuários.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loginAsUser(email, lifetimeCode) {
+            try {
+                const response = await apiFetch('/api/admin/login-as-user', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, lifetimeCode })
+                });
+
+                if (!response || !response.ok) throw new Error('Falha ao autenticar como usuário');
+                const result = await response.json();
+
+                if (result.success) {
+                    // Salva os tokens no localStorage para o modal.html usar
+                    localStorage.setItem('userToken', result.token);
+                    localStorage.setItem('userEmail', result.email);
+                    localStorage.setItem('userLoggedIn', 'true');
+
+                    showNotification(`✓ ${result.message}. Abrindo painel do usuário...`);
+
+                    // Abre o painel do usuário em uma nova aba
+                    window.open('modal.html', '_blank');
+                }
+            } catch (error) {
+                console.error('Erro ao entrar como usuário:', error);
+                showNotification('❌ Erro ao tentar entrar como usuário.');
+            }
+        }
+
+        async function removeUser(email) {
+            if (!email) return;
+            if (!confirm(`Tem certeza que deseja remover o registro do usuário ${email}? Ele terá que se registrar novamente.`)) return;
+
+            try {
+                const response = await apiFetch(`/api/admin/users/${encodeURIComponent(email)}`, {
+                    method: 'DELETE'
+                });
+                if (!response || !response.ok) throw new Error('Erro ao remover usuário');
+                const result = await response.json();
+                showNotification(`✓ ${result.message}`);
+                await renderUsers();
+            } catch (error) {
+                console.error('Erro ao remover usuário:', error);
+                showNotification('❌ Erro ao remover usuário.');
+            }
+        }
+
+        /* =====================================================
            LOGOUT / LIMPAR SESSÃO
         ===================================================== */
 
@@ -4392,8 +4684,81 @@
 
 
         /* =====================================================
+           AÇÕES EM MASSA (BULK ACTIONS)
+        ===================================================== */
+
+        function toggleSelectAll(containerId, masterCheckbox) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const checkboxes = container.querySelectorAll('.ticket-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = masterCheckbox.checked;
+            });
+        }
+
+        async function deleteSelectedTickets(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const selectedCheckboxes = container.querySelectorAll('.ticket-checkbox:checked');
+            const ids = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+            if (ids.length === 0) {
+                showNotification('⚠️ Selecione ao menos um ticket para apagar.');
+                return;
+            }
+
+            const confirmed = confirm(`Tem certeza que deseja apagar ${ids.length} ticket(s) selecionado(s)? Esta ação não pode ser desfeita.`);
+            if (!confirmed) return;
+
+            try {
+                const response = await apiFetch('/api/tickets/bulk-delete', {
+                    method: 'POST',
+                    body: JSON.stringify({ ids })
+                });
+
+                if (!response || !response.ok) {
+                    throw new Error('Erro ao deletar tickets.');
+                }
+
+                const result = await response.json();
+                showNotification(`✓ ${result.message}`);
+                await refreshAll();
+            } catch (error) {
+                console.error('Erro no bulk delete:', error);
+                showNotification('❌ Erro ao apagar tickets selecionados.');
+            }
+        }
+
+        async function deleteTicket(ticketId) {
+            if (!ticketId) return;
+
+            const confirmed = confirm(`Tem certeza que deseja apagar permanentemente o ticket #${ticketId}?`);
+            if (!confirmed) return;
+
+            try {
+                const response = await apiFetch(`/api/tickets/${encodeURIComponent(ticketId)}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response || !response.ok) {
+                    throw new Error('Erro ao deletar ticket.');
+                }
+
+                const result = await response.json();
+                showNotification(`✓ ${result.message}`);
+                await refreshAll();
+            } catch (error) {
+                console.error('Erro ao deletar ticket:', error);
+                showNotification('❌ Erro ao apagar ticket.');
+            }
+        }
+
+        /* =====================================================
            INICIALIZAÇÃO
         ===================================================== */
+
 
         async function initAdminPanel() {
 
