@@ -1280,7 +1280,7 @@
 
                 text-align: center;
 
-                padding: 22px;
+                padding: 20px 15px;
             }
 
             .admin-header h1 {
@@ -1356,6 +1356,9 @@
 
             .connection-status {
                 font-size: 0.7rem;
+            }
+            .stat-number {
+                font-size: 2.5rem;
             }
         }
     </style>
@@ -4457,7 +4460,7 @@
                                 <div style="word-break: break-all; font-weight: 500;">${escapeHTML(user.email)}</div>
                             </div>
                             <div class="ticket-info-item">
-                                <div class="ticket-info-label">Senha (Hashed)</div>
+                                <div class="ticket-info-label">Senha</div>
                                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; opacity: 0.8;">${escapeHTML(user.password)}</div>
                             </div>
                             <div class="ticket-info-item">
