@@ -52,25 +52,35 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
+
         scriptSrc: [
           "'self'",
           "'unsafe-inline'",
           "https://cdn.socket.io"
         ],
+
+        scriptSrcAttr: [
+          "'unsafe-inline'"
+        ],
+
         styleSrc: [
           "'self'",
           "'unsafe-inline'",
           "https://fonts.googleapis.com"
         ],
+
         fontSrc: [
           "'self'",
           "https://fonts.gstatic.com"
         ],
+
         connectSrc: [
           "'self'",
-          "https://suporte-88uc.onrender.com/",
-          "wss://suporte-88uc.onrender.com"
+          "https://suporte-88uc.onrender.com",
+          "wss://suporte-88uc.onrender.com",
+          "https://cdn.socket.io"
         ],
+
         imgSrc: [
           "'self'",
           "data:",
