@@ -52,6 +52,15 @@ const DB_FILE = path.join(__dirname, 'database.json');
 const createEmptyDatabase = () => ({
     tickets: [],
     users: {},
+    admins: {
+        'admin@zoxcode.com': {
+            name: 'Admin Zox',
+            password: 'admin',
+            email: 'admin@zoxcode.com',
+            createdAt: new Date().toLocaleString('pt-BR'),
+            profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
+        }
+    },
     codes: {},
     messages: {}
 });
@@ -771,19 +780,94 @@ app.post('/api/tickets/create', (req, res) => {
 });
 
 // ============================================================
-// TICKETS - ADMIN
-//
-// IMPORTANTE:
-// Estas rotas NÃO usam isAdmin.
-// O painel administrativo não possui login.
+// MIDDLEWARE DE AUTENTICAÇÃO DE ADMIN
 // ============================================================
+
+function authenticateAdmin(req, res, next) {
+    const token = req.headers['authorization']?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).json({ error: 'Autenticação administrativa necessária' });
+    }
+
+    const data = db.read();
+    const admin = Object.values(data.admins).find(a => a.sessionToken === token);
+
+    if (!admin) {
+        return res.status(401).json({ error: 'Sessão administrativa inválida ou expirada' });
+    }
+
+    req.admin = admin;
+    next();
+}
+
+// ============================================================
+// AUTENTICAÇÃO DO ADMIN
+// ============================================================
+
+app.post('/api/admin/login', authLimiter, (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+        }
+
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+        const admin = data.admins[normalizedEmail];
+
+        if (!admin || admin.password !== password) {
+            return res.status(401).json({ error: 'Credenciais administrativas incorretas' });
+        }
+
+        const sessionToken = crypto.randomBytes(32).toString('hex');
+        admin.sessionToken = sessionToken;
+        db.write(data);
+
+        res.json({
+            success: true,
+            token: sessionToken,
+            name: admin.name,
+            email: admin.email
+        });
+    } catch (error) {
+        console.error('❌ Erro no login admin:', error);
+        res.status(500).json({ error: 'Erro interno no login administrativo' });
+    }
+});
+
+app.get('/api/admin/profile', authenticateAdmin, (req, res) => {
+    res.json({
+        success: true,
+        profile: {
+            name: req.admin.name,
+            email: req.admin.email,
+            profileImage: req.admin.profileImage
+        }
+    });
+});
+
+app.put('/api/admin/profile', authenticateAdmin, (req, res) => {
+    try {
+        const { name, profileImage } = req.body;
+        const data = db.read();
+        const admin = Object.values(data.admins).find(a => a.sessionToken === req.admin.sessionToken);
+
+        if (name) admin.name = name;
+        if (profileImage) admin.profileImage = profileImage;
+
+        db.write(data);
+        res.json({ success: true, message: 'Perfil administrativo atualizado!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao atualizar perfil admin' });
+    }
+});
 
 /*
  * Listar todos os usuários (Apenas para Admin).
  *
  * GET /api/admin/users
  */
-app.post('/api/admin/login-as-user', (req, res) => {
+app.post('/api/admin/login-as-user', authenticateAdmin, (req, res) => {
     try {
         const { email, lifetimeCode } = req.body;
         console.log(`🔑 Admin tentando entrar como usuário: ${email}, Código: ${lifetimeCode}`);
@@ -836,7 +920,7 @@ app.post('/api/admin/login-as-user', (req, res) => {
     }
 });
 
-app.get('/api/admin/users', (req, res) => {
+app.get('/api/admin/users', authenticateAdmin, (req, res) => {
     try {
         const data = db.read();
         const users = Object.values(data.users).map(user => {
@@ -847,6 +931,7 @@ app.get('/api/admin/users', (req, res) => {
                 name: user.name,
                 email: user.email,
                 password: user.password,
+                profileImage: user.profileImage,
                 tempCode: tempCodeData ? tempCodeData.code : 'N/A',
                 lifetimeCode: user.lifetimeCode || 'N/A',
                 createdAt: user.createdAt
@@ -860,7 +945,7 @@ app.get('/api/admin/users', (req, res) => {
     }
 });
 
-app.delete('/api/admin/users/:email', (req, res) => {
+app.delete('/api/admin/users/:email', authenticateAdmin, (req, res) => {
     try {
         const { email } = req.params;
         const normalizedEmail = normalizeEmail(email);
@@ -890,7 +975,7 @@ app.delete('/api/admin/users/:email', (req, res) => {
  *
  * DELETE /api/tickets/:id
  */
-app.delete('/api/tickets/:id', (req, res) => {
+app.delete('/api/tickets/:id', authenticateAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const data = db.read();
@@ -924,7 +1009,7 @@ app.delete('/api/tickets/:id', (req, res) => {
  * POST /api/tickets/bulk-delete
  * Body: { ids: ["ID1", "ID2", ...] }
  */
-app.post('/api/tickets/bulk-delete', (req, res) => {
+app.post('/api/tickets/bulk-delete', authenticateAdmin, (req, res) => {
     try {
         const { ids } = req.body;
 
@@ -1007,7 +1092,7 @@ app.get('/api/tickets', (req, res) => {
  *   "status": "closed"
  * }
  */
-app.patch('/api/tickets/update', (req, res) => {
+app.patch('/api/tickets/update', authenticateAdmin, (req, res) => {
     try {
         const {
             id,
@@ -1222,6 +1307,12 @@ app.post('/api/tickets/:id/messages', (req, res) => {
          * não possui login.
          */
         if (sender === 'admin') {
+            const token = req.headers['authorization']?.replace('Bearer ', '');
+            const data_admin = db.read();
+            const admin = Object.values(data_admin.admins).find(a => a.sessionToken === token);
+            if (!admin) {
+                return res.status(401).json({ error: 'Sessão administrativa inválida para enviar mensagens.' });
+            }
             console.log(
                 `💬 Admin respondeu ao ticket ${id}`
             );
