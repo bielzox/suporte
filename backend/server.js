@@ -1395,6 +1395,36 @@ app.post('/api/admin/reset-password', authLimiter, async (req, res) => {
     }
 });
 
+app.post('/api/admin/verify-reset-code', (req, res) => {
+    try {
+        const { email, code } = req.body;
+        if (!email || !code) {
+            return res.status(400).json({ error: 'Email e código são obrigatórios' });
+        }
+
+        const normalizedEmail = normalizeEmail(email);
+        const data = db.read();
+        const storedCode = data.codes[normalizedEmail];
+
+        if (
+            !storedCode ||
+            storedCode.code !== code ||
+            Date.now() > storedCode.expiresAt
+        ) {
+            return res.status(400).json({ error: 'Código inválido ou expirado' });
+        }
+
+        if (!data.admins[normalizedEmail]) {
+            return res.status(404).json({ error: 'Administrador não encontrado' });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Erro ao verificar código de reset admin:', error);
+        res.status(500).json({ error: 'Erro interno ao verificar código' });
+    }
+});
+
 app.get('/api/admin/profile', authenticateAdmin, (req, res) => {
     res.json({
         success: true,
