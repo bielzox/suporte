@@ -2026,8 +2026,60 @@
     <script>
 
         /* =====================================================
+           AUTENTICAÇÃO ADMIN
+           ===================================================== */
+        function checkAdminAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('adminPanel').style.display = 'none';
+            } else {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+            }
+        }
+
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('adminEmailInput').value;
+            const password = document.getElementById('adminPasswordInput').value;
+            const btn = event.target.querySelector('.login-btn');
+
+            try {
+                btn.disabled = true;
+                btn.textContent = 'Autenticando...';
+
+                const response = await apiFetch('/api/admin/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response || !response.ok) throw new Error('Credenciais inválidas');
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminName', data.name);
+                    localStorage.setItem('adminEmail', data.email);
+
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('adminPanel').style.display = 'block';
+
+                    document.getElementById('adminNameDisplay').textContent = data.name;
+
+                    initAdminPanel();
+                }
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Entrar no Painel';
+            }
+        }
+
+        /* =====================================================
            CONFIGURAÇÃO
-        ===================================================== */
+           ===================================================== */
 
         const API_URL = 'http://localhost:3000';
 
