@@ -2056,7 +2056,7 @@
                  ================================================= -->
 
             <div class="discord-embed" style="max-width: 1200px; margin: 20px auto; text-align: center; padding: 20px; background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.3); border-radius: 15px; backdrop-filter: blur(10px);">
-                <span style="font-size: 1.1rem; color: var(--text-main);">Entre no nosso Discord para suporte rápido: </span>
+                <span style="font-size: 1.1rem; color: var(--text-main);">Entre no nosso Discord: </span>
                 <a href="https://discord.gg/2QDNg8gH7s" target="_blank" style="color: #5865F2; font-weight: bold; text-decoration: underline;">discord.gg/2QDNg8gH7s</a>
             </div>
 
@@ -3294,7 +3294,9 @@
                 .getElementById(tabName)
                 .classList.add("active");
 
-            event.currentTarget.classList.add("active");
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add("active");
+            }
 
             if (tabName === "meus-tickets") {
                 loadTickets();
@@ -3302,6 +3304,10 @@
 
             if (tabName === "conversas") {
                 loadChats();
+            }
+
+            if (tabName === "avaliacoes") {
+                loadReviews();
             }
         }
 
