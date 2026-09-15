@@ -2368,7 +2368,7 @@
                 btn.textContent = "Aguarde...";
 
                 const res = await fetch(
-                    "http://localhost:3000/api/auth/login",
+                    "/api/auth/login",
                     {
                         method: "POST",
 
@@ -2411,7 +2411,7 @@
                 console.error(err);
 
                 showError(
-                    "Erro ao conectar com o servidor. Verifique se o backend está rodando em http://localhost:3000",
+                    "Erro ao conectar com o servidor. Verifique se o backend está rodando em ",
                     "errorMessage"
                 );
 
@@ -2471,7 +2471,7 @@
                 btn.textContent = "Criando conta...";
 
                 const res = await fetch(
-                    "http://localhost:3000/api/auth/register",
+                    "/api/auth/register",
                     {
                         method: "POST",
 
@@ -2639,7 +2639,7 @@
                 } else {
 
                     const res = await fetch(
-                        "http://localhost:3000/api/auth/verify-code",
+                        "/api/auth/verify-code",
                         {
                             method: "POST",
 
@@ -2735,7 +2735,7 @@
             try {
 
                 const res = await fetch(
-                    "http://localhost:3000/api/auth/login",
+                    "/api/auth/login",
                     {
                         method: "POST",
 
@@ -2855,7 +2855,7 @@
                 btn.textContent = "Enviando...";
 
                 const res = await fetch(
-                    "http://localhost:3000/api/auth/forgot-password",
+                    "/api/auth/forgot-password",
                     {
                         method: "POST",
 
@@ -2965,7 +2965,7 @@
                 btn.textContent = "Alterando...";
 
                 const res = await fetch(
-                    "http://localhost:3000/api/auth/reset-password",
+                    "/api/auth/reset-password",
                     {
                         method: "POST",
 
@@ -3291,7 +3291,7 @@
             if (!socket) {
 
                 socket =
-                    io("http://localhost:3000");
+                    io('');
 
                 socket.emit(
                     "identify",
@@ -3551,7 +3551,7 @@
                     "⏳ Enviando ticket...";
 
                 const res = await fetch(
-                    "http://localhost:3000/api/tickets/create",
+                    "/api/tickets/create",
                     {
                         method: "POST",
 
@@ -3676,7 +3676,7 @@
                 );
 
                 errorMessage.textContent =
-                    "❌ Não foi possível conectar ao servidor. Verifique se o backend está rodando em http://localhost:3000.";
+                    "❌ Não foi possível conectar ao servidor. Verifique se o backend está rodando em .";
 
                 errorMessage.style.display =
                     "block";
@@ -3701,7 +3701,7 @@
             if (!email || !token) return;
 
             try {
-                const res = await fetch(`http://localhost:3000/api/user/profile?email=${encodeURIComponent(email)}`, {
+                const res = await fetch(`/api/user/profile?email=${encodeURIComponent(email)}`, {
                     headers: { 'Authorization': token }
                 });
                 const data = await res.json();
@@ -3714,7 +3714,7 @@
                 }
 
                 // Carregar sessões
-                const sessionRes = await fetch(`http://localhost:3000/api/user/sessions?email=${encodeURIComponent(email)}`, {
+                const sessionRes = await fetch(`/api/user/sessions?email=${encodeURIComponent(email)}`, {
                     headers: { 'Authorization': token }
                 });
                 const sessionData = await sessionRes.json();
@@ -3745,7 +3745,7 @@
             const profileImage = document.getElementById('profileImg').src;
 
             try {
-                const res = await fetch(`http://localhost:3000/api/user/profile?email=${encodeURIComponent(email)}`, {
+                const res = await fetch(`/api/user/profile?email=${encodeURIComponent(email)}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3778,7 +3778,7 @@
             const token = localStorage.getItem("userToken");
 
             try {
-                const res = await fetch(`http://localhost:3000/api/user/sessions/revoke-all?email=${encodeURIComponent(email)}`, {
+                const res = await fetch(`/api/user/sessions/revoke-all?email=${encodeURIComponent(email)}`, {
                     method: 'POST',
                     headers: { 'Authorization': token }
                 });
@@ -3798,7 +3798,7 @@
             const token = localStorage.getItem("userToken");
 
             try {
-                const res = await fetch(`http://localhost:3000/api/user/account?email=${encodeURIComponent(email)}`, {
+                const res = await fetch(`/api/user/account?email=${encodeURIComponent(email)}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': token }
                 });
@@ -3830,7 +3830,7 @@
             }
 
             try {
-                const res = await fetch('http://localhost:3000/api/user/change-password', {
+                const res = await fetch('/api/user/change-password', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3871,7 +3871,7 @@
             try {
 
                 const res = await fetch(
-                    "http://localhost:3000/api/tickets"
+                    "/api/tickets"
                 );
 
                 const tickets =
@@ -4025,7 +4025,7 @@
             try {
 
                 const res = await fetch(
-                    "http://localhost:3000/api/tickets"
+                    "/api/tickets"
                 );
 
                 const tickets =
@@ -4157,7 +4157,7 @@
 
             // Tickets fechados ficam somente para visualização (Transcript)
             const ticketsRes = await fetch(
-                "http://localhost:3000/api/tickets"
+                "/api/tickets"
             );
             const ticketsData = await ticketsRes.json();
             const currentTicket = ticketsData.find(t => String(t.id) === String(ticketId));
@@ -4181,7 +4181,7 @@
             try {
 
                 const res = await fetch(
-                    `http://localhost:3000/api/tickets/${encodeURIComponent(ticketId)}/messages?email=${encodeURIComponent(userEmail)}`,
+                    `/api/tickets/${encodeURIComponent(ticketId)}/messages?email=${encodeURIComponent(userEmail)}`,
                     {
                         headers: {
                             "Authorization":
@@ -4344,7 +4344,7 @@
             try {
 
                 const res = await fetch(
-                    `http://localhost:3000/api/tickets/${encodeURIComponent(activeTicketId)}/messages`,
+                    `/api/tickets/${encodeURIComponent(activeTicketId)}/messages`,
                     {
                         method: "POST",
 
@@ -4585,7 +4585,7 @@
                 const userEmail = localStorage.getItem("userEmail");
                 const token = localStorage.getItem("userToken");
 
-                const res = await fetch("http://localhost:3000/api/reviews", {
+                const res = await fetch("/api/reviews", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -4623,7 +4623,7 @@
             if (!container) return;
 
             try {
-                const res = await fetch("http://localhost:3000/api/reviews");
+                const res = await fetch("/api/reviews");
                 const data = await parseResponse(res);
 
                 if (data.success) {
