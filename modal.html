@@ -1197,6 +1197,16 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="registerUsername">Nome de Usuário</label>
+                        <input
+                            type="text"
+                            id="registerUsername"
+                            placeholder="seu_usuario"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
                         <label for="registerEmail">Email</label>
                         <input
                             type="email"
@@ -2170,7 +2180,6 @@
 
 
         async function handleRegister(event) {
-
             event.preventDefault();
 
             const btn =
@@ -2185,6 +2194,12 @@
                     .value
                     .trim();
 
+            const username =
+                document
+                    .getElementById("registerUsername")
+                    .value
+                    .trim();
+
             const email =
                 document
                     .getElementById("registerEmail")
@@ -2196,7 +2211,7 @@
                     .getElementById("registerPassword")
                     .value;
 
-            if (!name || !email || !password) {
+            if (!name || !username || !email || !password) {
 
                 showError(
                     "Por favor, preencha todos os campos",
@@ -2222,6 +2237,7 @@
 
                         body: JSON.stringify({
                             name,
+                            username,
                             email,
                             password
                         })

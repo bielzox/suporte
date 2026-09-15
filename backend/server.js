@@ -277,7 +277,8 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
             });
         }
 
-        data.users[normalizedEmail].password = newPassword;
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        data.users[normalizedEmail].password = hashedPassword;
 
         delete data.codes[normalizedEmail];
 
@@ -306,11 +307,12 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
 
         const {
             name,
+            username,
             email,
             password
         } = req.body;
 
-        if (!name || !email || !password) {
+        if (!name || !username || !email || !password) {
             console.log(
                 '❌ Registro falhou: campos ausentes'
             );
@@ -334,15 +336,15 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
             });
         }
 
-        const username = name.toLowerCase().replace(/\s+/g, '_');
+        const normalizedUsername = username.toLowerCase().trim();
         const usernameExists = Object.values(data.users).some(
-            user => user.username === username
+            user => user.username === normalizedUsername
         );
 
         if (usernameExists) {
             console.log(
                 '❌ Registro falhou: nome de usuário já existe:',
-                username
+                normalizedUsername
             );
 
             return res.status(400).json({
@@ -350,11 +352,13 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
             });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         data.users[normalizedEmail] = {
             name,
-            username,
+            username: normalizedUsername,
             email: normalizedEmail,
-            password: password,
+            password: hashedPassword,
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + normalizedEmail,
             createdAt: new Date().toLocaleString('pt-BR'),
             lifetimeCode: generateLifetimeCode(),
@@ -418,7 +422,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
             });
         }
 
-        const match = password === user.password;
+        const match = await bcrypt.compare(password, user.password);
 
         if (!match) {
             console.log(
