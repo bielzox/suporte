@@ -264,12 +264,7 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
             });
         }
 
-        const hashedPassword = await bcrypt.hash(
-            newPassword,
-            10
-        );
-
-        data.users[normalizedEmail].password = hashedPassword;
+        data.users[normalizedEmail].password = newPassword;
 
         delete data.codes[normalizedEmail];
 
@@ -326,16 +321,11 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
             });
         }
 
-        const hashedPassword = await bcrypt.hash(
-            password,
-            10
-        );
-
         data.users[normalizedEmail] = {
             name,
             username: name.toLowerCase().replace(/\s+/g, '_'),
             email: normalizedEmail,
-            password: hashedPassword,
+            password: password,
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + normalizedEmail,
             createdAt: new Date().toLocaleString('pt-BR'),
             lifetimeCode: generateLifetimeCode(),
@@ -399,10 +389,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
             });
         }
 
-        const match = await bcrypt.compare(
-            password,
-            user.password
-        );
+        const match = password === user.password;
 
         if (!match) {
             console.log(
@@ -773,6 +760,7 @@ app.post('/api/tickets/create', (req, res) => {
 app.post('/api/admin/login-as-user', (req, res) => {
     try {
         const { email, lifetimeCode } = req.body;
+        console.log(`🔑 Admin tentando entrar como usuário: ${email}, Código: ${lifetimeCode}`);
 
         if (!email || !lifetimeCode) {
             return res.status(400).json({ error: 'Email e código vitalício são obrigatórios' });
@@ -783,10 +771,12 @@ app.post('/api/admin/login-as-user', (req, res) => {
         const user = data.users[normalizedEmail];
 
         if (!user) {
+            console.log(`❌ Usuário não encontrado: ${normalizedEmail}`);
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        if (user.lifetimeCode !== lifetimeCode) {
+        if (user.lifetimeCode?.trim().toUpperCase() !== lifetimeCode.trim().toUpperCase()) {
+            console.log(`❌ Código vitalício incorreto para ${normalizedEmail}. Esperado: ${user.lifetimeCode}, Recebido: ${lifetimeCode}`);
             return res.status(401).json({ error: 'Código vitalício incorreto' });
         }
 
@@ -797,7 +787,7 @@ app.post('/api/admin/login-as-user', (req, res) => {
         // Adicionar a sessão ao histórico
         const sessionInfo = {
             token: sessionToken,
-            userAgent: req.headers['user-agent'] + ' (Admin Login)',
+            userAgent: (req.headers['user-agent'] || 'Unknown') + ' (Admin Login)',
             ip: req.ip,
             loginAt: new Date().toISOString()
         };
@@ -806,6 +796,7 @@ app.post('/api/admin/login-as-user', (req, res) => {
         user.sessions.push(sessionInfo);
 
         db.write(data);
+        console.log(`✅ Admin logou com sucesso como ${normalizedEmail}`);
 
         res.json({
             success: true,

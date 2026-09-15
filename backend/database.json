@@ -29,12 +29,6 @@
       "createdAt": "14/09/2026, 12:56:41",
       "sessionToken": "b9c0a83cb84a0b39442fcac9b62372ed21a61e6091bf9a4165ab9b836be9693f"
     },
-    "leobiel2605@gmail.com": {
-      "name": "Leonardo",
-      "email": "leobiel2605@gmail.com",
-      "password": "$2b$10$sBrifb05BKPSDbnLP2uLB.X/8UfA914HHChhzCqCko9dp8WQWWFMW",
-      "createdAt": "14/09/2026, 16:54:04"
-    },
     "shakcps@gmail.com": {
       "name": "gabriel",
       "email": "shakcps@gmail.com",
@@ -49,12 +43,22 @@
       "createdAt": "15/09/2026, 09:26:03",
       "lifetimeCode": "45D4B19F",
       "sessionToken": "b32eb3c6536cb7a3e9b89073e77445535a7a7310fefc92c127501542723b9a46"
+    },
+    "leobiel2605@gmail.com": {
+      "name": "leobiel",
+      "username": "leobiel",
+      "email": "leobiel2605@gmail.com",
+      "password": "$2b$10$fxIt6jkWRfzbHr6SmnPYjeaPp2JpikPra3Zn.L98bCyBVZ7hPR8tm",
+      "profileImage": "https://api.dicebear.com/7.x/avataaars/svg?seed=leobiel2605@gmail.com",
+      "createdAt": "15/09/2026, 10:05:43",
+      "lifetimeCode": "20774E3D",
+      "sessions": []
     }
   },
   "codes": {
     "leobiel2605@gmail.com": {
-      "code": "138545",
-      "expiresAt": 1789415965203
+      "code": "654811",
+      "expiresAt": 1789478161324
     }
   },
   "messages": {}
