@@ -291,16 +291,12 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
 
         const emailResult = await transporter.sendMail({
             from: process.env.EMAIL_USER,
-            to: "leogabriel2662@gmail.com",
+            to: normalizedEmail,
             subject: "Recuperação de Senha - Suporte",
-            text: `Seu código é: ${code}`,
-            html: `
-        <h2>Seu código</h2>
-        <h1>${code}</h1>
-    `
+            text: `Seu código é: ${code}`
         });
 
-        console.log("📨 EMAIL ENVIADO:", emailResult);
+        console.log("✅ EMAIL ENVIADO:", emailResult);
 
         res.json({
             success: true,
@@ -309,7 +305,8 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
 
     } catch (error) {
         console.error(
-            '❌ Erro ao enviar email de recuperação:',
+            "❌ ERRO GMAIL:",
+            error.message,
             error
         );
 
