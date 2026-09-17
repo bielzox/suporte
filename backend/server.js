@@ -282,30 +282,18 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
             code
         );
 
-        await resend.emails.send({
-            from: "Suporte <onboarding@resend.dev>",
-            to: normalizedEmail,
-            subject: "Recuperação de Senha - Suporte",
-            text: `Seu código de recuperação de senha é: ${code}`,
-            html: `
-        <div style="font-family:sans-serif;text-align:center;">
-            <h2>Recuperação de Senha</h2>
-
-            <p>
-                Olá ${data.users[normalizedEmail].name},
-                use o código abaixo:
-            </p>
-
-            <h1 style="color:#4ade80;font-size:32px;">
-                ${code}
-            </h1>
-
-            <p>
-                Este código expira em 15 minutos.
-            </p>
-        </div>
+const emailResult = await resend.emails.send({
+    from: "Suporte <onboarding@resend.dev>",
+    to: normalizedEmail,
+    subject: "Recuperação de Senha - Suporte",
+    text: `Seu código é: ${code}`,
+    html: `
+        <h2>Seu código</h2>
+        <h1>${code}</h1>
     `
-        });
+});
+
+console.log("📨 RESEND RETORNO:", emailResult);
 
         res.json({
             success: true,
