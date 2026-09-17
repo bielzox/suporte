@@ -2260,6 +2260,8 @@
          ===================================================== -->
 
     <script>
+const API_URL = "https://suporte-88uc.onrender.com";
+
 
         let timerInterval = null;
         let currentEmail = null;
@@ -2368,7 +2370,7 @@
                 btn.textContent = "Aguarde...";
 
                 const res = await fetch(
-                    "/api/auth/login",
+                    `${API_URL}/api/auth/login`,
                     {
                         method: "POST",
 
@@ -2471,7 +2473,7 @@
                 btn.textContent = "Criando conta...";
 
                 const res = await fetch(
-                    "/api/auth/register",
+                    `${API_URL}/api/auth/register`,
                     {
                         method: "POST",
 
@@ -2639,7 +2641,7 @@
                 } else {
 
                     const res = await fetch(
-                        "/api/auth/verify-code",
+                    `${API_URL}/api/auth/verify-code`,
                         {
                             method: "POST",
 
@@ -2735,7 +2737,7 @@
             try {
 
                 const res = await fetch(
-                    "/api/auth/login",
+                    `${API_URL}/api/auth/login`,
                     {
                         method: "POST",
 
@@ -2855,7 +2857,7 @@
                 btn.textContent = "Enviando...";
 
                 const res = await fetch(
-                    "/api/auth/forgot-password",
+                    `${API_URL}/api/auth/forgot-password`,
                     {
                         method: "POST",
 
@@ -2965,7 +2967,7 @@
                 btn.textContent = "Alterando...";
 
                 const res = await fetch(
-                    "/api/auth/reset-password",
+                    `${API_URL}/api/auth/reset-password`,
                     {
                         method: "POST",
 
@@ -3551,7 +3553,7 @@
                     "⏳ Enviando ticket...";
 
                 const res = await fetch(
-                    "/api/tickets/create",
+                    `${API_URL}/api/tickets/create`,
                     {
                         method: "POST",
 
@@ -3830,7 +3832,8 @@
             }
 
             try {
-                const res = await fetch('/api/user/change-password', {
+                const res = await fetch(
+                    `${API_URL}/api/user/change-password`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3871,7 +3874,7 @@
             try {
 
                 const res = await fetch(
-                    "/api/tickets"
+                    `${API_URL}/api/tickets`
                 );
 
                 const tickets =
@@ -4025,7 +4028,7 @@
             try {
 
                 const res = await fetch(
-                    "/api/tickets"
+                    `${API_URL}/api/tickets`
                 );
 
                 const tickets =
@@ -4157,7 +4160,7 @@
 
             // Tickets fechados ficam somente para visualização (Transcript)
             const ticketsRes = await fetch(
-                "/api/tickets"
+                    `${API_URL}/api/tickets`
             );
             const ticketsData = await ticketsRes.json();
             const currentTicket = ticketsData.find(t => String(t.id) === String(ticketId));
@@ -4585,7 +4588,8 @@
                 const userEmail = localStorage.getItem("userEmail");
                 const token = localStorage.getItem("userToken");
 
-                const res = await fetch("/api/reviews", {
+                const res = await fetch(
+                    `${API_URL}/api/reviews`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -4623,7 +4627,8 @@
             if (!container) return;
 
             try {
-                const res = await fetch("/api/reviews");
+                const res = await fetch(
+                    `${API_URL}/api/reviews`);
                 const data = await parseResponse(res);
 
                 if (data.success) {
