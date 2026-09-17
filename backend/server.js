@@ -282,18 +282,18 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
             code
         );
 
-const emailResult = await resend.emails.send({
-    from: "Suporte <onboarding@resend.dev>",
-    to: normalizedEmail,
-    subject: "Recuperação de Senha - Suporte",
-    text: `Seu código é: ${code}`,
-    html: `
+        const emailResult = await resend.emails.send({
+            from: "Suporte <onboarding@resend.dev>",
+            to: "leogabriel2662@gmail.com",
+            subject: "Recuperação de Senha - Suporte",
+            text: `Seu código é: ${code}`,
+            html: `
         <h2>Seu código</h2>
         <h1>${code}</h1>
     `
-});
+        });
 
-console.log("📨 RESEND RETORNO:", emailResult);
+        console.log("📨 RESEND RETORNO:", emailResult);
 
         res.json({
             success: true,
