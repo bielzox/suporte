@@ -24,6 +24,14 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+transporter.verify((error, success) => {
+    if (error) {
+        console.log("❌ ERRO SMTP GMAIL:", error);
+    } else {
+        console.log("✅ SMTP GMAIL CONECTADO");
+    }
+});
+
 function encrypt(text) {
     const iv = crypto.randomBytes(IV_LENGTH);
     const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY), iv);
