@@ -14,28 +14,10 @@ const ALGORITHM = 'aes-256-cbc';
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'votre-cle-secrete-de-32-caracteres!!'; // Deve ter 32 bytes
 const IV_LENGTH = 16;
 
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-transporter.verify((error, success) => {
-    if (error) {
-        console.log("❌ ERRO SMTP GMAIL:", error);
-    } else {
-        console.log("✅ SMTP GMAIL CONECTADO");
-    }
-});
 
 function encrypt(text) {
     const iv = crypto.randomBytes(IV_LENGTH);
@@ -302,19 +284,29 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
             code
         );
 
-        const emailResult = await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: normalizedEmail,
-            subject: "Recuperação de Senha - Suporte",
-            text: `Seu código é: ${code}`
-        });
+        async function enviarEmail() {
+            try {
 
-        console.log("✅ EMAIL ENVIADO:", emailResult);
+                await resend.emails.send({
+                    from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
+                    to: normalizedEmail,
+                    subject: "Recuperação de senha",
+                    html: `
+        <h2>Recuperação de acesso</h2>
+        <p>Seu código é:</p>
+        <h1>${code}</h1>
+        <p>Esse código expira em 15 minutos.</p>
+    `
+                });
 
-        res.json({
-            success: true,
-            message: 'Código de recuperação enviado ao seu email!'
-        });
+                console.log("✅ E-mail enviado!");
+
+            } catch (error) {
+                console.error("❌ ERRO EMAIL:", error.message);
+            }
+        }
+
+        await enviarEmail();
 
     } catch (error) {
         console.error(
@@ -537,31 +529,31 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         console.log("📧 CLIENTE - enviando código para:", normalizedEmail);
         console.log("🔢 Código:", code);
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        await resend.emails.send({
+            from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
             to: normalizedEmail,
-            subject: 'Seu Código de Acesso - Suporte',
+            subject: "Seu Código de Acesso - Suporte",
             text: `Seu código de verificação é: ${code}`,
             html: `
-                <div style="font-family:sans-serif;text-align:center;">
-                    <h2 style="color:#333;">
-                        Verificação de Segurança
-                    </h2>
+        <div style="font-family:sans-serif;text-align:center;">
+            <h2 style="color:#333;">
+                Verificação de Segurança
+            </h2>
 
-                    <p>
-                        Olá ${user.name},
-                        use o código abaixo para entrar:
-                    </p>
+            <p>
+                Olá ${user.name},<br>
+                use o código abaixo para entrar:
+            </p>
 
-                    <h1 style="color:#4ade80;font-size:32px;">
-                        ${code}
-                    </h1>
+            <h1 style="color:#4ade80;font-size:32px;">
+                ${code}
+            </h1>
 
-                    <p>
-                        Este código expira em 2 minutos.
-                    </p>
-                </div>
-            `
+            <p>
+                Este código expira em 2 minutos.
+            </p>
+        </div>
+    `
         });
 
         console.log('✅ Email enviado com sucesso!');
@@ -1106,31 +1098,31 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
             `📧 Enviando código admin para ${normalizedEmail}...`
         );
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        await resend.emails.send({
+            from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
             to: normalizedEmail,
-            subject: 'Seu Código de Acesso Admin - Suporte',
+            subject: "Seu Código de Acesso Admin - Suporte",
             text: `Seu código de verificação administrativa é: ${code}`,
             html: `
-                <div style="font-family:sans-serif;text-align:center;">
-                    <h2 style="color:#333;">
-                        Verificação Administrativa
-                    </h2>
+        <div style="font-family:sans-serif;text-align:center;">
+            <h2 style="color:#333;">
+                Verificação Administrativa
+            </h2>
 
-                    <p>
-                        Olá ${admin.name},
-                        use o código abaixo para entrar no painel:
-                    </p>
+            <p>
+                Olá ${admin.name},<br>
+                use o código abaixo para entrar no painel:
+            </p>
 
-                    <h1 style="color:#4ade80;font-size:32px;">
-                        ${code}
-                    </h1>
+            <h1 style="color:#4ade80;font-size:32px;">
+                ${code}
+            </h1>
 
-                    <p>
-                        Este código expira em 2 minutos.
-                    </p>
-                </div>
-            `
+            <p>
+                Este código expira em 2 minutos.
+            </p>
+        </div>
+    `
         });
 
         console.log('✅ Email admin enviado com sucesso!');
@@ -1310,8 +1302,8 @@ app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
 
         db.write(data);
 
-        await transporter.sendMail({
-            from: `Suporte Admin <${process.env.EMAIL_USER}>`,
+        await resend.emails.send({
+            from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
             to: normalizedEmail,
             subject: "Recuperação de Senha Admin - Suporte",
 
