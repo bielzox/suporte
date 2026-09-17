@@ -261,6 +261,33 @@ function isValidTicketStatus(status) {
 // AUTENTICAÇÃO DO CLIENTE
 // ============================================================
 
+app.post("/login", async (req, res) => {
+
+  try {
+
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: email,
+      subject: "Código de acesso",
+      html: `<h1>${codigo}</h1>`
+    });
+
+    res.json({
+      sucesso:true
+    });
+
+  } catch(error){
+
+    console.log(error);
+
+    res.status(500).json({
+      erro:"Erro ao enviar email"
+    });
+
+  }
+
+});
+
 app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
     try {
         const { email } = req.body;
