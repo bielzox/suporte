@@ -1044,6 +1044,7 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
 
         const normalizedEmail = normalizeEmail(email);
         const data = db.read();
+        console.log("ADMINS CADASTRADOS:", Object.keys(data.admins));
         const admin = data.admins[normalizedEmail];
 
         if (!admin) {
