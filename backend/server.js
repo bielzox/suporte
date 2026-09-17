@@ -16,15 +16,7 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'votre-cle-secrete-de-32-ca
 const IV_LENGTH = 16;
 
 const { Resend } = require("resend");
-
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-await resend.emails.send({
-  from: "onboarding@resend.dev",
-  to: email,
-  subject: "Código de acesso",
-  html: `<h1>${codigo}</h1>`
-});
 
 function encrypt(text) {
     const iv = crypto.randomBytes(IV_LENGTH);
@@ -220,9 +212,6 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   family: 4,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -260,33 +249,6 @@ function isValidTicketStatus(status) {
 // ============================================================
 // AUTENTICAÇÃO DO CLIENTE
 // ============================================================
-
-app.post("/login", async (req, res) => {
-
-  try {
-
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: email,
-      subject: "Código de acesso",
-      html: `<h1>${codigo}</h1>`
-    });
-
-    res.json({
-      sucesso:true
-    });
-
-  } catch(error){
-
-    console.log(error);
-
-    res.status(500).json({
-      erro:"Erro ao enviar email"
-    });
-
-  }
-
-});
 
 app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
     try {
