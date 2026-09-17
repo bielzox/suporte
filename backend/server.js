@@ -124,10 +124,10 @@ const createEmptyDatabase = () => ({
     tickets: [],
     users: {},
     admins: {
-'leogabriel2662@gmail.com': {
-    name: 'Leo Gabriel',
-    password: '$2b$10$vjnTqsbMliJn68jf9zP/O.4K.78gtbYl4UvQ/jJ.enTO2fHltHkSq',
-    email: 'leogabriel2662@gmail.com',
+        'leogabriel2662@gmail.com': {
+            name: 'Leo Gabriel',
+            password: '$2b$10$vjnTqsbMliJn68jf9zP/O.4K.78gtbYl4UvQ/jJ.enTO2fHltHkSq',
+            email: 'leogabriel2662@gmail.com',
 
             createdAt: new Date().toLocaleString('pt-BR'),
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
@@ -271,6 +271,18 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
         };
 
         db.write(data);
+
+        db.write(data);
+
+        console.log(
+            "📧 Enviando recuperação cliente para:",
+            normalizedEmail
+        );
+
+        console.log(
+            "Código:",
+            code
+        );
 
         await resend.emails.send({
             from: "Suporte <onboarding@resend.dev>",
@@ -1292,16 +1304,16 @@ app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
 
         db.write(data);
 
-const { Resend } = require("resend");
+        const { Resend } = require("resend");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+        const resend = new Resend(process.env.RESEND_API_KEY);
 
-await resend.emails.send({
-    from: "Suporte Admin <onboarding@resend.dev>",
-    to: normalizedEmail,
-    subject: "Recuperação de Senha Admin - Suporte",
+        await resend.emails.send({
+            from: "Suporte Admin <onboarding@resend.dev>",
+            to: normalizedEmail,
+            subject: "Recuperação de Senha Admin - Suporte",
 
-    html: `
+            html: `
         <div style="font-family:sans-serif;text-align:center;">
             <h2 style="color:#333;">
                 Recuperação de Senha Admin
@@ -1321,7 +1333,7 @@ await resend.emails.send({
             </p>
         </div>
     `
-});
+        });
 
         res.json({
             success: true,
