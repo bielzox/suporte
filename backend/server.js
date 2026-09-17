@@ -15,6 +15,17 @@ const ALGORITHM = 'aes-256-cbc';
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'votre-cle-secrete-de-32-caracteres!!'; // Deve ter 32 bytes
 const IV_LENGTH = 16;
 
+const { Resend } = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+await resend.emails.send({
+  from: "onboarding@resend.dev",
+  to: email,
+  subject: "Código de acesso",
+  html: `<h1>${codigo}</h1>`
+});
+
 function encrypt(text) {
     const iv = crypto.randomBytes(IV_LENGTH);
     const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY), iv);
