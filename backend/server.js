@@ -1301,30 +1301,36 @@ app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
 
         db.write(data);
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: normalizedEmail,
-            subject: 'Recuperação de Senha Admin - Suporte',
-            text: `Seu código de recuperação de senha administrativa é: ${code}`,
-            html: `
-                <div style="font-family:sans-serif;text-align:center;">
-                    <h2 style="color:#333;">Recuperação de Senha Admin</h2>
+const { Resend } = require("resend");
 
-                    <p>
-                        Olá ${data.admins[normalizedEmail].name},
-                        use o código abaixo para redefinir sua senha administrativa:
-                    </p>
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-                    <h1 style="color:#4ade80;font-size:32px;">
-                        ${code}
-                    </h1>
+await resend.emails.send({
+    from: "Suporte Admin <onboarding@resend.dev>",
+    to: normalizedEmail,
+    subject: "Recuperação de Senha Admin - Suporte",
 
-                    <p>
-                        Este código expira em 15 minutos.
-                    </p>
-                </div>
-            `
-        });
+    html: `
+        <div style="font-family:sans-serif;text-align:center;">
+            <h2 style="color:#333;">
+                Recuperação de Senha Admin
+            </h2>
+
+            <p>
+                Olá ${data.admins[normalizedEmail].name},
+                use o código abaixo para redefinir sua senha administrativa:
+            </p>
+
+            <h1 style="color:#4ade80;font-size:32px;">
+                ${code}
+            </h1>
+
+            <p>
+                Este código expira em 15 minutos.
+            </p>
+        </div>
+    `
+});
 
         res.json({
             success: true,
