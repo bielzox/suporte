@@ -14,8 +14,15 @@ const ALGORITHM = 'aes-256-cbc';
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'votre-cle-secrete-de-32-caracteres!!'; // Deve ter 32 bytes
 const IV_LENGTH = 16;
 
-const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY);
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
 
 function encrypt(text) {
     const iv = crypto.randomBytes(IV_LENGTH);
@@ -282,8 +289,8 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
             code
         );
 
-        const emailResult = await resend.emails.send({
-            from: "Suporte <onboarding@resend.dev>",
+        const emailResult = await transporter.sendMail({
+            from: process.env.EMAIL_USER,
             to: "leogabriel2662@gmail.com",
             subject: "Recuperação de Senha - Suporte",
             text: `Seu código é: ${code}`,
@@ -293,7 +300,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
     `
         });
 
-        console.log("📨 RESEND RETORNO:", emailResult);
+        console.log("📨 EMAIL ENVIADO:", emailResult);
 
         res.json({
             success: true,
@@ -520,8 +527,8 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         console.log("📧 CLIENTE - enviando código para:", normalizedEmail);
         console.log("🔢 Código:", code);
 
-        await resend.emails.send({
-            from: "Suporte <onboarding@resend.dev>",
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
             to: normalizedEmail,
             subject: 'Seu Código de Acesso - Suporte',
             text: `Seu código de verificação é: ${code}`,
@@ -1089,8 +1096,8 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
             `📧 Enviando código admin para ${normalizedEmail}...`
         );
 
-        await resend.emails.send({
-            from: "Suporte <onboarding@resend.dev>",
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
             to: normalizedEmail,
             subject: 'Seu Código de Acesso Admin - Suporte',
             text: `Seu código de verificação administrativa é: ${code}`,
@@ -1293,12 +1300,8 @@ app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
 
         db.write(data);
 
-        const { Resend } = require("resend");
-
-        const resend = new Resend(process.env.RESEND_API_KEY);
-
-        await resend.emails.send({
-            from: "Suporte Admin <onboarding@resend.dev>",
+        await transporter.sendMail({
+            from: `Suporte Admin <${process.env.EMAIL_USER}>`,
             to: normalizedEmail,
             subject: "Recuperação de Senha Admin - Suporte",
 
