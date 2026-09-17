@@ -272,41 +272,39 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
 
         db.write(data);
 
-        db.write(data);
-
         console.log(
-            "📧 Enviando recuperação cliente para:",
+            "📧 CLIENTE - enviando recuperação para:",
             normalizedEmail
         );
 
         console.log(
-            "Código:",
+            "🔢 Código:",
             code
         );
 
         await resend.emails.send({
             from: "Suporte <onboarding@resend.dev>",
             to: normalizedEmail,
-            subject: 'Recuperação de Senha - Suporte',
+            subject: "Recuperação de Senha - Suporte",
             text: `Seu código de recuperação de senha é: ${code}`,
             html: `
-                <div style="font-family:sans-serif;text-align:center;">
-                    <h2 style="color:#333;">Recuperação de Senha</h2>
+        <div style="font-family:sans-serif;text-align:center;">
+            <h2>Recuperação de Senha</h2>
 
-                    <p>
-                        Olá ${data.users[normalizedEmail].name},
-                        use o código abaixo para redefinir sua senha:
-                    </p>
+            <p>
+                Olá ${data.users[normalizedEmail].name},
+                use o código abaixo:
+            </p>
 
-                    <h1 style="color:#4ade80;font-size:32px;">
-                        ${code}
-                    </h1>
+            <h1 style="color:#4ade80;font-size:32px;">
+                ${code}
+            </h1>
 
-                    <p>
-                        Este código expira em 15 minutos.
-                    </p>
-                </div>
-            `
+            <p>
+                Este código expira em 15 minutos.
+            </p>
+        </div>
+    `
         });
 
         res.json({
@@ -530,6 +528,9 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         console.log(
             `📧 Enviando código para ${normalizedEmail}...`
         );
+
+        console.log("📧 CLIENTE - enviando código para:", normalizedEmail);
+        console.log("🔢 Código:", code);
 
         await resend.emails.send({
             from: "Suporte <onboarding@resend.dev>",
