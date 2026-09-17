@@ -3,7 +3,6 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
@@ -207,16 +206,7 @@ const db = {
 // EMAIL
 // ============================================================
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  family: 4,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+
 
 // ============================================================
 // FUNÇÕES AUXILIARES
@@ -282,8 +272,8 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
 
         db.write(data);
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        await resend.emails.send({
+            from: "Suporte <onboarding@resend.dev>",
             to: normalizedEmail,
             subject: 'Recuperação de Senha - Suporte',
             text: `Seu código de recuperação de senha é: ${code}`,
@@ -529,8 +519,8 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
             `📧 Enviando código para ${normalizedEmail}...`
         );
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        await resend.emails.send({
+            from: "Suporte <onboarding@resend.dev>",
             to: normalizedEmail,
             subject: 'Seu Código de Acesso - Suporte',
             text: `Seu código de verificação é: ${code}`,
@@ -1097,8 +1087,8 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
             `📧 Enviando código admin para ${normalizedEmail}...`
         );
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        await resend.emails.send({
+            from: "Suporte <onboarding@resend.dev>",
             to: normalizedEmail,
             subject: 'Seu Código de Acesso Admin - Suporte',
             text: `Seu código de verificação administrativa é: ${code}`,
