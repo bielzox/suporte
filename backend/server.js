@@ -287,7 +287,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
         async function enviarEmail() {
             try {
 
-                await resend.emails.send({
+                const { data: emailData, error: emailError } = await resend.emails.send({
                     from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
                     to: normalizedEmail,
                     subject: "Recuperação de senha",
@@ -296,8 +296,14 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
         <p>Seu código é:</p>
         <h1>${code}</h1>
         <p>Esse código expira em 15 minutos.</p>
-    `
+        `
                 });
+
+                if (emailError) {
+                    throw new Error(emailError.message);
+                }
+
+                console.log("✅ ID Resend:", emailData?.id);
 
                 console.log("✅ E-mail enviado!");
 
@@ -310,7 +316,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
 
     } catch (error) {
         console.error(
-            "❌ ERRO GMAIL:",
+            "❌ ERRO EMAIL:",
             error.message,
             error
         );
@@ -529,7 +535,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         console.log("📧 CLIENTE - enviando código para:", normalizedEmail);
         console.log("🔢 Código:", code);
 
-        await resend.emails.send({
+        const { data: emailData, error: emailError } = await resend.emails.send({
             from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
             to: normalizedEmail,
             subject: "Seu Código de Acesso - Suporte",
@@ -556,7 +562,11 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     `
         });
 
-        console.log('✅ Email enviado com sucesso!');
+        if (emailError) {
+            throw new Error(emailError.message);
+        }
+
+        console.log('✅ Email enviado com sucesso!', emailData?.id);
 
         res.json({
             success: true,
@@ -1098,7 +1108,7 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
             `📧 Enviando código admin para ${normalizedEmail}...`
         );
 
-        await resend.emails.send({
+        const { data: emailData, error: emailError } = await resend.emails.send({
             from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
             to: normalizedEmail,
             subject: "Seu Código de Acesso Admin - Suporte",
@@ -1125,7 +1135,11 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
     `
         });
 
-        console.log('✅ Email admin enviado com sucesso!');
+        if (emailError) {
+            throw new Error(emailError.message);
+        }
+
+        console.log('✅ Email admin enviado com sucesso!', emailData?.id);
 
         res.json({
             success: true,
@@ -1302,7 +1316,7 @@ app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
 
         db.write(data);
 
-        await resend.emails.send({
+        const { data: emailData, error: emailError } = await resend.emails.send({
             from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
             to: normalizedEmail,
             subject: "Recuperação de Senha Admin - Suporte",
