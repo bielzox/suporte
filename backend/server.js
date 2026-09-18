@@ -299,7 +299,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
             try {
 
                 const { data: emailData, error: emailError } = await resend.emails.send({
-                    from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
+                    from: process.env.EMAIL_FROM || "Suporte ZoxCode <onboarding@resend.dev>",
                     to: normalizedEmail,
                     subject: "Recuperação de senha",
                     html: `
@@ -319,7 +319,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
                 console.log("✅ E-mail enviado!");
 
             } catch (error) {
-                console.error("❌ ERRO EMAIL:", error.message);
+                console.error("❌ ERRO EMAIL:", error);
             }
         }
 
@@ -552,7 +552,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         console.log("🔢 Código:", code);
 
         const { data: emailData, error: emailError } = await resend.emails.send({
-            from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
+            from: process.env.EMAIL_FROM || "Suporte ZoxCode <onboarding@resend.dev>",
             to: normalizedEmail,
             subject: "Seu Código de Acesso - Suporte",
             text: `Seu código de verificação é: ${code}`,
@@ -1133,7 +1133,7 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
         );
 
         const { data: emailData, error: emailError } = await resend.emails.send({
-            from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
+            from: process.env.EMAIL_FROM || "Suporte ZoxCode <onboarding@resend.dev>",
             to: normalizedEmail,
             subject: "Seu Código de Acesso Admin - Suporte",
             text: `Seu código de verificação administrativa é: ${code}`,
@@ -1347,7 +1347,7 @@ app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
         db.write(data);
 
         const { data: emailData, error: emailError } = await resend.emails.send({
-            from: "Suporte ZoxCode <suporte@suportezoxcode.com.br>",
+            from: process.env.EMAIL_FROM || "Suporte ZoxCode <onboarding@resend.dev>",
             to: normalizedEmail,
             subject: "Recuperação de Senha Admin - Suporte",
 
