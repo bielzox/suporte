@@ -1023,20 +1023,12 @@ app.post('/api/tickets/create', (req, res) => {
 
 // ============================================================
 // MIDDLEWARE DE AUTENTICAÇÃO DE ADMIN
-// ============================================================
 
 function authenticateAdmin(req, res, next) {
 
     const token = req.headers['authorization']?.replace('Bearer ', '');
 
     const data = db.read();
-
-    console.log("TOKEN RECEBIDO:", token);
-
-    console.log(
-        "TOKENS ADMINS:",
-        Object.values(data.admins).map(a => a.sessionToken)
-    );
 
     if (!token) {
         return res.status(401).json({
@@ -1056,16 +1048,6 @@ function authenticateAdmin(req, res, next) {
     req.admin = admin;
     next();
 }
-
-const data = db.read();
-const admin = Object.values(data.admins).find(a => a.sessionToken === token);
-
-if (!admin) {
-    return res.status(401).json({ error: 'Sessão administrativa inválida ou expirada' });
-}
-
-req.admin = admin;
-next();
 
 
 // ============================================================
