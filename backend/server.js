@@ -278,6 +278,11 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
 
         const expiresAt = Date.now() + 15 * 60 * 1000;
 
+        // Garante que a área de códigos exista mesmo em bancos antigos
+        if (!data.codes) {
+            data.codes = {};
+        }
+
         data.codes[normalizedEmail] = {
             code,
             expiresAt
@@ -338,7 +343,8 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
         );
 
         res.status(500).json({
-            error: 'Falha ao enviar email'
+            error: 'Falha ao enviar email',
+            details: error.message
         });
     }
 });
@@ -537,6 +543,11 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
         const expiresAt = Date.now() + 2 * 60 * 1000;
 
+        // Garante que a área de códigos exista mesmo em bancos antigos
+        if (!data.codes) {
+            data.codes = {};
+        }
+
         data.codes[normalizedEmail] = {
             code,
             expiresAt
@@ -563,7 +574,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
             </h2>
 
             <p>
-                Olá ${user.name},<br>
+                Olá ${user.name || 'usuário'},<br>
                 use o código abaixo para entrar:
             </p>
 
@@ -596,7 +607,8 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         );
 
         res.status(500).json({
-            error: 'Falha ao enviar email'
+            error: 'Falha ao enviar email',
+            details: error.message
         });
     }
 });
@@ -1121,6 +1133,11 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
 
         const expiresAt = Date.now() + 2 * 60 * 1000;
 
+        // Garante que a área de códigos exista mesmo em bancos antigos
+        if (!data.codes) {
+            data.codes = {};
+        }
+
         data.codes[normalizedEmail] = {
             code,
             expiresAt
@@ -1176,7 +1193,8 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
         );
 
         res.status(500).json({
-            error: 'Falha ao enviar email'
+            error: 'Falha ao enviar email',
+            details: error.message
         });
     }
 });
@@ -1339,6 +1357,11 @@ app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
 
         const expiresAt = Date.now() + 15 * 60 * 1000;
 
+        // Garante que a área de códigos exista mesmo em bancos antigos
+        if (!data.codes) {
+            data.codes = {};
+        }
+
         data.codes[normalizedEmail] = {
             code,
             expiresAt
@@ -1384,7 +1407,8 @@ app.post('/api/admin/forgot-password', authLimiter, async (req, res) => {
         );
 
         res.status(500).json({
-            error: 'Falha ao enviar email'
+            error: 'Falha ao enviar email',
+            details: error.message
         });
     }
 });
