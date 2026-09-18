@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -125,13 +126,13 @@
             letter-spacing: -0.02em;
         }
 
-.gradient-text {
-    background: linear-gradient(to bottom, #ffffff, #aaaaaa);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-}
+        .gradient-text {
+            background: linear-gradient(to bottom, #ffffff, #aaaaaa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
 
         .login-box p {
             color: var(--text-muted);
@@ -388,9 +389,9 @@
             transition: var(--transition);
         }
 
-        .star-rating input:checked ~ label,
+        .star-rating input:checked~label,
         .star-rating label:hover,
-        .star-rating label:hover ~ label {
+        .star-rating label:hover~label {
             color: #ffca28;
         }
 
@@ -1123,110 +1124,109 @@
                 height: 47px;
             }
         }
-    
-/* ===== AJUSTE VISUAL PERFIL ===== */
-.profile-style-card,
-.modal-content,
-.user-card,
-.profile-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 18px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 45px -15px rgba(0,0,0,.65);
-    padding: 22px;
-}
 
-.profile-style-card input,
-.modal-content input,
-.user-card input {
-    background: rgba(0,0,0,.4);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 11px;
-    color: #fff;
-    padding: 11px 14px;
-}
+        /* ===== AJUSTE VISUAL PERFIL ===== */
+        .profile-style-card,
+        .modal-content,
+        .user-card,
+        .profile-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 45px -15px rgba(0, 0, 0, .65);
+            padding: 22px;
+        }
 
-.profile-style-card button,
-.modal-content button,
-.user-card button {
-    border-radius: 11px;
-    transition: .3s ease;
-    font-weight: 700;
-}
+        .profile-style-card input,
+        .modal-content input,
+        .user-card input {
+            background: rgba(0, 0, 0, .4);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 11px;
+            color: #fff;
+            padding: 11px 14px;
+        }
 
-.profile-style-card button:hover,
-.modal-content button:hover,
-.user-card button:hover {
-    transform: translateY(-2px);
-}
+        .profile-style-card button,
+        .modal-content button,
+        .user-card button {
+            border-radius: 11px;
+            transition: .3s ease;
+            font-weight: 700;
+        }
+
+        .profile-style-card button:hover,
+        .modal-content button:hover,
+        .user-card button:hover {
+            transform: translateY(-2px);
+        }
 
 
-/* ===== PERFIL PREMIUM IGUAL AO MODELO ===== */
-#perfil .form-section {
-    max-width: 480px;
-    margin: 0 auto;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 22px;
-    padding: 28px 32px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 45px -15px rgba(0,0,0,.65);
-    gap: 22px !important;
-}
+        /* ===== PERFIL PREMIUM IGUAL AO MODELO ===== */
+        #perfil .form-section {
+            max-width: 480px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 22px;
+            padding: 28px 32px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 45px -15px rgba(0, 0, 0, .65);
+            gap: 22px !important;
+        }
 
-#perfil #profileImageContainer img {
-    width: 120px !important;
-    height: 120px !important;
-    border: 3px solid var(--accent) !important;
-    box-shadow: 0 0 25px rgba(74,222,128,.25);
-}
+        #perfil #profileImageContainer img {
+            width: 120px !important;
+            height: 120px !important;
+            border: 3px solid var(--accent) !important;
+            box-shadow: 0 0 25px rgba(74, 222, 128, .25);
+        }
 
-#perfil h3 {
-    font-size: 1rem !important;
-    color: var(--text-muted) !important;
-    text-align: left;
-    font-weight: 600;
-}
+        #perfil h3 {
+            font-size: 1rem !important;
+            color: var(--text-muted) !important;
+            text-align: left;
+            font-weight: 600;
+        }
 
-#perfil .form-group {
-    margin-bottom: 14px;
-}
+        #perfil .form-group {
+            margin-bottom: 14px;
+        }
 
-#perfil .form-group label {
-    font-size: .72rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: .05em;
-}
+        #perfil .form-group label {
+            font-size: .72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
 
-#perfil input {
-    height: 42px;
-    background: rgba(0,0,0,.45);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-}
+        #perfil input {
+            height: 42px;
+            background: rgba(0, 0, 0, .45);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
 
-#perfil .submit-btn {
-    height: 40px;
-    border-radius: 10px;
-    background: var(--accent);
-    color: #000;
-    font-weight: 700;
-}
+        #perfil .submit-btn {
+            height: 40px;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #000;
+            font-weight: 700;
+        }
 
-#perfil #sessionsList > div {
-    background: rgba(0,0,0,.35);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-}
+        #perfil #sessionsList>div {
+            background: rgba(0, 0, 0, .35);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+        }
 
-#perfil .danger {
-    background: var(--danger);
-}
-
-</style>
+        #perfil .danger {
+            background: var(--danger);
+        }
+    </style>
 </head>
 
 <body>
@@ -1268,43 +1268,25 @@
                 <div class="error-message" id="errorMessage"></div>
                 <div class="success-message" id="successMessage"></div>
 
-                <form
-                    class="login-form"
-                    id="loginFormContainer"
-                    onsubmit="handleLogin(event)"
-                >
+                <form class="login-form" id="loginFormContainer" onsubmit="handleLogin(event)">
 
                     <div class="form-group">
                         <label for="loginEmail">Email</label>
-                        <input
-                            type="email"
-                            id="loginEmail"
-                            placeholder="seu@email.com"
-                            required
-                        >
+                        <input type="email" id="loginEmail" placeholder="seu@email.com" required>
                     </div>
 
                     <div class="form-group">
                         <label for="loginPassword">Senha</label>
-                        <input
-                            type="password"
-                            id="loginPassword"
-                            placeholder="Sua senha"
-                            required
-                        >
+                        <input type="password" id="loginPassword" placeholder="Sua senha" required>
                     </div>
 
                     <div style="text-align:right;margin-bottom:5px;">
-                        <a
-                            href="#"
-                            onclick="switchAuthTab('recover'); return false;"
-                            style="
+                        <a href="#" onclick="switchAuthTab('recover'); return false;" style="
                                 color:var(--text-muted);
                                 font-size:0.8rem;
                                 text-decoration:none;
                                 transition:var(--transition);
-                            "
-                        >
+                            ">
                             Recuperar Senha
                         </a>
                     </div>
@@ -1329,50 +1311,26 @@
                 <div class="error-message" id="registerErrorMessage"></div>
                 <div class="success-message" id="registerSuccessMessage"></div>
 
-                <form
-                    class="login-form"
-                    id="registerFormContainer"
-                    onsubmit="handleRegister(event)"
-                >
+                <form class="login-form" id="registerFormContainer" onsubmit="handleRegister(event)">
 
                     <div class="form-group">
                         <label for="registerName">Nome</label>
-                        <input
-                            type="text"
-                            id="registerName"
-                            placeholder="Seu Nome Completo"
-                            required
-                        >
+                        <input type="text" id="registerName" placeholder="Seu Nome Completo" required>
                     </div>
 
                     <div class="form-group">
                         <label for="registerUsername">Nome de Usuário</label>
-                        <input
-                            type="text"
-                            id="registerUsername"
-                            placeholder="seu_usuario"
-                            required
-                        >
+                        <input type="text" id="registerUsername" placeholder="seu_usuario" required>
                     </div>
 
                     <div class="form-group">
                         <label for="registerEmail">Email</label>
-                        <input
-                            type="email"
-                            id="registerEmail"
-                            placeholder="seu@email.com"
-                            required
-                        >
+                        <input type="email" id="registerEmail" placeholder="seu@email.com" required>
                     </div>
 
                     <div class="form-group">
                         <label for="registerPassword">Senha</label>
-                        <input
-                            type="password"
-                            id="registerPassword"
-                            placeholder="Crie uma senha"
-                            required
-                        >
+                        <input type="password" id="registerPassword" placeholder="Crie uma senha" required>
                     </div>
 
                     <button type="submit" class="login-btn">
@@ -1395,20 +1353,12 @@
                 <div class="error-message" id="forgotErrorMessage"></div>
                 <div class="success-message" id="forgotSuccessMessage"></div>
 
-                <form
-                    class="login-form"
-                    onsubmit="handleForgotPassword(event)"
-                >
+                <form class="login-form" onsubmit="handleForgotPassword(event)">
 
                     <div class="form-group">
                         <label for="forgotEmail">Email</label>
 
-                        <input
-                            type="email"
-                            id="forgotEmail"
-                            placeholder="seu@email.com"
-                            required
-                        >
+                        <input type="email" id="forgotEmail" placeholder="seu@email.com" required>
                     </div>
 
                     <button type="submit" class="login-btn">
@@ -1431,20 +1381,14 @@
                 <div class="error-message" id="verifyErrorMessage"></div>
                 <div class="success-message" id="verifySuccessMessage"></div>
 
-                <form
-                    class="login-form"
-                    id="verificationForm"
-                    onsubmit="handleVerificationSubmit(event)"
-                >
+                <form class="login-form" id="verificationForm" onsubmit="handleVerificationSubmit(event)">
 
-                    <p
-                        style="
+                    <p style="
                             text-align:center;
                             color:rgba(255,255,255,0.7);
                             font-size:0.82rem;
                             margin-bottom:10px;
-                        "
-                    >
+                        ">
                         Digite o código de 6 dígitos enviado para seu email
                     </p>
 
@@ -1468,23 +1412,14 @@
                         Verificar Código
                     </button>
 
-                    <button
-                        type="button"
-                        class="resend-btn"
-                        id="resendBtn"
-                        onclick="resendCode()"
-                    >
+                    <button type="button" class="resend-btn" id="resendBtn" onclick="resendCode()">
                         Reenviar código
                     </button>
 
                 </form>
 
                 <div class="toggle-auth">
-                    <button
-                        type="button"
-                        onclick="backToAuth()"
-                        style="margin-top:15px;"
-                    >
+                    <button type="button" onclick="backToAuth()" style="margin-top:15px;">
                         ← Voltar
                     </button>
                 </div>
@@ -1501,32 +1436,18 @@
                     Crie sua nova senha de acesso
                 </p>
 
-                <div
-                    class="error-message"
-                    id="resetPasswordErrorMessage"
-                ></div>
+                <div class="error-message" id="resetPasswordErrorMessage"></div>
 
-                <div
-                    class="success-message"
-                    id="resetPasswordSuccessMessage"
-                ></div>
+                <div class="success-message" id="resetPasswordSuccessMessage"></div>
 
-                <form
-                    class="login-form"
-                    onsubmit="handleResetPasswordSubmit(event)"
-                >
+                <form class="login-form" onsubmit="handleResetPasswordSubmit(event)">
 
                     <div class="form-group">
                         <label for="newPassword">
                             Nova Senha
                         </label>
 
-                        <input
-                            type="password"
-                            id="newPassword"
-                            placeholder="Sua nova senha"
-                            required
-                        >
+                        <input type="password" id="newPassword" placeholder="Sua nova senha" required>
                     </div>
 
                     <div class="form-group">
@@ -1534,12 +1455,7 @@
                             Confirmar Nova Senha
                         </label>
 
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            placeholder="Confirme a nova senha"
-                            required
-                        >
+                        <input type="password" id="confirmPassword" placeholder="Confirme a nova senha" required>
                     </div>
 
                     <button type="submit" class="login-btn">
@@ -1549,11 +1465,7 @@
                 </form>
 
                 <div class="toggle-auth">
-                    <button
-                        type="button"
-                        onclick="backToAuth()"
-                        style="margin-top:15px;"
-                    >
+                    <button type="button" onclick="backToAuth()" style="margin-top:15px;">
                         ← Voltar
                     </button>
                 </div>
@@ -1576,20 +1488,14 @@
 
             <div class="user-info-bar">
 
-                <div
-                    id="welcomeUser"
-                    style="
+                <div id="welcomeUser" style="
                         font-weight:600;
                         color:rgba(255,255,255,0.9);
-                    "
-                >
+                    ">
                     Olá, Usuário
                 </div>
 
-                <button
-                    class="logout-btn"
-                    onclick="logout()"
-                >
+                <button class="logout-btn" onclick="logout()">
                     Sair
                 </button>
 
@@ -1615,52 +1521,31 @@
 
             <div class="tabs">
 
-                <button
-                    class="tab-button active"
-                    onclick="switchTab(event, 'novo-ticket')"
-                >
+                <button class="tab-button active" onclick="switchTab(event, 'novo-ticket')">
                     ➕ Novo Ticket
                 </button>
 
-                <button
-                    class="tab-button"
-                    onclick="switchTab(event, 'meus-tickets')"
-                >
+                <button class="tab-button" onclick="switchTab(event, 'meus-tickets')">
                     📋 Meus Tickets
                 </button>
 
-                <button
-                    class="tab-button"
-                    onclick="switchTab(event, 'perfil')"
-                >
+                <button class="tab-button" onclick="switchTab(event, 'perfil')">
                     👤 Perfil
                 </button>
 
-                <button
-                    class="tab-button"
-                    onclick="switchTab(event, 'conversas')"
-                >
+                <button class="tab-button" onclick="switchTab(event, 'conversas')">
                     💬 Conversas
                 </button>
 
-                <button
-                    class="tab-button"
-                    onclick="switchTab(event, 'avaliar')"
-                >
+                <button class="tab-button" onclick="switchTab(event, 'avaliar')">
                     ⭐ Avaliar
                 </button>
 
-                <button
-                    class="tab-button"
-                    onclick="switchTab(event, 'avaliacoes')"
-                >
+                <button class="tab-button" onclick="switchTab(event, 'avaliacoes')">
                     📋 Avaliações
                 </button>
 
-                <button
-                    class="tab-button"
-                    onclick="switchTab(event, 'faq')"
-                >
+                <button class="tab-button" onclick="switchTab(event, 'faq')">
                     ❓ FAQ
                 </button>
 
@@ -1671,19 +1556,13 @@
                  NOVO TICKET
                  ================================================= -->
 
-            <div
-                id="novo-ticket"
-                class="tab-content active"
-            >
+            <div id="novo-ticket" class="tab-content active">
 
                 <div class="form-section">
 
                     <!-- SUCESSO -->
 
-                    <div
-                        class="ticket-success"
-                        id="ticketSuccessMessage"
-                    >
+                    <div class="ticket-success" id="ticketSuccessMessage">
                         ✅ <strong>Ticket enviado com sucesso!</strong><br>
                         Seu ticket foi registrado.
                         <br>
@@ -1693,15 +1572,9 @@
 
                     <!-- ERRO -->
 
-                    <div
-                        class="ticket-error"
-                        id="ticketErrorMessage"
-                    ></div>
+                    <div class="ticket-error" id="ticketErrorMessage"></div>
 
-                    <form
-                        id="ticketForm"
-                        onsubmit="submitTicket(event)"
-                    >
+                    <form id="ticketForm" onsubmit="submitTicket(event)">
 
                         <div class="form-row">
 
@@ -1711,13 +1584,7 @@
                                     Seu Nome *
                                 </label>
 
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    required
-                                    placeholder="João Silva"
-                                >
+                                <input type="text" id="name" name="name" required placeholder="João Silva">
 
                             </div>
 
@@ -1727,13 +1594,7 @@
                                     Email *
                                 </label>
 
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    required
-                                    placeholder="seu@email.com"
-                                >
+                                <input type="email" id="email" name="email" required placeholder="seu@email.com">
 
                             </div>
 
@@ -1746,11 +1607,7 @@
                                 Categoria *
                             </label>
 
-                            <select
-                                id="category"
-                                name="category"
-                                required
-                            >
+                            <select id="category" name="category" required>
 
                                 <option value="">
                                     Selecione uma categoria
@@ -1787,13 +1644,8 @@
                                 Nome do Projeto *
                             </label>
 
-                            <input
-                                type="text"
-                                id="project"
-                                name="project"
-                                required
-                                placeholder="Ex: Zox Code, KB Store, etc"
-                            >
+                            <input type="text" id="project" name="project" required
+                                placeholder="Ex: Zox Code, KB Store, etc">
 
                         </div>
 
@@ -1804,13 +1656,7 @@
                                 Título *
                             </label>
 
-                            <input
-                                type="text"
-                                id="title"
-                                name="title"
-                                required
-                                placeholder="Resumo do problema"
-                            >
+                            <input type="text" id="title" name="title" required placeholder="Resumo do problema">
 
                         </div>
 
@@ -1821,21 +1667,13 @@
                                 Descrição Detalhada *
                             </label>
 
-                            <textarea
-                                id="description"
-                                name="description"
-                                required
-                                placeholder="Descreva o problema em detalhes..."
-                            ></textarea>
+                            <textarea id="description" name="description" required
+                                placeholder="Descreva o problema em detalhes..."></textarea>
 
                         </div>
 
 
-                        <button
-                            type="submit"
-                            class="submit-btn"
-                            id="submitTicketButton"
-                        >
+                        <button type="submit" class="submit-btn" id="submitTicketButton">
                             📤 Enviar Ticket
                         </button>
 
@@ -1850,31 +1688,26 @@
                  MEUS TICKETS
                  ================================================= -->
 
-            <div
-                id="meus-tickets"
-                class="tab-content"
-            >
+            <div id="meus-tickets" class="tab-content">
 
-                <div
-                    class="tickets-list"
-                    id="ticketsList"
-                ></div>
+                <div class="tickets-list" id="ticketsList"></div>
 
             </div>
 
 
             <!-- PERFIL / CONFIGURAÇÕES -->
 
-            <div
-                id="perfil"
-                class="tab-content"
-            >
-                <div class="form-section" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px;">
+            <div id="perfil" class="tab-content">
+                <div class="form-section"
+                    style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px;">
                     <div id="profileImageContainer" style="position: relative;">
-                        <img id="profileImg" src="" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; background: #222;">
-                        <label for="profileImageInput" style="position: absolute; bottom: 0; right: 0; background: var(--accent); color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; border: 2px solid #000;">
+                        <img id="profileImg" src=""
+                            style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; background: #222;">
+                        <label for="profileImageInput"
+                            style="position: absolute; bottom: 0; right: 0; background: var(--accent); color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; border: 2px solid #000;">
                             📷
-                            <input type="file" id="profileImageInput" style="display: none;" onchange="updateProfileImage(this)">
+                            <input type="file" id="profileImageInput" style="display: none;"
+                                onchange="updateProfileImage(this)">
                         </label>
                     </div>
 
@@ -1908,18 +1741,23 @@
                     </div>
 
                     <div style="width: 100%; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
-                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-muted);">Sessões Ativas</h3>
-                        <div id="sessionsList" style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-muted);">Sessões Ativas
+                        </h3>
+                        <div id="sessionsList"
+                            style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
                             <!-- Sessões serão inseridas aqui -->
                         </div>
-                        <button class="submit-btn" style="background: rgba(248, 113, 113, 0.2); color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.3); margin-top: 15px;" onclick="revokeAllSessions()">
+                        <button class="submit-btn"
+                            style="background: rgba(248, 113, 113, 0.2); color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.3); margin-top: 15px;"
+                            onclick="revokeAllSessions()">
                             🚫 Encerrar Todas as Sessões
                         </button>
                     </div>
 
                     <div style="width: 100%; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
                         <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--danger);">Zona de Perigo</h3>
-                        <button class="submit-btn" style="background: var(--danger); color: #fff; border: none;" onclick="deleteAccount()">
+                        <button class="submit-btn" style="background: var(--danger); color: #fff; border: none;"
+                            onclick="deleteAccount()">
                             🗑️ Excluir Minha Conta Permanentemente
                         </button>
                     </div>
@@ -1930,321 +1768,265 @@
                  CONVERSAS
                  ================================================= -->
 
-            <div
-                id="conversas"
-                class="tab-content"
-            >
+            <div id="conversas" class="tab-content">
 
-                <div
-                    class="tickets-list"
-                    id="chatsList"
-                ></div>
+                <div class="tickets-list" id="chatsList"></div>
 
             </div>
 
 
-            </div>
+        </div>
 
-            <!-- =================================================
+        <!-- =================================================
                  AVALIAR
                  ================================================= -->
 
-            <div
-                id="avaliar"
-                class="tab-content"
-            >
-                <div class="form-section">
-                    <div class="panel-header">
-                        <h2>⭐ Avalie nosso Serviço</h2>
-                        <p>Sua opinião é muito importante para nós!</p>
+        <div id="avaliar" class="tab-content">
+            <div class="form-section">
+                <div class="panel-header">
+                    <h2>⭐ Avalie nosso Serviço</h2>
+                    <p>Sua opinião é muito importante para nós!</p>
+                </div>
+
+                <div class="error-message" id="reviewErrorMessage"></div>
+                <div class="success-message" id="reviewSuccessMessage"></div>
+
+                <form onsubmit="submitReview(event)" class="login-form">
+                    <div class="form-group"
+                        style="align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                        <label>Sua Nota:</label>
+                        <div class="star-rating">
+                            <input type="radio" name="rating" value="0" id="star0"><label for="star0">☆</label>
+                            <input type="radio" name="rating" value="1" id="star1"><label for="star1">☆</label>
+                            <input type="radio" name="rating" value="2" id="star2"><label for="star2">☆</label>
+                            <input type="radio" name="rating" value="3" id="star3"><label for="star3">☆</label>
+                            <input type="radio" name="rating" value="4" id="star4"><label for="star4">☆</label>
+                            <input type="radio" name="rating" value="5" id="star5"><label for="star5">☆</label>
+                        </div>
                     </div>
 
-                    <div class="error-message" id="reviewErrorMessage"></div>
-                    <div class="success-message" id="reviewSuccessMessage"></div>
+                    <div class="form-group">
+                        <label for="reviewComment">Descrição</label>
+                        <textarea id="reviewComment" placeholder="Conte-nos como foi sua experiência..."
+                            required></textarea>
+                    </div>
 
-                    <form onsubmit="submitReview(event)" class="login-form">
-                        <div class="form-group" style="align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-bottom: 20px;">
-                            <label>Sua Nota:</label>
-                            <div class="star-rating">
-                                <input type="radio" name="rating" value="0" id="star0"><label for="star0">☆</label>
-                                <input type="radio" name="rating" value="1" id="star1"><label for="star1">☆</label>
-                                <input type="radio" name="rating" value="2" id="star2"><label for="star2">☆</label>
-                                <input type="radio" name="rating" value="3" id="star3"><label for="star3">☆</label>
-                                <input type="radio" name="rating" value="4" id="star4"><label for="star4">☆</label>
-                                <input type="radio" name="rating" value="5" id="star5"><label for="star5">☆</label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="reviewComment">Descrição</label>
-                            <textarea id="reviewComment" placeholder="Conte-nos como foi sua experiência..." required></textarea>
-                        </div>
-
-                        <button type="submit" class="submit-btn">Enviar Avaliação</button>
-                    </form>
-                </div>
+                    <button type="submit" class="submit-btn">Enviar Avaliação</button>
+                </form>
             </div>
+        </div>
 
-            <!-- =================================================
+        <!-- =================================================
                  AVALIAÇÕES
                  ================================================= -->
 
-            <div
-                id="avaliacoes"
-                class="tab-content"
-            >
-                <div class="header">
-                    <h1>📋 Avaliações dos Usuários</h1>
-                    <p>Veja o que as pessoas estão dizendo sobre nosso suporte</p>
-                </div>
-                <div class="tickets-list" id="reviewsList">
-                    <!-- Avaliações serão inseridas aqui -->
-                </div>
+        <div id="avaliacoes" class="tab-content">
+            <div class="header">
+                <h1>📋 Avaliações dos Usuários</h1>
+                <p>Veja o que as pessoas estão dizendo sobre nosso suporte</p>
             </div>
+            <div class="tickets-list" id="reviewsList">
+                <!-- Avaliações serão inseridas aqui -->
+            </div>
+        </div>
 
-            <!-- =================================================
+        <!-- =================================================
                  FAQ
                  ================================================= -->
 
-            <div
-                id="faq"
-                class="tab-content"
-            >
+        <div id="faq" class="tab-content">
 
-                <div id="faqList">
+            <div id="faqList">
 
-                    <div class="faq-item">
+                <div class="faq-item">
 
-                        <div
-                            class="faq-question"
-                            onclick="toggleFaq(this)"
-                        >
-                            <span>
-                                Como abro um novo ticket de suporte?
-                            </span>
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>
+                            Como abro um novo ticket de suporte?
+                        </span>
 
-                            <span class="faq-icon">
-                                ▼
-                            </span>
-                        </div>
-
-                        <div class="faq-answer">
-                            Clique na aba "Novo Ticket" acima e preencha o formulário com os dados solicitados. Descreva seu problema de forma clara e detalhada para que possamos ajudá-lo melhor.
-                        </div>
-
+                        <span class="faq-icon">
+                            ▼
+                        </span>
                     </div>
 
-
-                    <div class="faq-item">
-
-                        <div
-                            class="faq-question"
-                            onclick="toggleFaq(this)"
-                        >
-                            <span>
-                                Qual é o tempo médio de resposta?
-                            </span>
-
-                            <span class="faq-icon">
-                                ▼
-                            </span>
-                        </div>
-
-                        <div class="faq-answer">
-                            O tempo de resposta pode variar conforme a quantidade de solicitações e a complexidade de cada problema. Nossa equipe responderá assim que possível.
-                        </div>
-
+                    <div class="faq-answer">
+                        Clique na aba "Novo Ticket" acima e preencha o formulário com os dados solicitados. Descreva seu
+                        problema de forma clara e detalhada para que possamos ajudá-lo melhor.
                     </div>
 
+                </div>
 
-                    <div class="faq-item">
 
-                        <div
-                            class="faq-question"
-                            onclick="toggleFaq(this)"
-                        >
-                            <span>
-                                Vocês oferecem suporte 24/7?
-                            </span>
+                <div class="faq-item">
 
-                            <span class="faq-icon">
-                                ▼
-                            </span>
-                        </div>
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>
+                            Qual é o tempo médio de resposta?
+                        </span>
 
-                        <div class="faq-answer">
-                            Você pode abrir tickets a qualquer hora. Nossa equipe analisará as solicitações e responderá assim que possível. Para assuntos urgentes, entre em contato via Discord.
-                        </div>
-
+                        <span class="faq-icon">
+                            ▼
+                        </span>
                     </div>
 
-
-                    <div class="faq-item">
-
-                        <div
-                            class="faq-question"
-                            onclick="toggleFaq(this)"
-                        >
-                            <span>
-                                Posso acompanhar meu ticket em tempo real?
-                            </span>
-
-                            <span class="faq-icon">
-                                ▼
-                            </span>
-                        </div>
-
-                        <div class="faq-answer">
-                            Sim! Você pode acompanhar o status do ticket na aba "Meus Tickets" e conversar diretamente com a equipe através do chat do ticket.
-                        </div>
-
+                    <div class="faq-answer">
+                        O tempo de resposta pode variar conforme a quantidade de solicitações e a complexidade de cada
+                        problema. Nossa equipe responderá assim que possível.
                     </div>
 
+                </div>
 
-                    <div class="faq-item">
 
-                        <div
-                            class="faq-question"
-                            onclick="toggleFaq(this)"
-                        >
-                            <span>
-                                E se meu problema não for resolvido no primeiro contato?
-                            </span>
+                <div class="faq-item">
 
-                            <span class="faq-icon">
-                                ▼
-                            </span>
-                        </div>
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>
+                            Vocês oferecem suporte 24/7?
+                        </span>
 
-                        <div class="faq-answer">
-                            Sem problemas! Você pode adicionar comentários ao seu ticket com mais informações. Continuaremos investigando e oferecendo suporte até que o problema seja completamente resolvido.
-                        </div>
-
+                        <span class="faq-icon">
+                            ▼
+                        </span>
                     </div>
 
-
-                    <div class="faq-item">
-
-                        <div
-                            class="faq-question"
-                            onclick="toggleFaq(this)"
-                        >
-                            <span>
-                                Como contato o suporte via Discord?
-                            </span>
-
-                            <span class="faq-icon">
-                                ▼
-                            </span>
-                        </div>
-
-                        <div class="faq-answer">
-                            Você pode entrar em nosso Discord (https://discord.gg/uqnUaapRBa) e abrir um ticket no canal de suporte. Um membro da equipe responderá assim que possível!
-                        </div>
-
+                    <div class="faq-answer">
+                        Você pode abrir tickets a qualquer hora. Nossa equipe analisará as solicitações e responderá
+                        assim que possível. Para assuntos urgentes, entre em contato via Discord.
                     </div>
 
+                </div>
 
-                    <div class="faq-item">
 
-                        <div
-                            class="faq-question"
-                            onclick="toggleFaq(this)"
-                        >
-                            <span>
-                                Posso contratar suporte customizado?
-                            </span>
+                <div class="faq-item">
 
-                            <span class="faq-icon">
-                                ▼
-                            </span>
-                        </div>
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>
+                            Posso acompanhar meu ticket em tempo real?
+                        </span>
 
-                        <div class="faq-answer">
-                            Sim! Oferecemos pacotes de suporte customizado, manutenção proativa e atendimento personalizado. Entre em contato via Discord ou email para mais informações.
-                        </div>
+                        <span class="faq-icon">
+                            ▼
+                        </span>
+                    </div>
 
+                    <div class="faq-answer">
+                        Sim! Você pode acompanhar o status do ticket na aba "Meus Tickets" e conversar diretamente com a
+                        equipe através do chat do ticket.
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>
+                            E se meu problema não for resolvido no primeiro contato?
+                        </span>
+
+                        <span class="faq-icon">
+                            ▼
+                        </span>
+                    </div>
+
+                    <div class="faq-answer">
+                        Sem problemas! Você pode adicionar comentários ao seu ticket com mais informações. Continuaremos
+                        investigando e oferecendo suporte até que o problema seja completamente resolvido.
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>
+                            Como contato o suporte via Discord?
+                        </span>
+
+                        <span class="faq-icon">
+                            ▼
+                        </span>
+                    </div>
+
+                    <div class="faq-answer">
+                        Você pode entrar em nosso Discord (https://discord.gg/uqnUaapRBa) e abrir um ticket no canal de
+                        suporte. Um membro da equipe responderá assim que possível!
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>
+                            Posso contratar suporte customizado?
+                        </span>
+
+                        <span class="faq-icon">
+                            ▼
+                        </span>
+                    </div>
+
+                    <div class="faq-answer">
+                        Sim! Oferecemos pacotes de suporte customizado, manutenção proativa e atendimento personalizado.
+                        Entre em contato via Discord ou email para mais informações.
                     </div>
 
                 </div>
 
             </div>
 
+        </div>
 
-            <!-- =================================================
+
+        <!-- =================================================
                  CHAT MODAL
                  ================================================= -->
 
-            <div class="discord-embed" style="max-width: 1200px; margin: 20px auto; text-align: center; padding: 20px; background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.3); border-radius: 15px; backdrop-filter: blur(10px);">
-                <span style="font-size: 1.1rem; color: var(--text-main);">Entre no nosso Discord: </span>
-                <a href="https://discord.gg/2QDNg8gH7s" target="_blank" style="color: #5865F2; font-weight: bold; text-decoration: underline;">discord.gg/2QDNg8gH7s</a>
-            </div>
+        <div class="discord-embed"
+            style="max-width: 1200px; margin: 20px auto; text-align: center; padding: 20px; background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.3); border-radius: 15px; backdrop-filter: blur(10px);">
+            <span style="font-size: 1.1rem; color: var(--text-main);">Entre no nosso Discord: </span>
+            <a href="https://discord.gg/2QDNg8gH7s" target="_blank"
+                style="color: #5865F2; font-weight: bold; text-decoration: underline;">discord.gg/2QDNg8gH7s</a>
+        </div>
 
-            <div
-                class="chat-modal"
-                id="chatModal"
-            >
+        <div class="chat-modal" id="chatModal">
 
-                <div class="chat-container">
+            <div class="chat-container">
 
-                    <div class="chat-header">
+                <div class="chat-header">
 
-                        <h3 id="chatTitle">
-                            Chat - Ticket #ID
-                        </h3>
+                    <h3 id="chatTitle">
+                        Chat - Ticket #ID
+                    </h3>
 
-                        <button
-                            class="close-chat"
-                            onclick="closeChat()"
-                            aria-label="Fechar chat"
-                        >
-                            ×
-                        </button>
+                    <button class="close-chat" onclick="closeChat()" aria-label="Fechar chat">
+                        ×
+                    </button>
 
-                    </div>
+                </div>
 
 
-                    <div
-                        class="chat-messages"
-                        id="chatMessages"
-                    ></div>
+                <div class="chat-messages" id="chatMessages"></div>
 
 
-                    <div class="chat-input-area">
+                <div class="chat-input-area">
 
-                        <label
-                            class="chat-btn"
-                            style="cursor:pointer;"
-                            title="Anexar arquivo"
-                        >
-                            📎
+                    <label class="chat-btn" style="cursor:pointer;" title="Anexar arquivo">
+                        📎
 
-                            <input
-                                type="file"
-                                id="chatFile"
-                                style="display:none;"
-                                onchange="handleFileSelect()"
-                            >
-                        </label>
+                        <input type="file" id="chatFile" style="display:none;" onchange="handleFileSelect()">
+                    </label>
 
-                        <input
-                            type="text"
-                            class="chat-input"
-                            id="chatInput"
-                            placeholder="Digite sua mensagem..."
-                            onkeypress="if(event.key === 'Enter') sendChatMessage()"
-                        >
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Digite sua mensagem..."
+                        onkeypress="if(event.key === 'Enter') sendChatMessage()">
 
-                        <button
-                            class="chat-btn"
-                            id="sendChatBtn"
-                            onclick="sendChatMessage()"
-                            title="Enviar mensagem"
-                        >
-                            🚀
-                        </button>
-
-                    </div>
+                    <button class="chat-btn" id="sendChatBtn" onclick="sendChatMessage()" title="Enviar mensagem">
+                        🚀
+                    </button>
 
                 </div>
 
@@ -2254,13 +2036,15 @@
 
     </div>
 
+    </div>
+
 
     <!-- =====================================================
          JAVASCRIPT
          ===================================================== -->
 
     <script>
-const API_URL = "https://suporte-88uc.onrender.com";
+        const API_URL = "https://suporte-88uc.onrender.com";
 
 
         let timerInterval = null;
@@ -2641,7 +2425,7 @@ const API_URL = "https://suporte-88uc.onrender.com";
                 } else {
 
                     const res = await fetch(
-                    `${API_URL}/api/auth/verify-code`,
+                        `${API_URL}/api/auth/verify-code`,
                         {
                             method: "POST",
 
@@ -2996,7 +2780,8 @@ const API_URL = "https://suporte-88uc.onrender.com";
                     );
 
                     setTimeout(() => {
-                        backToAuth();
+                        console.log("ABRINDO TELA DE CÓDIGO");
+                        showVerificationForm("reset");
                     }, 1500);
 
                 } else {
@@ -3052,10 +2837,9 @@ const API_URL = "https://suporte-88uc.onrender.com";
                         `${minutes
                             .toString()
                             .padStart(2, "0")
-                        }:${
-                            seconds
-                                .toString()
-                                .padStart(2, "0")
+                        }:${seconds
+                            .toString()
+                            .padStart(2, "0")
                         }`;
                 }
 
@@ -3767,7 +3551,7 @@ const API_URL = "https://suporte-88uc.onrender.com";
         async function updateProfileImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     document.getElementById('profileImg').src = e.target.result;
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -4160,7 +3944,7 @@ const API_URL = "https://suporte-88uc.onrender.com";
 
             // Tickets fechados ficam somente para visualização (Transcript)
             const ticketsRes = await fetch(
-                    `${API_URL}/api/tickets`
+                `${API_URL}/api/tickets`
             );
             const ticketsData = await ticketsRes.json();
             const currentTicket = ticketsData.find(t => String(t.id) === String(ticketId));
@@ -4416,10 +4200,9 @@ const API_URL = "https://suporte-88uc.onrender.com";
                 );
 
             div.className =
-                `message ${
-                    msg.sender === "admin"
-                        ? "admin"
-                        : "user"
+                `message ${msg.sender === "admin"
+                    ? "admin"
+                    : "user"
                 }`;
 
             const info =
@@ -4433,9 +4216,8 @@ const API_URL = "https://suporte-88uc.onrender.com";
             info.textContent =
                 `${msg.sender === "admin"
                     ? "Administrador"
-                    : "Você"} • ${
-                        msg.timestamp || ""
-                    }`;
+                    : "Você"} • ${msg.timestamp || ""
+                }`;
 
             div.appendChild(
                 info
@@ -4505,9 +4287,8 @@ const API_URL = "https://suporte-88uc.onrender.com";
                         "message-file";
 
                     link.textContent =
-                        `📎 ${
-                            msg.fileName ||
-                            "Arquivo"
+                        `📎 ${msg.fileName ||
+                        "Arquivo"
                         }`;
 
                     div.appendChild(
@@ -4702,4 +4483,5 @@ const API_URL = "https://suporte-88uc.onrender.com";
     </script>
 
 </body>
+
 </html>
