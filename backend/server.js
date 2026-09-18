@@ -297,7 +297,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
         <h2>Recuperação de acesso</h2>
         <p>Seu código é:</p>
         <h1>${code}</h1>
-        <p>Esse código expira em 15 minutos.</p>
+        <p>Esse código expira em 2 minutos.</p>
         `
                 });
 
