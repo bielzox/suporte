@@ -25,7 +25,27 @@ function getBrazilDateTime() {
 
 const { Resend } = require("resend");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+async function sendEmail({to, subject, html, text}) {
+    if (!resend) {
+        throw new Error("RESEND_API_KEY não configurada no servidor");
+    }
+
+    const result = await resend.emails.send({
+        from: process.env.EMAIL_FROM || "Suporte ZoxCode <onboarding@resend.dev>",
+        to,
+        subject,
+        html,
+        text
+    });
+
+    if (result.error) {
+        throw new Error(result.error.message || "Erro desconhecido no envio de email");
+    }
+
+    return result.data;
+}
 
 
 function encrypt(text) {
@@ -303,24 +323,19 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
         async function enviarEmail() {
             try {
 
-                const { data: emailData, error: emailError } = await resend.emails.send({
-                    from: process.env.EMAIL_FROM || "Suporte ZoxCode <onboarding@resend.dev>",
+                const emailData = await sendEmail({
                     to: normalizedEmail,
                     subject: "Recuperação de senha",
+                    text: `Seu código de recuperação é: ${code}`,
                     html: `
-        <h2>Recuperação de acesso</h2>
-        <p>Seu código é:</p>
-        <h1>${code}</h1>
-        <p>Esse código expira em 2 minutos.</p>
-        `
+                        <h2>Recuperação de acesso</h2>
+                        <p>Seu código é:</p>
+                        <h1>${code}</h1>
+                        <p>Esse código expira em 15 minutos.</p>
+                    `
                 });
 
-                if (emailError) {
-                    throw new Error(emailError.message);
-                }
-
                 console.log("✅ ID Resend:", emailData?.id);
-
                 console.log("✅ E-mail enviado!");
 
             } catch (error) {
@@ -562,41 +577,19 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         console.log("📧 CLIENTE - enviando código para:", normalizedEmail);
         console.log("🔢 Código:", code);
 
-        const { data: emailData, error: emailError } = await resend.emails.send({
-            from: process.env.EMAIL_FROM || "Suporte ZoxCode <onboarding@resend.dev>",
+        const emailData = await sendEmail({
             to: normalizedEmail,
             subject: "Seu Código de Acesso - Suporte",
             text: `Seu código de verificação é: ${code}`,
             html: `
-        <div style="font-family:sans-serif;text-align:center;">
-            <h2 style="color:#333;">
-                Verificação de Segurança
-            </h2>
-
-            <p>
-                Olá ${user.name || 'usuário'},<br>
-                use o código abaixo para entrar:
-            </p>
-
-            <h1 style="color:#4ade80;font-size:32px;">
-                ${code}
-            </h1>
-
-            <p>
-                Este código expira em 2 minutos.
-            </p>
-        </div>
-    `
+                <div style="font-family:sans-serif;text-align:center;">
+                    <h2>Verificação de Segurança</h2>
+                    <p>Olá ${user.name || 'usuário'}, use o código abaixo:</p>
+                    <h1 style="color:#4ade80;font-size:32px;">${code}</h1>
+                    <p>Este código expira em 2 minutos.</p>
+                </div>
+            `
         });
-
-        if (emailError) {
-            console.error("❌ RESEND ERRO:", emailError);
-
-            return res.status(500).json({
-                error: "Falha ao enviar email",
-                details: emailError.message || "Erro no serviço de email"
-            });
-        }
 
         console.log('✅ Email enviado com sucesso!', emailData?.id);
 
