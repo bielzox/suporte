@@ -316,6 +316,11 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
 
         await enviarEmail();
 
+        return res.json({
+            success: true,
+            message: 'Código de recuperação enviado ao seu email!'
+        });
+
     } catch (error) {
         console.error(
             "❌ ERRO EMAIL:",
