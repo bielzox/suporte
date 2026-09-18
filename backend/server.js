@@ -365,7 +365,7 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
 
         const normalizedEmail = normalizeEmail(email);
         const data = db.read();
-        const storedCode = data.codes[normalizedEmail];
+        const storedCode = data.codes ? data.codes[normalizedEmail] : null;
 
         if (
             !storedCode ||
@@ -590,7 +590,12 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         });
 
         if (emailError) {
-            throw new Error(emailError.message);
+            console.error("❌ RESEND ERRO:", emailError);
+
+            return res.status(500).json({
+                error: "Falha ao enviar email",
+                details: emailError.message || "Erro no serviço de email"
+            });
         }
 
         console.log('✅ Email enviado com sucesso!', emailData?.id);
@@ -628,7 +633,7 @@ app.post('/api/auth/verify-code', authLimiter, (req, res) => {
 
         const normalizedEmail = normalizeEmail(email);
         const data = db.read();
-        const storedCode = data.codes[normalizedEmail];
+        const storedCode = data.codes ? data.codes[normalizedEmail] : null;
 
         if (
             !storedCode ||
@@ -1214,7 +1219,7 @@ app.post('/api/admin/verify-code', authLimiter, (req, res) => {
 
         const normalizedEmail = normalizeEmail(email);
         const data = db.read();
-        const storedCode = data.codes[normalizedEmail];
+        const storedCode = data.codes ? data.codes[normalizedEmail] : null;
 
         if (
             !storedCode ||
@@ -1429,7 +1434,7 @@ app.post('/api/admin/reset-password', authLimiter, async (req, res) => {
 
         const normalizedEmail = normalizeEmail(email);
         const data = db.read();
-        const storedCode = data.codes[normalizedEmail];
+        const storedCode = data.codes ? data.codes[normalizedEmail] : null;
 
         if (
             !storedCode ||
@@ -1476,7 +1481,7 @@ app.post('/api/admin/verify-reset-code', (req, res) => {
 
         const normalizedEmail = normalizeEmail(email);
         const data = db.read();
-        const storedCode = data.codes[normalizedEmail];
+        const storedCode = data.codes ? data.codes[normalizedEmail] : null;
 
         if (
             !storedCode ||
