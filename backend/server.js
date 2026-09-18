@@ -14,6 +14,15 @@ const ALGORITHM = 'aes-256-cbc';
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'votre-cle-secrete-de-32-caracteres!!'; // Deve ter 32 bytes
 const IV_LENGTH = 16;
 
+// HORARIO PADRAO BRASIL (America/Sao_Paulo)
+function getBrazilDateTime() {
+    return new Date().toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour12: false
+    });
+}
+
+
 const { Resend } = require("resend");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -133,7 +142,7 @@ const createEmptyDatabase = () => ({
             password: '$2b$10$vjnTqsbMliJn68jf9zP/O.4K.78gtbYl4UvQ/jJ.enTO2fHltHkSq',
             email: 'leogabriel2662@gmail.com',
 
-            createdAt: new Date().toLocaleString('pt-BR'),
+            createdAt: getBrazilDateTime(),
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
         }
     },
@@ -447,7 +456,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
             email: normalizedEmail,
             password: hashedPassword,
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + normalizedEmail,
-            createdAt: new Date().toLocaleString('pt-BR'),
+            createdAt: getBrazilDateTime(),
             lifetimeCode: generateLifetimeCode(),
             sessions: []
         };
@@ -637,7 +646,7 @@ app.post('/api/auth/verify-code', authLimiter, (req, res) => {
             token: sessionToken,
             userAgent: req.headers['user-agent'],
             ip: req.ip,
-            loginAt: new Date().toISOString()
+            loginAt: getBrazilDateTime()
         };
 
         if (!user.sessions) user.sessions = [];
@@ -920,7 +929,7 @@ app.post('/api/reviews', authenticateUser, (req, res) => {
             username: req.user.username || req.user.name,
             rating: numRating,
             comment: comment ? String(comment).trim() : '',
-            createdAt: new Date().toISOString()
+            createdAt: getBrazilDateTime()
         };
 
         data.reviews.push(newReview);
@@ -987,7 +996,7 @@ app.post('/api/tickets/create', (req, res) => {
 
             status: 'open',
 
-            createdAt: new Date().toISOString()
+            createdAt: getBrazilDateTime()
         };
 
         data.tickets.push(newTicket);
@@ -1277,7 +1286,7 @@ app.post('/api/admin/register', authLimiter, async (req, res) => {
             email: normalizedEmail,
             password: hashedPassword,
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + normalizedEmail,
-            createdAt: new Date().toLocaleString('pt-BR'),
+            createdAt: getBrazilDateTime(),
             sessionToken: null
         };
 
@@ -1476,7 +1485,7 @@ app.get('/api/admin/sessions', authenticateAdmin, (req, res) => {
             sessions: [{
                 userAgent: req.headers['user-agent'] || 'Unknown',
                 ip: req.ip,
-                loginAt: new Date().toISOString(),
+                loginAt: getBrazilDateTime(),
                 current: true
             }]
         });
@@ -1575,7 +1584,7 @@ app.post('/api/admin/login-as-user', authenticateAdmin, (req, res) => {
             token: sessionToken,
             userAgent: (req.headers['user-agent'] || 'Unknown') + ' (Admin Login)',
             ip: req.ip,
-            loginAt: new Date().toISOString()
+            loginAt: getBrazilDateTime()
         };
 
         if (!user.sessions) user.sessions = [];
@@ -1807,7 +1816,7 @@ app.patch('/api/tickets/update', authenticateAdmin, (req, res) => {
         /*
          * Registra quando houve atualização.
          */
-        ticket.updatedAt = new Date().toISOString();
+        ticket.updatedAt = getBrazilDateTime();
 
         db.write(data);
 
@@ -2022,7 +2031,7 @@ app.post('/api/tickets/:id/messages', (req, res) => {
             file: file || null,
             fileName: fileName || null,
             fileType: fileType || null,
-            timestamp: new Date().toISOString()
+            timestamp: getBrazilDateTime()
         };
 
         data.messages[id].push(message);
@@ -2032,7 +2041,7 @@ app.post('/api/tickets/:id/messages', (req, res) => {
         /*
          * Atualiza atividade do ticket.
          */
-        ticket.updatedAt = new Date().toISOString();
+        ticket.updatedAt = getBrazilDateTime();
 
         /*
          * Não muda automaticamente o status quando
