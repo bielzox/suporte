@@ -24,8 +24,32 @@ function getBrazilDateTime() {
 
 
 const { Resend } = require("resend");
+const webpush = require('web-push');
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+// PUSH NOTIFICATIONS (Android/iOS/PWA)
+const pushSubscriptions = new Map();
+
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+        'mailto:' + (process.env.EMAIL_USER || 'contato@suportezoxcode.com.br'),
+        process.env.VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+    );
+}
+
+async function sendPushToUser(email, payload) {
+    const subs = pushSubscriptions.get(email) || [];
+    for (const subscription of subs) {
+        try {
+            await webpush.sendNotification(subscription, JSON.stringify(payload));
+        } catch (err) {
+            console.log('Push removido:', err.message);
+        }
+    }
+}
+
 
 async function sendEmail({to, subject, html, text}) {
     if (!resend) {
@@ -1961,6 +1985,17 @@ app.get('/api/tickets/:id/messages', (req, res) => {
  *   text: "..."
  * }
  */
+
+// Registrar celular para notificações push
+app.post('/api/push/subscribe', (req, res) => {
+    const { email, subscription } = req.body;
+    if (!email || !subscription) return res.status(400).json({error:'Dados inválidos'});
+    const list = pushSubscriptions.get(email) || [];
+    list.push(subscription);
+    pushSubscriptions.set(email, list);
+    res.json({success:true});
+});
+
 app.post('/api/tickets/:id/messages', (req, res) => {
     try {
         const {
@@ -2085,6 +2120,15 @@ app.post('/api/tickets/:id/messages', (req, res) => {
             ticketId: id,
             message
         });
+
+        if (sender === 'admin') {
+            await sendPushToUser(ticket.email, {
+                title: 'Zox Code Suporte',
+                body: 'Seu chamado recebeu uma nova resposta',
+                icon: '/logo.png',
+                url: '/suporte.html'
+            });
+        }
 
         res.json({
             success: true,

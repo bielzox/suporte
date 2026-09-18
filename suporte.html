@@ -577,6 +577,24 @@ const API_URL = "https://suporte-88uc.onrender.com";
         <br>© 2026 Desenvolvido com muito ❤️ por Zox Code
         <br>Central de Suporte</br>
     </footer>
+
+<script>
+async function ativarNotificacoesZox(email){
+ if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+ const reg = await navigator.serviceWorker.register('/service-worker.js');
+ const permission = await Notification.requestPermission();
+ if(permission !== 'granted') return;
+ const sub = await reg.pushManager.subscribe({
+  userVisibleOnly:true,
+  applicationServerKey: window.VAPID_PUBLIC_KEY
+ });
+ await fetch('/api/push/subscribe',{
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({email,subscription:sub})
+ });
+}
+</script>
 </body>
 
 </html>
