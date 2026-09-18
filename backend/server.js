@@ -1051,7 +1051,7 @@ function authenticateAdmin(req, res, next) {
     }
 
     const admin = Object.values(data.admins)
-        .find(a => a.sessionToken === token);
+        .find(a => a.sessionToken === token || (Array.isArray(a.sessionTokens) && a.sessionTokens.includes(token)));
 
     if (!admin) {
         return res.status(401).json({
@@ -1220,6 +1220,11 @@ app.post('/api/admin/verify-code', authLimiter, (req, res) => {
 
         const admin = data.admins[normalizedEmail];
         admin.sessionToken = sessionToken;
+        admin.sessionTokens = Array.isArray(admin.sessionTokens) ? admin.sessionTokens : [];
+        admin.sessionTokens.push(sessionToken);
+
+        // Mantém os últimos 10 tokens ativos por administrador
+        admin.sessionTokens = admin.sessionTokens.slice(-10);
 
         delete data.codes[normalizedEmail];
 
@@ -1287,7 +1292,8 @@ app.post('/api/admin/register', authLimiter, async (req, res) => {
             password: hashedPassword,
             profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + normalizedEmail,
             createdAt: getBrazilDateTime(),
-            sessionToken: null
+            sessionToken: null,
+            sessionTokens: []
         };
 
         db.write(data);
@@ -1499,6 +1505,7 @@ app.post('/api/admin/sessions/revoke-all', authenticateAdmin, (req, res) => {
         const data = db.read();
         const admin = req.admin;
         admin.sessionToken = null;
+        admin.sessionTokens = [];
         db.write(data);
         res.json({ success: true, message: 'Todas as sessões foram encerradas.' });
     } catch (error) {
