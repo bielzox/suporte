@@ -1916,6 +1916,13 @@
                     <span class="connection-status" id="connectionStatus">
                         🔴 Desconectado
                     </span>
+                    <button
+                        id="notifyBellBtn"
+                        class="logout-btn"
+                        onclick="NotifyManager.requestPermission()"
+                    >
+                        🔔 Ativar notificações
+                    </button>
                     <button class="logout-btn" onclick="logoutAdmin()">
                         Sair
                     </button>
@@ -3325,6 +3332,95 @@
         let ticketsRefreshInterval = null;
 
         let lastTicketsSnapshot = '';
+
+
+        /* =====================================================
+           NOTIFICAÇÕES (som + navegador + título da aba)
+           ===================================================== */
+        const NotifyManager = (function () {
+            let unread = 0;
+            const baseTitle = document.title;
+            let audioCtx = null;
+
+            function beep() {
+                try {
+                    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = 740;
+                    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } catch (e) { /* som bloqueado até interação do usuário */ }
+            }
+
+            function updateTitle() {
+                document.title = unread > 0 ? `(${unread}) ${baseTitle}` : baseTitle;
+            }
+
+            function requestPermission() {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().then(updateBellButton);
+                }
+                updateBellButton();
+            }
+
+            function updateBellButton() {
+                const btn = document.getElementById('notifyBellBtn');
+                if (!btn || !('Notification' in window)) return;
+                if (Notification.permission === 'granted') {
+                    btn.textContent = '🔔 Notificações ativas';
+                    btn.disabled = true;
+                } else if (Notification.permission === 'denied') {
+                    btn.textContent = '🔕 Notificações bloqueadas';
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = '🔔 Ativar notificações';
+                    btn.disabled = false;
+                }
+            }
+
+            function notify(title, body) {
+                beep();
+
+                if (document.hidden) {
+                    unread++;
+                    updateTitle();
+                }
+
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try {
+                        const n = new Notification(title, {
+                            body: body || '',
+                            icon: 'logo.png',
+                            tag: title
+                        });
+                        n.onclick = () => {
+                            window.focus();
+                            n.close();
+                        };
+                    } catch (e) {}
+                }
+            }
+
+            function clear() {
+                unread = 0;
+                updateTitle();
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) clear();
+            });
+
+            window.addEventListener('focus', clear);
+
+            return { requestPermission, notify, clear, updateBellButton };
+        })();
 
 
         /* =====================================================
@@ -5630,6 +5726,11 @@
                         `🆕 Novo Ticket Recebido: #${ticket.id}`
                     );
 
+                    NotifyManager.notify(
+                        '🆕 Novo ticket recebido',
+                        `Ticket #${ticket.id}`
+                    );
+
 
                     refreshAll();
 
@@ -5713,8 +5814,29 @@
 
                     }
 
+                    /*
+                     * Som + notificação do navegador apenas
+                     * para mensagens enviadas pelo cliente
+                     * (evita notificar a própria resposta do admin).
+                     */
+                    if (
+                        data &&
+                        data.ticketId &&
+                        data.message &&
+                        data.message.sender === 'user'
+                    ) {
+
+                        NotifyManager.notify(
+                            '💬 Nova mensagem do cliente',
+                            `Ticket #${data.ticketId}`
+                        );
+
+                    }
+
                 }
             );
+
+            NotifyManager.requestPermission();
 
         }
 
@@ -6526,6 +6648,8 @@
              */
 
             initSocket();
+
+            NotifyManager.updateBellButton();
 
 
             /*

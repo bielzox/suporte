@@ -1495,6 +1495,15 @@
                     Olá, Usuário
                 </div>
 
+                <button
+                    id="notifyBellBtn"
+                    class="logout-btn"
+                    onclick="NotifyManager.requestPermission()"
+                    style="margin-right:10px;"
+                >
+                    🔔 Ativar notificações
+                </button>
+
                 <button class="logout-btn" onclick="logout()">
                     Sair
                 </button>
@@ -2053,6 +2062,96 @@
         let socket = null;
         let activeTicketId = null;
         let selectedFile = null;
+        let myTicketIds = new Set();
+
+
+        /* =====================================================
+           NOTIFICAÇÕES (som + navegador + título da aba)
+           ===================================================== */
+        const NotifyManager = (function () {
+            let unread = 0;
+            const baseTitle = document.title;
+            let audioCtx = null;
+
+            function beep() {
+                try {
+                    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = 880;
+                    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.22, audioCtx.currentTime + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } catch (e) { /* som bloqueado até interação do usuário */ }
+            }
+
+            function updateTitle() {
+                document.title = unread > 0 ? `(${unread}) ${baseTitle}` : baseTitle;
+            }
+
+            function requestPermission() {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().then(updateBellButton);
+                }
+                updateBellButton();
+            }
+
+            function updateBellButton() {
+                const btn = document.getElementById('notifyBellBtn');
+                if (!btn || !('Notification' in window)) return;
+                if (Notification.permission === 'granted') {
+                    btn.textContent = '🔔 Notificações ativas';
+                    btn.disabled = true;
+                } else if (Notification.permission === 'denied') {
+                    btn.textContent = '🔕 Notificações bloqueadas';
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = '🔔 Ativar notificações';
+                    btn.disabled = false;
+                }
+            }
+
+            function notify(title, body) {
+                beep();
+
+                if (document.hidden) {
+                    unread++;
+                    updateTitle();
+                }
+
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try {
+                        const n = new Notification(title, {
+                            body: body || '',
+                            icon: 'logo.png',
+                            tag: title
+                        });
+                        n.onclick = () => {
+                            window.focus();
+                            n.close();
+                        };
+                    } catch (e) {}
+                }
+            }
+
+            function clear() {
+                unread = 0;
+                updateTitle();
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) clear();
+            });
+
+            window.addEventListener('focus', clear);
+
+            return { requestPermission, notify, clear, updateBellButton };
+        })();
 
 
         /* =====================================================
@@ -3071,6 +3170,8 @@
                 "email"
             ).value = email;
 
+            NotifyManager.updateBellButton();
+
             loadProfile();
             loadTickets();
 
@@ -3099,8 +3200,28 @@
                                 data.message
                             );
                         }
+
+                        /*
+                         * Notifica apenas respostas do suporte
+                         * (evita notificar a própria mensagem do
+                         * usuário) e somente para tickets do
+                         * próprio usuário.
+                         */
+                        if (
+                            data &&
+                            data.message &&
+                            data.message.sender === 'admin' &&
+                            myTicketIds.has(data.ticketId)
+                        ) {
+                            NotifyManager.notify(
+                                '💬 Nova resposta do suporte',
+                                `Ticket #${data.ticketId}`
+                            );
+                        }
                     }
                 );
+
+                NotifyManager.requestPermission();
             }
         }
 
@@ -3668,6 +3789,13 @@
                     tickets.filter(
                         ticket =>
                             ticket.email === email
+                    );
+
+                myTicketIds =
+                    new Set(
+                        userTickets.map(
+                            ticket => ticket.id
+                        )
                     );
 
                 const ticketsList =
