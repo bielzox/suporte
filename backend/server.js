@@ -1996,7 +1996,7 @@ app.post('/api/push/subscribe', (req, res) => {
     res.json({success:true});
 });
 
-app.post('/api/tickets/:id/messages', (req, res) => {
+app.post('/api/tickets/:id/messages', async (req, res) => {
     try {
         const {
             id
