@@ -2419,8 +2419,31 @@
 
                 if (isReset) {
 
-                    window.pendingResetCode =
-                        enteredCode;
+                    const res = await fetch(
+                        `${API_URL}/api/auth/verify-code`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                email: currentEmail,
+                                code: enteredCode
+                            })
+                        }
+                    );
+
+                    const data = await parseResponse(res);
+
+                    if (!res.ok) {
+                        showError(
+                            data.error || "Código inválido ou expirado",
+                            "verifyErrorMessage"
+                        );
+                        return;
+                    }
+
+                    window.pendingResetCode = enteredCode;
 
                     showResetPasswordForm();
 
